@@ -81,6 +81,7 @@ public class Processamento {
 
     /*
      Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore    
+    10/08/2014- Alteraado Carlos
      */
     public void ProcessamentoArvores(Instances dados, ArrayList<Arvores> arvores) {
         //Percorrer todas as instâncias encontradas
