@@ -6,7 +6,8 @@ public class PrjAGEDA {
     private static final String arquivo = "C:\\Program Files\\Weka-3-6\\data\\ionosphere.arff";
 
     //Arquivo com Atributos Nominais
-    //private static final String arquivo = "C:\\Program Files\\Weka-3-6\\data\\contact-lenses.arff";
+    //private static final String arquivo = "C:\\Program Files\\Weka-3-6\\data\\balance-scale.arff";
+    
     public static void main(String[] args) throws Exception {
         /*
          1° - Leitura do(s) Arquivo(s) <nome(s)>.arff

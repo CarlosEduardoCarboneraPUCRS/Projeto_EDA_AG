@@ -1,6 +1,7 @@
 package prjageda;
 
 import java.util.ArrayList;
+import java.util.Random;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -61,16 +62,17 @@ public class Processamento {
         for (int i = 0; i < dados.numClasses(); i++) {
             //Declaração Variáveis e Objetos
             Double qtdRegs = 0d;
-            double valor = dados.instance(i).classValue();
+            //double valor = dados.instance(i).classValue();
+            String atributo = dados.classAttribute().value(i).toUpperCase();
 
             for (int j = 0; j < dados.numInstances(); j++) {
                 //Atualizar a quantidade
-                qtdRegs += dados.instance(j).value(posAtr) == valor ? 1 : 0;
+                qtdRegs += String.valueOf(dados.instance(j).value(posAtr)).toUpperCase().equals(atributo) ? 1 : 0;
 
             }
 
             //Adicionar o Registro
-            registros.add(new Atributos(String.valueOf(valor), qtdRegs, null));
+            registros.add(new Atributos(atributo, qtdRegs, null));
 
         }
 
@@ -79,21 +81,72 @@ public class Processamento {
 
     }
 
-    /*
-     Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore    
-    10/08/2014- Alteraado Carlos
-     */
-    public void ProcessamentoArvores(Instances dados, ArrayList<Arvores> arvores) {
-        //Percorrer todas as instâncias encontradas
-        for (int i = 0; i < dados.numInstances(); i++) {
-            //Percorrer toda a árvore
-            for (int j = 0; j < arvores.size(); j++) {
-                //percorer todos os nodos da árvore
+    //Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore    
+    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, ArrayList<Arvores> arvores, boolean elitismo) {
+        //Declaração Variáveis e Objetos
+        ArrayList<Arvores> novaPopulacao = new ArrayList<Arvores>();
 
-            }
+        //Se tiver elitismo, mantém o melhor indivíduo da geração atual
+        if (elitismo) {
+            novaPopulacao.set(0, arvores.get(0));
         }
 
-    }
-    //</editor-fold>      
+        /*
+         //Percorrer todas as instâncias encontradas
+         for (int i = 0; i < dados.numInstances(); i++) {
+         //Percorrer toda a árvore
+         for (int j = 0; j < arvores.size(); j++) {
+         //percorer todos os nodos da árvore
 
+         }
+         }
+         */
+        //Efetuar a Seleção por Torneio
+        //Efetuar a Mutação das Árvores
+        EfetuarMutacao(arvores);
+
+        //Definir o retorno
+        return novaPopulacao;
+
+    }
+
+    /*
+     private void ProcessamentoEmOrdem(Arvores nos) {
+     //Se for nulo retorna
+     if (nos == null) {
+     return;
+     }
+
+     //Se possuir nós filhos (arestas) 
+     if (nos.getArestas().size() != 0) {
+     //Percorrer todas as arestas do nó selecionado
+     for (int i = 0; i <= nos.getArestas().size() - 1; i++) {
+
+     }
+     }
+
+     //Percorrer todas as arestas do nó selecionado
+     for (int i = 0; i <= nos.getArestas().size() - 1; i++) {
+     //Chamada Recursiva de processamento
+     ProcessamentoEmOrdem(nos.getArvoreApartirAresta(i));
+
+     }
+
+     }*/
+    //</editor-fold>      
+    private void EfetuarMutacao(ArrayList<Arvores> arvores) {
+        //Sortar as Duas Árvores Aleatóriamente
+        Arvores arvore1 = arvores.get(new Random().nextInt(arvores.size())),
+                arvore2 = arvores.get(new Random().nextInt(arvores.size()));
+
+    }
+
+    public boolean AvaliarSolucao(ArrayList<Arvores> arvores) {
+        //Declaração Variáveis e objetos
+        boolean bValido = true;
+
+        //Definição do retorno
+        return bValido;
+        
+    }
 }
