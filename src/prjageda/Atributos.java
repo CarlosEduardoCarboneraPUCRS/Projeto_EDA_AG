@@ -5,21 +5,24 @@ public class Atributos {
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
     private String atributo;
     private double quantidade;
+    private double acuracia;    
     private Arvores nodo;
 
     public Atributos() {
         //setar o atributo
         this.atributo = "";
         this.quantidade = 0;
+        this.acuracia = 0;
         this.nodo = null; //propriedade para a Sub-Árvore
         
     }
-
-    public Atributos(String atr, double quant, Arvores no) {
+    
+    public Atributos(String atr, double quant, Arvores no, double acuracia) {
         //setar o atributo
         this.atributo = atr;
         this.quantidade = quant;
         this.nodo = no;
+        this.acuracia = acuracia;
         
     }
     //</editor-fold>    
@@ -49,6 +52,13 @@ public class Atributos {
         this.nodo = nodo;
     }
 
+    public double getAcuracia() {
+        return acuracia;
+    }
+
+    public void setAcuracia(double acuracia) {
+        this.acuracia = acuracia;
+    }
     //</editor-fold>        
 
 }

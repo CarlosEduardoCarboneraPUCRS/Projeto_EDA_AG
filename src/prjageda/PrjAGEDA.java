@@ -3,10 +3,10 @@ package prjageda;
 public class PrjAGEDA {
 
     //Arquivo com Atributos Numéricos
-    private static final String arquivo = "C:\\Program Files\\Weka-3-6\\data\\ionosphere.arff";
+    //private static final String arquivo = "C:\\ArffTeste\\ionosphere.arff";
 
     //Arquivo com Atributos Nominais
-    //private static final String arquivo = "C:\\Program Files\\Weka-3-6\\data\\balance-scale.arff";
+    private static final String arquivo = "C:\\ArffTeste\\weathernominal.arff";
     
     public static void main(String[] args) throws Exception {
         /*
@@ -21,5 +21,4 @@ public class PrjAGEDA {
         new DecisionStumps().ProcessamentoDS(new Processamento(arquivo).LeituraArquivo());
 
     }
-
 }
