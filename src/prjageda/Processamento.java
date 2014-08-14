@@ -1,6 +1,7 @@
 package prjageda;
 
 import java.util.ArrayList;
+import java.util.Random;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -121,7 +122,7 @@ public class Processamento {
 
         //Se tiver elitismo, mantém o melhor indivíduo da geração atual
         if (elitismo) {
-            novaPopulacao.set(0, arvores.get(0));
+//            novaPopulacao.set(0, arvores.get(0));
         }
 
         /*
@@ -152,12 +153,28 @@ public class Processamento {
     private ArrayList<Arvores> Mutacao(ArrayList<Arvores> arvores) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> populacao = new ArrayList<>();
-
-        //percorrer todos os registros
-        for (Arvores reg : arvores) {
-
-        }
-
+        
+        //Sortear 2 indivíduos
+        Arvores individuo1 = arvores.get(new Random().nextInt(arvores.size()));
+        Arvores individuo2 = arvores.get(new Random().nextInt(arvores.size()));
+        
+        /*
+        Efetuar a Troca de material genético (Neste caso a árvore poderá ter um tamnho maior que o limite máximo de profundidade)
+        --------------------------------------------------------------------------------------------------------------------------------------------------------
+        1 - Efetuar a troca de material entre os indivíduos
+          - Neste caso o indivíduo 1 trocará material com um posição aleatória do indivíduo 2, aonde po material trocado deverá ser um nodo folha
+        */
+        
+        
+        
+        //Recalcular o fitness de cada um dos indivíduos
+        CalcularFitness(individuo1);
+        CalcularFitness(individuo2);
+        
+        //Adicionar os indivíduos
+        populacao.add(individuo1);
+        populacao.add(individuo2);
+                
         //Definir o retorno
         return populacao;
 
@@ -199,6 +216,10 @@ public class Processamento {
         //Definir o retorno
         return quantidade;
 
+    }
+
+    private void CalcularFitness(Arvores individuo1) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

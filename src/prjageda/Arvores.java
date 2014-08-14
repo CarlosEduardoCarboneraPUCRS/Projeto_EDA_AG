@@ -6,6 +6,7 @@ public class Arvores {
 
     //1° Definição dos Atributos
     private String nomeAtr;
+
     private ArrayList<Atributos> arestas;
 
     //2° Métodos Inicializadores da classe
@@ -16,7 +17,7 @@ public class Arvores {
 
     }
 
-    public Arvores(String nome, ArrayList<Atributos> galhos) {
+    public Arvores(String nome, int nivel, ArrayList<Atributos> galhos) {
         //Atribuições
         this.nomeAtr = nome;
         this.arestas = galhos;
@@ -44,10 +45,10 @@ public class Arvores {
         arestas.get(pos).setNodo(nodo);
 
     }
-    
+
     public Arvores getArvoreApartirAresta(int pos) {
         //Setar o Nodo na Aresta Selecionada
         return arestas.get(pos).getNodo();
     }
-    
+
 }
