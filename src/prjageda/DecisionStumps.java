@@ -8,7 +8,7 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
     private static final int profundidade = 2;
-    private static final int quantidade = 10;
+    private static final int quantidade = 2;
     private static final int geracoes = 10;
 
     public DecisionStumps() {
@@ -57,16 +57,13 @@ public class DecisionStumps {
                  3° Parâmetro - Nodo Sorteado p/ ser o Nodo Raiz
                  */
                 //Declaração Objetos
-                Arvores nodoInicial = new Arvores();
+                Arvores arvore = nodos.get(new Random().nextInt(dados.numAttributes() - 1));
 
-                //Seleciona o nodo Inicial 
-                nodoInicial = nodos.get(new Random().nextInt(dados.numAttributes() - 1));
-
-                //Chamada da função
-                GerarPopulacaoIndividuos(1, nodos, nodoInicial);
+                //Chamada da função para a geração dos indivíduos
+                GerarPopulacaoIndividuos(geracao, nodos, arvore);
 
                 //Adicionar o Indivíduo novo
-                arvores.add(i, nodoInicial);
+                arvores.add(i, arvore);
 
             }
 
@@ -87,42 +84,6 @@ public class DecisionStumps {
 
     }
 
-    //<editor-fold defaultstate="collapsed" desc="Função Comentada de Recursidade - ERRADA - Não Funciona">    
-    /*
-     Definições sobre o processamento
-     -----------------------------------------------------------------------------------------------------------------------------------------------------------
-     1° Passo - Sortear uma árvore para ser o nodo raiz e remover da lista (validar com o professor se será outro critério)
-     2° Passo - Sortear as demais árvores removendo da Lista Atual
-     - Critério de avaliação = Valor % para a substituição do nodo ou não.
-     public Arvores GerarPopulacaoIndividuos(int prof, ArrayList<Arvores> nodos, Arvores arvore) {
-     //Condição de Parada, Se o grau de profundidade for igual ao informado
-     if (prof <= profundidade) {
-     //percorrer todas as arestas do indivíduo
-     for (int i = 0; i < arvore.getArestas().size(); i++) {
-     //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-     if (new Random().nextBoolean()) {                    
-     //1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-     //2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                    
-     arvore.setNodoApartirAresta(i, nodos.get(new Random().nextInt(nodos.size())));
-     //arvore.setNivel(prof + 1);
-
-     //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-     GerarPopulacaoIndividuos(prof + 1, nodos, arvore.getArvoreApartirAresta(i));
-
-     }
-
-     }
-
-     }
-
-     //Definir o retorno
-     return arvore;
-
-     }
-     */
-    //</editor-fold> 
-    
     //<editor-fold defaultstate="collapsed" desc="Função Comentada de Recursidade para geração dos Indivíduos">    
     public void GerarPopulacaoIndividuos(int prof, ArrayList<Arvores> nodos, Arvores arvore) {
         //Condição de Parada, Se o grau de profundidade for igual ao informado
@@ -135,9 +96,7 @@ public class DecisionStumps {
                      1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
                      2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
                      */
-
-                    arvore.setNodoApartirAresta(i, nodos.get(new Random().nextInt(nodos.size())));
-                    //arvore.setNivel(prof + 1);
+                    arvore.SetNodo(arvore.getArestas(i), nodos.get(new Random().nextInt(nodos.size())));
 
                     //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
                     GerarPopulacaoIndividuos(prof + 1, nodos, arvore.getArvoreApartirAresta(i));
