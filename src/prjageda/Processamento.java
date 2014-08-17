@@ -9,6 +9,7 @@ public class Processamento {
 
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
     private String caminhoDados;
+    private static final int qtdAmostras = 2;
 
     public String getCaminhoDados() {
         return caminhoDados;
@@ -116,67 +117,46 @@ public class Processamento {
     }
 
 //Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore    
-    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, ArrayList<Arvores> arvores, boolean elitismo) {
+    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados,
+            ArrayList<Arvores> arvores, boolean elitismo) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> novaPopulacao = new ArrayList<>();
 
         //Se tiver elitismo, mantém o melhor indivíduo da geração atual
         if (elitismo) {
-//            novaPopulacao.set(0, arvores.get(0));
+            novaPopulacao.set(0, arvores.get(0));
         }
 
-        /*
-         //Percorrer todas as instâncias encontradas
-         for (int i = 0; i < dados.numInstances(); i++) {
-         //Percorrer toda a árvore
-         for (int j = 0; j < arvores.size(); j++) {
-         //percorer todos os nodos da árvore
+        //Efetua a geração da nova população equanto a população for menor que 
+        //a população inicialmente estabelecida
+        while (novaPopulacao.size() < DecisionStumps.quantidade) {
+            //Selecionar 2 pais pelo método do "TORNEIO"
+            ArrayList<Arvores> pais = selecaoTorneio(arvores);
 
-         }
-         }
-         */
-        //Efetuar a Seleção por Torneio
-        //Efetuar a Mutação das Árvores
-        Mutacao(arvores);
+            //Declaração de variáveis e objetos
+            ArrayList<Arvores> filhos = new ArrayList<>();
 
-        //Efetuar a Mutação das Árvores
-        Crossover(arvores);
+            //Se Valor Gerado <= TxCrossover, realiza o Crossover entre os pais 
+            //SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
+            if (new Random().nextDouble() <= DecisionStumps.TxCrossover) {
+                filhos = Crossover(pais.get(0), pais.get(1));
 
-        //Definir o retorno
+            } else {
+                filhos.add(pais.get(0));
+                filhos.add(pais.get(1));
+
+            }
+
+            //adiciona os filhos na nova geração
+            novaPopulacao.add(filhos.get(0));
+            novaPopulacao.add(filhos.get(1));
+
+        }
+
+        //ordena a nova população
+        //novaPopulacao.ordenaPopulacao();
+        //Defnição do retorno        
         return novaPopulacao;
-
-    }
-
-    /*
-     Efetuar a mutação da população
-     */
-    private ArrayList<Arvores> Mutacao(ArrayList<Arvores> arvores) {
-        //Declaração Variáveis e Objetos
-        ArrayList<Arvores> populacao = new ArrayList<>();
-        
-        //Sortear 2 indivíduos
-        Arvores individuo1 = arvores.get(new Random().nextInt(arvores.size()));
-        Arvores individuo2 = arvores.get(new Random().nextInt(arvores.size()));
-        
-        /*
-        Efetuar a Troca de material genético (Neste caso a árvore poderá ter um tamnho maior que o limite máximo de profundidade)
-        --------------------------------------------------------------------------------------------------------------------------------------------------------
-        1 - Efetuar a troca de material entre os indivíduos
-          - Neste caso o indivíduo 1 trocará material com um posição aleatória do indivíduo 2, aonde po material trocado deverá ser um nodo folha
-        */
-        
-        
-        
-        //Recalcular o fitness de cada um dos indivíduos
-        CalcularFitness(individuo1);
-        CalcularFitness(individuo2);
-        
-        //Adicionar os indivíduos
-        populacao.add(individuo1);
-        populacao.add(individuo2);
-                
-        //Definir o retorno
-        return populacao;
 
     }
 
@@ -197,7 +177,7 @@ public class Processamento {
 
     }
 
-    //</editor-fold>          
+    //</editor-fold> 
     private double OcorrenciasAtributo(String atributo, Instances dados, int pos) {
         //Declaração Variáveis e Objetos
         double quantidade = 0;
@@ -218,8 +198,83 @@ public class Processamento {
 
     }
 
-    private void CalcularFitness(Arvores individuo1) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void CalcularFitness(Arvores individuo) {
+        //Declaração Variáveis e Objetos
+        double valor = 0;
+
+        //Atribuição do valor do fitness
+        individuo.setFitness(valor);
+
+    }
+
+    private ArrayList<Arvores> selecaoTorneio(ArrayList<Arvores> arvores) {
+        //Declaração Variáveis e Objetos
+        ArrayList<Arvores> selecao = new ArrayList<>();
+        
+        //seleciona 3 indivíduos aleatóriamente na população
+        for (int i = 0; i < qtdAmostras; i++) {
+            //Selecionar os 10 indivíduos aleatórios DENTRO da população gerada aleatóriamente no inicio
+            selecao.add(arvores.get(new Random().nextInt(arvores.size())));
+
+        }
+        
+        
+        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
+        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
+        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
+        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
+        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
+        
+        
+        //Definir o retorno
+        return selecao;
+
+    }
+
+    private ArrayList<Arvores> Crossover(Arvores arvore1, Arvores arvore2) {
+        //Declaração Variáveis e Objetos
+        ArrayList<Arvores> selecao = new ArrayList<>();
+
+        //Efetuar o crossover
+        
+        
+        //Adicionar as duas árvores
+        selecao.add(arvore1);
+        selecao.add(arvore2);
+
+        //Definir o retorno
+        return selecao;
+        
+    }
+
+    /*
+     Efetuar a mutação da população
+     */
+    private ArrayList<Arvores> Mutacao(ArrayList<Arvores> arvores) {
+        //Declaração Variáveis e Objetos
+        ArrayList<Arvores> populacao = new ArrayList<>();
+
+        //Sortear 2 indivíduos
+        Arvores individuo1 = arvores.get(new Random().nextInt(arvores.size()));
+        Arvores individuo2 = arvores.get(new Random().nextInt(arvores.size()));
+
+        /*
+         Efetuar a Troca de material genético (Neste caso a árvore poderá ter um tamnho maior que o limite máximo de profundidade)
+         --------------------------------------------------------------------------------------------------------------------------------------------------------
+         1 - Efetuar a troca de material entre os indivíduos
+         - Neste caso o indivíduo 1 trocará material com um posição aleatória do indivíduo 2, aonde po material trocado deverá ser um nodo folha
+         */
+        //Recalcular o fitness de cada um dos indivíduos
+        CalcularFitness(individuo1);
+        CalcularFitness(individuo2);
+
+        //Adicionar os indivíduos
+        populacao.add(individuo1);
+        populacao.add(individuo2);
+
+        //Definir o retorno
+        return populacao;
+
     }
 
 }
