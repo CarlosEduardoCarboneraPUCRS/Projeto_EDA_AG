@@ -1,7 +1,7 @@
 package prjageda;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Collections;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -10,6 +10,8 @@ public class Processamento {
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
     private String caminhoDados;
     private static final int qtdAmostras = 2;
+    private ArrayList<Arvores> novaPopulacao = null;
+    private static final MersenneTwister mt = new MersenneTwister();
 
     public String getCaminhoDados() {
         return caminhoDados;
@@ -116,29 +118,35 @@ public class Processamento {
 
     }
 
-//Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore    
-    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados,
-            ArrayList<Arvores> arvores, boolean elitismo) {
+    /*
+     Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore
+     */
+    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, ArrayList<Arvores> arvores, boolean elitismo) {
         //Declaração Variáveis e Objetos
-        ArrayList<Arvores> novaPopulacao = new ArrayList<>();
+        ArrayList<Arvores> populacao = new ArrayList<>();
 
-        //Se tiver elitismo, mantém o melhor indivíduo da geração atual
+        //Se tiver elitismo, adicionar (mantém) o melhor indivíduo da geração atual(ordenada) para a próxima geração
         if (elitismo) {
-            novaPopulacao.set(0, arvores.get(0));
+            //Adicionar o indivíduo
+            populacao.add(arvores.get(0));
+
         }
 
         //Efetua a geração da nova população equanto a população for menor que 
         //a população inicialmente estabelecida
-        while (novaPopulacao.size() < DecisionStumps.quantidade) {
+        while (populacao.size() < DecisionStumps.quantidade) {
             //Selecionar 2 pais pelo método do "TORNEIO"
             ArrayList<Arvores> pais = selecaoTorneio(arvores);
 
             //Declaração de variáveis e objetos
             ArrayList<Arvores> filhos = new ArrayList<>();
 
+            //A mutação seré efetuada em 2 indivíduos a cada geração
+            filhos.addAll(Mutacao(arvores));
+
             //Se Valor Gerado <= TxCrossover, realiza o Crossover entre os pais 
             //SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
-            if (new Random().nextDouble() <= DecisionStumps.TxCrossover) {
+            if (new MersenneTwister().nextDouble() <= DecisionStumps.TxCrossover) {
                 filhos = Crossover(pais.get(0), pais.get(1));
 
             } else {
@@ -147,16 +155,18 @@ public class Processamento {
 
             }
 
-            //adiciona os filhos na nova geração
-            novaPopulacao.add(filhos.get(0));
-            novaPopulacao.add(filhos.get(1));
+            //Calcular o Fitness de cada um dos indivíduos
+            CalcularFitness(filhos.get(0));
+            CalcularFitness(filhos.get(1));
+
+            //Adicionar os novos filhos 
+            populacao.add(filhos.get(0));
+            populacao.add(filhos.get(1));
 
         }
 
-        //ordena a nova população
-        //novaPopulacao.ordenaPopulacao();
-        //Defnição do retorno        
-        return novaPopulacao;
+        //Definição do retorno da função
+        return populacao;
 
     }
 
@@ -173,31 +183,6 @@ public class Processamento {
 
     }
 
-    private void Crossover(ArrayList<Arvores> arvores) {
-
-    }
-
-    //</editor-fold> 
-    private double OcorrenciasAtributo(String atributo, Instances dados, int pos) {
-        //Declaração Variáveis e Objetos
-        double quantidade = 0;
-
-        //Percorrer todas as instâncias
-        for (int j = 0; j < dados.numInstances(); j++) {
-            //Se for igual ao valor informado
-            if (dados.instance(j).attribute(pos).equals(atributo)) {
-                //Atualizar a Quantidade
-                quantidade += 1;
-
-            }
-
-        }
-
-        //Definir o retorno
-        return quantidade;
-
-    }
-
     private void CalcularFitness(Arvores individuo) {
         //Declaração Variáveis e Objetos
         double valor = 0;
@@ -210,22 +195,17 @@ public class Processamento {
     private ArrayList<Arvores> selecaoTorneio(ArrayList<Arvores> arvores) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
-        
+
         //seleciona 3 indivíduos aleatóriamente na população
         for (int i = 0; i < qtdAmostras; i++) {
             //Selecionar os 10 indivíduos aleatórios DENTRO da população gerada aleatóriamente no inicio
-            selecao.add(arvores.get(new Random().nextInt(arvores.size())));
+            selecao.add(arvores.get(new MersenneTwister().nextInt(arvores.size())));
 
         }
-        
-        
-        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
-        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
-        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
-        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
-        //AQUI FALA DEFINIR A ORDENAÇÂO DOS INDIVIDUOS
-        
-        
+
+        //Ordenar as árvores selecionadas aleatóriamente
+        Collections.sort(selecao);
+
         //Definir o retorno
         return selecao;
 
@@ -236,45 +216,91 @@ public class Processamento {
         ArrayList<Arvores> selecao = new ArrayList<>();
 
         //Efetuar o crossover
-        
-        
         //Adicionar as duas árvores
         selecao.add(arvore1);
         selecao.add(arvore2);
 
         //Definir o retorno
         return selecao;
-        
+
     }
 
     /*
      Efetuar a mutação da população
      */
-    private ArrayList<Arvores> Mutacao(ArrayList<Arvores> arvores) {
+    private ArrayList<Arvores> Mutacao(ArrayList<Arvores> regs) {
         //Declaração Variáveis e Objetos
-        ArrayList<Arvores> populacao = new ArrayList<>();
+        ArrayList<Arvores> individuos = new ArrayList<>();
+        boolean bProcessar = true;
 
-        //Sortear 2 indivíduos
-        Arvores individuo1 = arvores.get(new Random().nextInt(arvores.size()));
-        Arvores individuo2 = arvores.get(new Random().nextInt(arvores.size()));
+        /*Sortear 2 Indivíduos Aleatóriamente*/
+        Arvores individuo1 = regs.get(mt.nextInt(regs.size()));
+        Arvores individuo2 = regs.get(mt.nextInt(regs.size()));
 
         /*
-         Efetuar a Troca de material genético (Neste caso a árvore poderá ter um tamnho maior que o limite máximo de profundidade)
-         --------------------------------------------------------------------------------------------------------------------------------------------------------
-         1 - Efetuar a troca de material entre os indivíduos
-         - Neste caso o indivíduo 1 trocará material com um posição aleatória do indivíduo 2, aonde po material trocado deverá ser um nodo folha
+         Detalhamento da Mutação
+         ---------------------------------------------------------------------------------------------------------------------
+         1 Passo - Percorrer o indivíduo até o seu maior nível a partir do nó raiz
+         2 Passo - Move o Ramo selecionado para o ramo próximo e transforma o ramo atual em ramo folha
          */
+        PercorreNivelNodo(individuo1, 0, bProcessar);
+        PercorreNivelNodo(individuo2, 0, bProcessar);
+
         //Recalcular o fitness de cada um dos indivíduos
         CalcularFitness(individuo1);
         CalcularFitness(individuo2);
 
         //Adicionar os indivíduos
-        populacao.add(individuo1);
-        populacao.add(individuo2);
+        individuos.add(individuo1);
+        individuos.add(individuo2);
 
         //Definir o retorno
-        return populacao;
+        return individuos;
 
     }
+
+    /*Ordena a população pelo valor de aptidão de cada indivíduo, do maior valor
+     para o menor, assim se eu quiser obter o melhor indivíduo desta população, 
+     acesso a posição 0 do array de indivíduos*/
+    public void ordenaPopulacao() {
+        //Ordernar os registros crescente
+        Collections.sort(novaPopulacao);
+
+    }
+
+    /*A mutação ocorrerá SOMENTE com o individuo que tiver a profundidade IGUAL ao limite máximo */
+    public void PercorreNivelNodo(Arvores no, int nivel, boolean bProcessar) {
+        //Se o nó não for nulo
+        if (no != null) {
+            //Selecionar uma posição aleatóriamente
+            int posicao = mt.nextInt(1);
+
+            //Se a primeira aresta não for nula pesquisa pela mesma
+            if (no.getArestas(posicao) != null) {
+                //Chamada recursiva da função
+                PercorreNivelNodo(no.getArestas(posicao).getNodo(), nivel + 1, bProcessar);
+
+                //Se atingiu o MAIOR OU ÚLTIMO NÍVEL de profundidade E não for o nodo raiz, efetuará a mutação 
+                if (bProcessar && nivel >= 1) {
+                    //Se processou a alteração não efetuará mais alterações
+                    bProcessar = false;
+
+                    //Declaração Variáveis e Objetos
+                    Arvores temp = no.getArestas(posicao).getNodo();
+
+                    //Setar o nodo da aresta 1 para a aresta 0
+                    no.getArestas(posicao).setNodo(no.getArestas(posicao == 0 ? 1 : 0).getNodo());
+
+                    //Setar o nodo da aresta 0 para a aresta 1
+                    no.getArestas(posicao == 0 ? 1 : 0).setNodo(temp);
+
+                }
+
+            }
+
+        }
+
+    }
+    //</editor-fold> 
 
 }

@@ -1,13 +1,13 @@
 package prjageda;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Arvores implements Comparable<Arvores> {
     //1° Definição dos Atributos
     private String nomeAtr;
     private ArrayList<Atributos> arestas;
     private double fitness;
+    
 
     //2° Métodos Inicializadores da classe
     public Arvores() {

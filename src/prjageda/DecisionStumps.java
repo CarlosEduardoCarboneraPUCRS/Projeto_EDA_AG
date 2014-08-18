@@ -1,6 +1,5 @@
 package prjageda;
 
-import java.util.Random;
 import weka.core.Instances;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +7,7 @@ import java.util.Collections;
 public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
-    private static final int profundidade = 5;
+    public static final int profundidade = 5;
     public static final int quantidade = 10;
     public static final double TxCrossover = 0.3;
     private static final int geracoes = 10;
@@ -23,14 +22,19 @@ public class DecisionStumps {
         try {
             //Declaração Objetos
             int geracao = 1;
-            
+
             //Inicialização do objeto
             arvores = new ArrayList<>();
 
             //Efetuar a Geração da População Inicial
-            arvores.addAll(GeracaoPopulacaoInicial(dados));
+            arvores = GeracaoPopulacaoInicial(dados);
 
-            //Ordenação da população
+            //Efetuar o Cálculo da Aptidão do Indivíduo {Fitness} - Pela acurácia do modelo
+            EfetuarCalculoFitnessPopulacao(dados);
+
+            //Ordenar a população de indivíduos gerados
+            ordenaPopulacao();
+
             //Laço até o critério de parada ser atingido
             while (geracao < geracoes) {
                 //Atualizar o número de Gerações
@@ -55,7 +59,7 @@ public class DecisionStumps {
             //percorrer todas as arestas do indivíduo
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                if (new Random().nextBoolean()) {
+                if (new MersenneTwister().nextBoolean()) {
                     //Declaração variáveis e Objetos
                     ArrayList<Arvores> nodos = new ArrayList<>();
 
@@ -66,7 +70,7 @@ public class DecisionStumps {
                      1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
                      2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
                      */
-                    arvore.SetNodo(arvore.getArestas(i), nodos.get(new Random().nextInt(nodos.size())));
+                    arvore.SetNodo(arvore.getArestas(i), nodos.get(new MersenneTwister().nextInt(nodos.size())));
 
                     //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
                     GerarPopulacaoIndividuos(dados, prof + 1, arvore.getArvoreApartirAresta(i));
@@ -128,16 +132,13 @@ public class DecisionStumps {
             temp.addAll(ProcessamentoNodos(dados));
 
             //Declaração Objetos
-            Arvores arvore = temp.get(new Random().nextInt(dados.numAttributes() - 1));
+            Arvores arvore = temp.get(new MersenneTwister().nextInt(dados.numAttributes() - 1));
 
             //Chamada da função para a geração dos indivíduos
             GerarPopulacaoIndividuos(dados, 1, arvore);
 
             //Adicionar o Indivíduo novo
             arvores.add(arvore);
-            
-            //Ordenar a população
-            ordenaPopulacao();
 
         }
 
@@ -153,6 +154,30 @@ public class DecisionStumps {
         //Ordernar os registros crescente
         Collections.sort(arvores);
 
+    }
+
+    private void EfetuarCalculoFitnessPopulacao(Instances dados) {
+        // Choose a type of validation split
+        Instances[][] split = crossValidationSplit(dados, 10);
+
+        //Separar nas splits de treino, validacao e teste
+        Instances[] treino = split[0], validacao = split[1], teste = split[2];
+        
+        //Deve-se construir algum classificador em cima disto ???
+        
+
+    }
+
+    public static Instances[][] crossValidationSplit(Instances data, int numberOfFolds) {
+        Instances[][] split = new Instances[3][numberOfFolds];
+
+        for (int i = 0; i < numberOfFolds; i++) {
+            split[0][i] = data.trainCV(numberOfFolds, i);
+            split[1][i] = data.testCV(numberOfFolds, i);
+            split[2][i] = data.testCV(numberOfFolds, i);
+        }
+
+        return split;
     }
 
 }
