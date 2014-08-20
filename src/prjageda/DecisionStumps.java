@@ -56,29 +56,62 @@ public class DecisionStumps {
     public void GerarPopulacaoIndividuos(Instances dados, int prof, Arvores arvore) {
         //Condição de Parada, Se o grau de profundidade for igual ao informado
         if (prof <= profundidade) {
+            //Declaração Variáveis e Objetos
+            MersenneTwister mt = new MersenneTwister();
+
             //percorrer todas as arestas do indivíduo
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                if (new MersenneTwister().nextBoolean()) {
-                    //Declaração variáveis e Objetos
-                    ArrayList<Arvores> nodos = new ArrayList<>();
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                //
+                //
+                //if (mt.nextBoolean()) {
+                //
+                //
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                // Descomentar quando subir fontes
+                //Declaração variáveis e Objetos
+                ArrayList<Arvores> nodos = new ArrayList<>();
 
-                    //Adicionar os nodos originais, isto é devido ao java trabalhar APENAS com a referência dos mesmos
-                    nodos.addAll(ProcessamentoNodos(dados));
+                //Adicionar os nodos originais, isto é devido ao java trabalhar APENAS com a referência dos mesmos
+                nodos.addAll(ProcessamentoNodos(dados));
 
-                    /*
-                     1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                     2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                     */
-                    arvore.SetNodo(arvore.getArestas(i), nodos.get(new MersenneTwister().nextInt(nodos.size())));
+                /*
+                 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
+                 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                 */
+                arvore.SetNodo(arvore.getArestas(i), nodos.get(mt.nextInt(nodos.size())));
 
-                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                    GerarPopulacaoIndividuos(dados, prof + 1, arvore.getArvoreApartirAresta(i));
+                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                GerarPopulacaoIndividuos(dados, prof + 1, arvore.getArvoreApartirAresta(i));
 
-                }
-
+                //}
             }
-
+            
         }
 
     }
@@ -167,9 +200,9 @@ public class DecisionStumps {
         //Percorrer todos os Indivíduos da árvore
         for (Arvores arvore : arvores) {
             //Efetuar a distribuição dos dados de treinamento
-            
+
         }
-        
+
     }
 
     public static Instances[][] crossValidationSplit(Instances dados, int nroFolds) {
