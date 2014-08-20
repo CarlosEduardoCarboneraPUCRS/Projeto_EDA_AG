@@ -30,7 +30,7 @@ public class DecisionStumps {
             arvores = GeracaoPopulacaoInicial(dados);
 
             //Efetuar o Cálculo da Aptidão do Indivíduo {Fitness} - Pela acurácia do modelo
-            EfetuarCalculoFitnessPopulacao(dados);
+            EfetuarCalculoFitnessPopulacao(dados, arvores);
 
             //Ordenar a população de indivíduos gerados
             ordenaPopulacao();
@@ -156,28 +156,40 @@ public class DecisionStumps {
 
     }
 
-    private void EfetuarCalculoFitnessPopulacao(Instances dados) {
-        // Choose a type of validation split
+    /*Efetuar o calculo do fitness de cada um dos indivíduos*/
+    private void EfetuarCalculoFitnessPopulacao(Instances dados, ArrayList<Arvores> arvores) {
+        // Dividir os dados em 3 vetores de 10 folds cada um deles
         Instances[][] split = crossValidationSplit(dados, 10);
 
         //Separar nas splits de treino, validacao e teste
         Instances[] treino = split[0], validacao = split[1], teste = split[2];
-        
-        //Deve-se construir algum classificador em cima disto ???
-        
 
+        //Percorrer todos os Indivíduos da árvore
+        for (Arvores arvore : arvores) {
+            //Efetuar a distribuição dos dados de treinamento
+            
+        }
+        
     }
 
-    public static Instances[][] crossValidationSplit(Instances data, int numberOfFolds) {
-        Instances[][] split = new Instances[3][numberOfFolds];
+    public static Instances[][] crossValidationSplit(Instances dados, int nroFolds) {
+        //Declaração Variáveis e Objetos
+        Instances[][] split = new Instances[3][nroFolds];
 
-        for (int i = 0; i < numberOfFolds; i++) {
-            split[0][i] = data.trainCV(numberOfFolds, i);
-            split[1][i] = data.testCV(numberOfFolds, i);
-            split[2][i] = data.testCV(numberOfFolds, i);
+        //percorrer o número de folds
+        for (int i = 0; i < nroFolds; i++) {
+            //Atribuições
+            //trainCV - Creates the training set for one fold of a cross-validation on the dataset.
+            //testeCV - Creates the test set for one fold of a cross-validation on the dataset.
+            split[0][i] = dados.trainCV(nroFolds, i);
+            split[1][i] = dados.testCV(nroFolds, i);
+            split[2][i] = dados.testCV(nroFolds, i);
+
         }
 
+        //Definir o retorno
         return split;
+
     }
 
 }
