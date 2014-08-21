@@ -23,11 +23,11 @@ public class DecisionStumps {
             //Declaração Objetos
             int geracao = 1;
 
-            //Inicialização do objeto
+            //Inicialização do Objeto
             arvores = new ArrayList<>();
 
             //Efetuar a Geração da População Inicial
-            arvores = GeracaoPopulacaoInicial(dados);
+            GeracaoPopulacaoInicial(dados);
 
             //Efetuar o Cálculo da Aptidão do Indivíduo {Fitness} - Pela acurácia do modelo
             EfetuarCalculoFitnessPopulacao(dados, arvores);
@@ -61,39 +61,18 @@ public class DecisionStumps {
 
             //percorrer todas as arestas do indivíduo
             for (int i = 0; i < arvore.getArestas().size(); i++) {
+                //
+                //
+                //----------------------------------------------------------------------------------------------------------------------------------------------
+                // Comentado pois para fins de teste serã testados todos os níveis da árvore                
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
                 //
                 //
                 //if (mt.nextBoolean()) {
+                // Comentado pois para fins de teste serã testados todos os níveis da árvore                
+                //----------------------------------------------------------------------------------------------------------------------------------------------
                 //
                 //
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
-                // Descomentar quando subir fontes
                 //Declaração variáveis e Objetos
                 ArrayList<Arvores> nodos = new ArrayList<>();
 
@@ -111,7 +90,7 @@ public class DecisionStumps {
 
                 //}
             }
-            
+
         }
 
     }
@@ -140,13 +119,13 @@ public class DecisionStumps {
     }
     //</editor-fold> 
 
-    /*
-     Geração da População Inicial
-     ---------------------------------------------------------------------------------------------------------------------------------------------------
-     - Cada Individuo da população será uma Árvore c/ Sub-Árvores
-     - Esta possibilidade será para cada um dos atributos existentes
+    /**
+     * Geração da População Inicial
+     * --------------------------------------------------------------------------------------------------------------------------------------------------- -
+     * Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para cada um dos atributos existentes
+     *
      */
-    private ArrayList<Arvores> GeracaoPopulacaoInicial(Instances dados) {
+    private void GeracaoPopulacaoInicial(Instances dados) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> temp;
 
@@ -175,21 +154,19 @@ public class DecisionStumps {
 
         }
 
-        //Definir o retorno
-        return arvores;
-
     }
 
-    /*Ordena a população pelo valor de aptidão de cada indivíduo, do maior valor
-     para o menor, assim se eu quiser obter o melhor indivíduo desta população, 
-     acesso a posição 0 do array de indivíduos*/
+    /**
+     * Ordena a população pelo valor de aptidão de cada indivíduo, do maior valor para o menor, assim se eu quiser obter o melhor indivíduo desta população,
+     * acesso a posição 0 do array de indivíduos
+     */
     public void ordenaPopulacao() {
         //Ordernar os registros crescente
         Collections.sort(arvores);
 
     }
 
-    /*Efetuar o calculo do fitness de cada um dos indivíduos*/
+    //Efetuar o calculo do fitness de cada um dos indivíduos
     private void EfetuarCalculoFitnessPopulacao(Instances dados, ArrayList<Arvores> arvores) {
         // Dividir os dados em 3 vetores de 10 folds cada um deles
         Instances[][] split = crossValidationSplit(dados, 10);

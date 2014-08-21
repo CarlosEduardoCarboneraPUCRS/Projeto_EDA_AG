@@ -133,17 +133,17 @@ public class Processamento {
         while (populacao.size() < DecisionStumps.quantidade) {
             //Selecionar 2 Indivíduos Pais pelo método "TORNEIO"
             ArrayList<Arvores> pais = selecaoTorneio(arvores);
-            
+
             //Declaração de variáveis e objetos
             ArrayList<Arvores> filhos = new ArrayList<>();
 
             //Adicionar os 2 indivíduos que sofreram a mutação
-            filhos.addAll(Mutacao(arvores));
+            filhos.addAll(MutacaoIndividuo(arvores));
 
             //SE Valor Gerado <= TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
             if (new MersenneTwister().nextDouble() <= DecisionStumps.TxCrossover) {
                 //Adicionar os 2 filhos que sofreram Crossover
-                filhos = Crossover(pais.get(0), pais.get(1));
+                filhos = CrossoverIndividuo(pais.get(0), pais.get(1));
 
             } else {
                 //Calcular o Fitness de cada um dos indivíduos
@@ -194,7 +194,7 @@ public class Processamento {
 
     }
 
-    private ArrayList<Arvores> Crossover(Arvores origem, Arvores destino) {
+    private ArrayList<Arvores> CrossoverIndividuo(Arvores origem, Arvores destino) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> populacao = new ArrayList<>();
 
@@ -221,28 +221,28 @@ public class Processamento {
     //</editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="FUNÇÕES PERTINENTES AOS MÉTODOS DE MUTAÇÃO">   
-    private ArrayList<Arvores> Mutacao(ArrayList<Arvores> regs) {
+    private ArrayList<Arvores> MutacaoIndividuo(ArrayList<Arvores> populacao) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> individuos = new ArrayList<>();
-        Arvores individuo1 = regs.get(mt.nextInt(regs.size()));
-        Arvores individuo2 = regs.get(mt.nextInt(regs.size()));
-        
+        Arvores indiv1 = populacao.get(mt.nextInt(populacao.size()));
+        Arvores indiv2 = populacao.get(mt.nextInt(populacao.size()));
+
         /*
          Detalhamento da Mutação
          ---------------------------------------------------------------------------------------------------------------------
          1 Passo - Percorrer o indivíduo até o seu maior nível a partir do nó raiz
          2 Passo - Move o Ramo selecionado para o ramo próximo e transforma o ramo atual em ramo folha
          */
-        PosicionarMaiorNivel(individuo1, 1);
-        PosicionarMaiorNivel(individuo2, 1);
+        PosicionarMaiorNivel(indiv1, 1);
+        PosicionarMaiorNivel(indiv2, 1);
 
         //Recalcular o fitness de cada um dos indivíduos
-        CalcularFitness(individuo1);
-        CalcularFitness(individuo2);
+        CalcularFitness(indiv1);
+        CalcularFitness(indiv2);
 
         //Adicionar os indivíduos
-        individuos.add(individuo1);
-        individuos.add(individuo2);
+        individuos.add(indiv1);
+        individuos.add(indiv2);
 
         //Definir o retorno
         return individuos;
@@ -266,17 +266,27 @@ public class Processamento {
                 //Chamada recursiva da função
                 PosicionarMaiorNivel(individuo.getArestas(posicao).getNodo(), nivel + 1);
 
-                //Se atingiu o MAIOR OU ÚLTIMO NÍVEL de profundidade E não for o nodo raiz, efetuará a mutação 
-                if (nivel == DecisionStumps.profundidade) {
+                //Se atingiu o MAIOR NÍVEL de profundidade da árvore (O último nodo da aresta DEVERÁ SER nulo)
+                //if (nivel == DecisionStumps.profundidade) {
+                if (individuo.getArestas(posicao).getNodo().getArestas(0).getNodo() == null) {
                     //Declaração Variáveis e Objetos
+                    ArrayList<Atributos> arestas = new ArrayList<>();
                     Arvores temp = individuo.getArestas(posicao).getNodo();
 
-                    //Setar o nodo da aresta 1 para a aresta 0
-                    individuo.getArestas(posicao).setNodo(individuo.getArestas(posicao == 0 ? 1 : 0).getNodo());
+                    //Adicionar as arestas Trocando de Posição (Aresta 0 -> Aresta 1 E Aresta 1 -> Aresta 0) - EFETIVAR A MUTAÇÃO
+                    arestas.add(new Atributos(temp.getArestas(posicao == 0 ? 1 : 0).getAtributo(),
+                            temp.getArestas(posicao == 0 ? 1 : 0).getQuantidade(),
+                            temp.getArestas(posicao == 0 ? 1 : 0).getNodo(),
+                            temp.getArestas(posicao == 0 ? 1 : 0).getAcuracia()));
 
-                    //Setar o nodo da aresta 0 para a aresta 1
-                    individuo.getArestas(posicao == 0 ? 1 : 0).setNodo(temp);
+                    //Adicionar a aresta que estava na primeira posição
+                    arestas.add(new Atributos(temp.getArestas(posicao).getAtributo(),
+                            temp.getArestas(posicao).getQuantidade(),
+                            temp.getArestas(posicao).getNodo(),
+                            temp.getArestas(posicao).getAcuracia()));
 
+                    //Setar o "NOVO" nodo com as arestas mutadas
+                    individuo.getArestas(posicao).getNodo().setArestas(arestas);
 
                 }
 
@@ -316,11 +326,11 @@ public class Processamento {
     }
 
     /**
-     Incluir o nodo selecionado em algum dos nodos folhas da árvore informada
-     -------------------------------------------------------------------------------------------------------------------------
-     1° Passo - Percorrer a árvore até o nodo mais profundo, selecionando aleatóriamente a aresta
-     2° Passo - Efetua a inclusão do Nodo na Sub-Árvore
-     **/
+     * Incluir o nodo selecionado em algum dos nodos folhas da árvore informada
+     * ------------------------------------------------------------------------------------------------------------------------- 1° Passo - Percorrer a árvore
+     * até o nodo mais profundo, selecionando aleatóriamente a aresta 2° Passo - Efetua a inclusão do Nodo na Sub-Árvore
+     *
+     */
     public void IncluirNodoNoDestino(Arvores individuo, Arvores no) {
         //Se o nó não for nulo
         if (individuo != null) {
@@ -357,11 +367,12 @@ public class Processamento {
 
             //Se a primeira aresta não for nula pesquisa pela mesma
             if (individuo.getArestas(posicao).getNodo() != null) {
-                //Chamada recursiva da função
+                //Chamada recursiva da função até atinbgir o último nível
                 PosicionarMaiorNivelNodoOrigem(individuo.getArestas(posicao).getNodo(), nivel + 1);
 
                 //Se atingiu o MAIOR OU ÚLTIMO NÍVEL de profundidade E não for o nodo raiz, efetuará a mutação 
-                if (nivel == DecisionStumps.profundidade) {
+                //if (nivel == DecisionStumps.profundidade) {
+                if (individuo.getArestas(posicao).getNodo() == null) {
                     //Atribuir valor a Árvore
                     tempNodo = individuo.getArestas(posicao).getNodo();
 
