@@ -13,6 +13,11 @@ public class DecisionStumps {
     private static final int geracoes = 10;
     private ArrayList<Arvores> arvores;
 
+    private static enum tipo {
+
+        Treinamento, Valiacao, Teste;
+    };
+
     public DecisionStumps() {
     }
     //</editor-fold> 
@@ -30,10 +35,10 @@ public class DecisionStumps {
             GeracaoPopulacaoInicial(dados);
 
             //Efetuar o Cálculo da Aptidão do Indivíduo {Fitness} - Pela acurácia do modelo
-            EfetuarCalculoFitnessPopulacao(dados, arvores);
+            DefinicaoPropriedadesFolhas(dados, arvores);
 
-            //Ordenar a população de indivíduos gerados
-            ordenaPopulacao();
+            //Calcular o Fitness da população
+            CalculoFitnessPopulacao(arvores);
 
             //Laço até o critério de parada ser atingido
             while (geracao < geracoes) {
@@ -167,39 +172,92 @@ public class DecisionStumps {
     }
 
     //Efetuar o calculo do fitness de cada um dos indivíduos
-    private void EfetuarCalculoFitnessPopulacao(Instances dados, ArrayList<Arvores> arvores) {
-        // Dividir os dados em 3 vetores de 10 folds cada um deles
-        Instances[][] split = crossValidationSplit(dados, 10);
-
-        //Separar nas splits de treino, validacao e teste
-        Instances[] treino = split[0], validacao = split[1], teste = split[2];
-
-        //Percorrer todos os Indivíduos da árvore
-        for (Arvores arvore : arvores) {
-            //Efetuar a distribuição dos dados de treinamento
-
-        }
+    private void DefinicaoPropriedadesFolhas(Instances dados, ArrayList<Arvores> arvores) {
 
     }
 
-    public static Instances[][] crossValidationSplit(Instances dados, int nroFolds) {
+    //Efetuar o calculo do fitness de cada um dos indivíduos
+    private void CalculoFitnessPopulacao(ArrayList<Arvores> arvores) {
+
+        //Ordenar a população
+        ordenaPopulacao();
+
+    }
+
+    /**
+     * @param dados = Dados a serem avaliados de acordo com o tipo de instância
+     * @param tipo = POderá ser "A" - Avaliação(Teste) - 30%, "V" - Validação - 35%, "T" - Treinamento - 35%
+     */
+    private Instances FonteDadosAvaliacao(Instances dados, Enum opcao) {
         //Declaração Variáveis e Objetos
-        Instances[][] split = new Instances[3][nroFolds];
-
-        //percorrer o número de folds
-        for (int i = 0; i < nroFolds; i++) {
-            //Atribuições
-            //trainCV - Creates the training set for one fold of a cross-validation on the dataset.
-            //testeCV - Creates the test set for one fold of a cross-validation on the dataset.
-            split[0][i] = dados.trainCV(nroFolds, i);
-            split[1][i] = dados.testCV(nroFolds, i);
-            split[2][i] = dados.testCV(nroFolds, i);
-
+        Instances retorno = new Instances(dados);
+        int qtdRegs = (int) (dados.numInstances() * (opcao == tipo.Treinamento ? 0.3 : 0.35));
+        
+        //Percorrer a quan
+        for (int i = 0; i < qtdRegs; i++) {
+            
         }
-
-        //Definir o retorno
-        return split;
-
+        
+        
+        //Definir o retorno dos dados
+        return retorno;
     }
 
+    /*
+     Classifier[]        base;
+     int                 i;
+     int                 n;
+     int                 fromIndex;
+     int                 toIndex;
+     Instances           train;
+     double              chunkSize;
+    
+     // can classifier handle the data?
+     getCapabilities().testWithFail(data);
+
+     // remove instances with missing class
+     data = new Instances(data);
+     data.deleteWithMissingClass();
+    
+     m_Vote    = new Vote();
+     base      = new Classifier[getNumFolds()];
+     chunkSize = (double) data.numInstances() / (double) getNumFolds();
+    
+     // stratify data
+     if (getNumFolds() > 1)
+     data.stratify(getNumFolds());
+
+     // generate <folds> classifiers
+     for (i = 0; i < getNumFolds(); i++) {
+     base[i] = makeCopy(getClassifier());
+
+     // generate training data
+     if (getNumFolds() > 1) {
+     // some progress information
+     if (getVerbose())
+     System.out.print(".");
+        
+     train     = new Instances(data, 0);
+     fromIndex = (int) ((double) i * chunkSize);
+     toIndex   = (int) (((double) i + 1) * chunkSize) - 1;
+     if (i == getNumFolds() - 1)
+     toIndex = data.numInstances() - 1;
+     for (n = fromIndex; n < toIndex; n++)
+     train.add(data.instance(n));
+     }
+     else {
+     train = data;
+     }
+
+     // train classifier
+     base[i].buildClassifier(train);
+     }
+    
+     // init vote
+     m_Vote.setClassifiers(base);
+    
+     if (getVerbose())
+     System.out.println();
+     }
+     */
 }
