@@ -11,6 +11,7 @@ public class DecisionStumps {
     public static final int quantidade = 10;
     public static final double TxCrossover = 0.3;
     private static final int geracoes = 10;
+    private static final int nroFolds = 10;
     private ArrayList<Arvores> arvores;
 
     private static enum tipo {
@@ -188,17 +189,21 @@ public class DecisionStumps {
      * @param dados = Dados a serem avaliados de acordo com o tipo de instância
      * @param tipo = POderá ser "A" - Avaliação(Teste) - 30%, "V" - Validação - 35%, "T" - Treinamento - 35%
      */
-    private Instances FonteDadosAvaliacao(Instances dados, Enum opcao) {
+    private Instances FormatacaoFonteDados(Instances dados, Enum opcao) {
         //Declaração Variáveis e Objetos
         Instances retorno = new Instances(dados);
+        
+        //Se for Treinamento será de 30% qualquer outro tipo será 35%
         int qtdRegs = (int) (dados.numInstances() * (opcao == tipo.Treinamento ? 0.3 : 0.35));
-        
+
+        //Estratificação dos dados na quantidade de Folds especificado
+        dados.stratify(nroFolds);
+
         //Percorrer a quan
-        for (int i = 0; i < qtdRegs; i++) {
-            
+        for (int i = 0; i < nroFolds; i++) {
+
         }
-        
-        
+
         //Definir o retorno dos dados
         return retorno;
     }
