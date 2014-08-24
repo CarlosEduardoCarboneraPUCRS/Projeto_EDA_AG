@@ -3,10 +3,10 @@ package prjageda;
 public class PrjAGEDA {
 
     //Arquivo com Atributos Numéricos
-    //private static final String arquivo = "C:\\ArffTeste\\ionosphere.arff";
+    private static final String arquivo = "C:\\ArffTeste\\ionosphere.arff";
 
     //Arquivo com Atributos Nominais
-    private static final String arquivo = "C:\\ArffTeste\\weathernominal.arff";
+    //private static final String arquivo = "C:\\ArffTeste\\weathernominal.arff";
     
     public static void main(String[] args) throws Exception {
         /*

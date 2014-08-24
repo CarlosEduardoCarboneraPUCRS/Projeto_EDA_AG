@@ -1,7 +1,7 @@
 package prjageda;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -11,7 +11,7 @@ public class Processamento {
     private String caminhoDados;
 
     //Declaração de objetos
-    private static final MersenneTwister mt = new MersenneTwister();
+    public static final MersenneTwister mt = new MersenneTwister();
     private static final int qtdAmostras = 2;
     private static Arvores tempNodo = null;
 
@@ -74,39 +74,23 @@ public class Processamento {
         if (dados.attribute(posicao).isNumeric()) {
             //Percorre todas as Classes Encontradas
             for (int pos = 0; pos < dados.numClasses(); pos++) {
-                //Declaração Variáveis e Objetos
-                Double qtdRegs = 0d;
+                /*
+                 //double valor = dados.instance(i).classValue();
+                 for (int j = 0; j < dados.numInstances(); j++) {
+                 //Atualizar a quantidade
+                 qtdRegs += dados.instance(j).value(posicao) == pos ? 1 : 0;
 
-                //double valor = dados.instance(i).classValue();
-                for (int j = 0; j < dados.numInstances(); j++) {
-                    //Atualizar a quantidade
-                    qtdRegs += dados.instance(j).value(posicao) == pos ? 1 : 0;
-
-                }
-
+                 }*/
                 //Adicionar o Registro
-                registros.add(new Atributos(String.valueOf(pos), qtdRegs, null, (1 - Math.pow(qtdRegs / dados.numInstances(), 2))));
+                registros.add(new Atributos(String.valueOf(pos), null, ""));
 
             }
 
         } else {
             //Percorrer a Quantidade de Atributos existentes
             for (int i = 0; i < dados.attribute(posicao).numValues(); i++) {
-                //Declaração Variáveis e Objetos
-                Double qtdRegs = 0d;
-
-                //Declaração Variáveis e Objetos
-                String nomeAtr = dados.attribute(posicao).value(i);
-
-                for (int j = 0; j < dados.numInstances(); j++) {
-                    //Atualizar a quantidade
-                    //qtdRegs += String.valueOf(dados.instance(j).value(posicao)) == nomeAtr ? 1 : 0;
-                    qtdRegs += String.valueOf(dados.instance(j).attribute(posicao).value(i)) == nomeAtr ? 1 : 0;
-
-                }
-
                 //Adicionar o nodo                
-                registros.add(new Atributos(nomeAtr, qtdRegs, null, (1 - Math.pow(qtdRegs / dados.numInstances(), 2))));
+                registros.add(new Atributos(dados.attribute(posicao).value(i), null, ""));
 
             }
 
@@ -118,7 +102,7 @@ public class Processamento {
     }
 
     //Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore
-    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, ArrayList<Arvores> arvores, boolean elitismo) {
+    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, List<Arvores> arvores, boolean elitismo) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> populacao = new ArrayList<>();
 
@@ -132,7 +116,7 @@ public class Processamento {
         //Efetua a geração da nova população equanto a população for menor que a população inicialmente estabelecida
         while (populacao.size() < DecisionStumps.quantidade) {
             //Selecionar 2 Indivíduos Pais pelo método "TORNEIO"
-            ArrayList<Arvores> pais = selecaoTorneio(arvores);
+            List<Arvores> pais = SelecaoPorTorneio(arvores);
 
             //Declaração de variáveis e objetos
             ArrayList<Arvores> filhos = new ArrayList<>();
@@ -141,14 +125,12 @@ public class Processamento {
             filhos.addAll(MutacaoIndividuo(arvores));
 
             //SE Valor Gerado <= TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
-            if (new MersenneTwister().nextDouble() <= DecisionStumps.TxCrossover) {
+            if (mt.nextDouble() <= DecisionStumps.TxCrossover) {
                 //Adicionar os 2 filhos que sofreram Crossover
                 filhos = CrossoverIndividuo(pais.get(0), pais.get(1));
 
             } else {
                 //Calcular o Fitness de cada um dos indivíduos
-                CalcularFitness(pais.get(0));
-                CalcularFitness(filhos.get(1));
 
                 //Apenas adicionar os 2 filhos selecionados
                 filhos.add(pais.get(0));
@@ -165,29 +147,20 @@ public class Processamento {
         return populacao;
 
     }
-
-    private void CalcularFitness(Arvores individuo) {
-        //Declaração Variáveis e Objetos
-        double valor = 0;
-
-        //Atribuição do valor do fitness
-        individuo.setFitness(valor);
-
-    }
-
-    private ArrayList<Arvores> selecaoTorneio(ArrayList<Arvores> arvores) {
+    
+    private List<Arvores> SelecaoPorTorneio(List<Arvores> arvores) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
 
         //seleciona 3 indivíduos aleatóriamente na população
         for (int i = 0; i < qtdAmostras; i++) {
             //Selecionar os 10 indivíduos aleatórios DENTRO da população gerada aleatóriamente no inicio
-            selecao.add(arvores.get(new MersenneTwister().nextInt(arvores.size())));
+            selecao.add(arvores.get(mt.nextInt(arvores.size())));
 
         }
 
         //Ordenar as árvores selecionadas aleatóriamente
-        Collections.sort(selecao);
+        
 
         //Definir o retorno
         return selecao;
@@ -206,9 +179,6 @@ public class Processamento {
             //Incluir o nodo processado na árvore de destino
             IncluirNodoNoDestino(destino, tempNodo);
 
-            //Calcular o Fitness
-            CalcularFitness(destino);
-
             //Adicionar as duas árvores
             populacao.add(destino);
 
@@ -221,7 +191,7 @@ public class Processamento {
     //</editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="FUNÇÕES PERTINENTES AOS MÉTODOS DE MUTAÇÃO">   
-    private ArrayList<Arvores> MutacaoIndividuo(ArrayList<Arvores> populacao) {
+    private ArrayList<Arvores> MutacaoIndividuo(List<Arvores> populacao) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> individuos = new ArrayList<>();
         Arvores indiv1 = populacao.get(mt.nextInt(populacao.size()));
@@ -235,11 +205,7 @@ public class Processamento {
          */
         PosicionarMaiorNivel(indiv1, 1);
         PosicionarMaiorNivel(indiv2, 1);
-
-        //Recalcular o fitness de cada um dos indivíduos
-        CalcularFitness(indiv1);
-        CalcularFitness(indiv2);
-
+        
         //Adicionar os indivíduos
         individuos.add(indiv1);
         individuos.add(indiv2);
@@ -275,15 +241,11 @@ public class Processamento {
 
                     //Adicionar as arestas Trocando de Posição (Aresta 0 -> Aresta 1 E Aresta 1 -> Aresta 0) - EFETIVAR A MUTAÇÃO
                     arestas.add(new Atributos(temp.getArestas(posicao == 0 ? 1 : 0).getAtributo(),
-                            temp.getArestas(posicao == 0 ? 1 : 0).getQuantidade(),
-                            temp.getArestas(posicao == 0 ? 1 : 0).getNodo(),
-                            temp.getArestas(posicao == 0 ? 1 : 0).getAcuracia()));
+                            temp.getArestas(posicao == 0 ? 1 : 0).getNodo(), ""));
 
                     //Adicionar a aresta que estava na primeira posição
                     arestas.add(new Atributos(temp.getArestas(posicao).getAtributo(),
-                            temp.getArestas(posicao).getQuantidade(),
-                            temp.getArestas(posicao).getNodo(),
-                            temp.getArestas(posicao).getAcuracia()));
+                            temp.getArestas(posicao).getNodo(), ""));
 
                     //Setar o "NOVO" nodo com as arestas mutadas
                     individuo.getArestas(posicao).getNodo().setArestas(arestas);
@@ -300,8 +262,9 @@ public class Processamento {
     //<editor-fold defaultstate="collapsed" desc="FUNÇÕES PERTINENTES AOS MÉTODOS DE CROSSOVER">       
     /**
      *
-     * 1° Passo - Avaliação do Individuo informado - O mesmo deverá ter pelo menos 1 das arestas válidas(com nível maior que 2° Passo - Atualizar a variável
-     * passada por parâmetro(declarada antes da chamada do método), atualizada por referência 3° Passo - Setar nulo ao nodo informado
+     * 1° Passo - Avaliação do Individuo informado - O mesmo deverá ter pelo menos 1 das arestas válidas(com nível maior que
+     * 2° Passo - Atualizar a variável passada por parâmetro(declarada antes da chamada do método), atualizada por referência
+     * 3° Passo - Setar nulo ao nodo informado
      * -----------------------------------------------------------------------------------------------------------------------
      *
      * @param individuo Indivíduo que sofrerá a mutação
@@ -327,9 +290,12 @@ public class Processamento {
 
     /**
      * Incluir o nodo selecionado em algum dos nodos folhas da árvore informada
-     * ------------------------------------------------------------------------------------------------------------------------- 1° Passo - Percorrer a árvore
-     * até o nodo mais profundo, selecionando aleatóriamente a aresta 2° Passo - Efetua a inclusão do Nodo na Sub-Árvore
+     * -------------------------------------------------------------------------------------------------------------------------
+     * 1° Passo - Percorrer a árvore até o nodo mais profundo, selecionando aleatóriamente a aresta 2° Passo - Efetua a
+     * inclusão do Nodo na Sub-Árvore
      *
+     * @param individuo -Individuo que sofrerá o Crossover
+     * @param no - Nodo a ser incluso no indvíduo
      */
     public void IncluirNodoNoDestino(Arvores individuo, Arvores no) {
         //Se o nó não for nulo
@@ -386,6 +352,63 @@ public class Processamento {
         }
 
     }
-    //</editor-fold> 
 
+    public void AtribuicaoClasseNodoFolha(Arvores individuo, Instances avaliacao) {
+        //Se o nó não for nulo
+        if (individuo != null) {
+            //Percorrer todas as arestas do nodo selecionado
+            for (int i = 0; i < individuo.getArestas().size(); i++) {
+                //Se a aresta selecionada não for nula pesquisa pela mesma
+                if (individuo.getArestas(i).getNodo() != null) {
+                    //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                    AtribuicaoClasseNodoFolha(individuo.getArestas(i).getNodo(), avaliacao);
+
+                } else //Chegou em um nodo folha
+                {
+                    //Percorrer as amostras de avaliação e todas as suas arestas, SE ENCONTRAR ALGUMA ARESTA IGUAL                   
+                    //atribui a classe a aresta atual
+                    for (int j = 0; j < avaliacao.numInstances(); j++) {
+                        //Se o nome do Atributo Classe for igual ao nome do atributo selecionado
+                        if (individuo.getNomeAtr().equals(avaliacao.instance(j).attribute(j).name())) {
+                            /*
+                             Se o tipo do atributo for numérico SENÃO será Nominal
+                             */
+                            if (avaliacao.instance(j).attribute(j).isNumeric()) {
+                                //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
+                                if (Double.valueOf(individuo.getArestas(i).getAtributo()).equals(
+                                        avaliacao.instance(j).classValue())) {
+                                    //Atribuir a classe a qual o nodo folha pertence
+                                    individuo.getArestas(i).setClasse(avaliacao.instance(j).classAttribute().value(
+                                            (int) avaliacao.instance(j).classValue()));
+
+                                }
+
+                            } else {
+                                //Percorrer todos as arestas do atributo
+                                for (int k = 0; k < avaliacao.instance(j).numValues(); k++) {
+                                    //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
+                                    if (individuo.getArestas(i).getAtributo().equals(avaliacao.instance(j).attribute(j).value(k))) {
+                                        //Atribuir a classe a qual o nodo folha pertence
+                                        individuo.getArestas(i).setClasse(avaliacao.instance(j).classAttribute().name());
+                                        
+                                    }
+
+                                }
+                                //Atualizar a quantidade de ocorrências em 1 para calculo do Fitness
+                                //individuo.AtualizarQtdOcorr(1);
+
+                            }
+                            //Se já processou o atributo sai fora
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            }
+            //</editor-fold> 
+        }
+    }
 }
