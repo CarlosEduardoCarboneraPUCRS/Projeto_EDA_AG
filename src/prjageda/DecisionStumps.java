@@ -10,7 +10,7 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
     public static final int profundidade = 2;
-    public static final int quantidade = 5;
+    public static final int quantidade = 1;
     public static final double TxCrossover = 0.3;
     private static final int geracoes = 10;
     //private static final int nroFolds = 10;
@@ -124,9 +124,8 @@ public class DecisionStumps {
 
     /**
      * Geração da População Inicial
-     * ---------------------------------------------------------------------------------------------------------------------------------------------------
-     * - Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para cada um dos atributos
-     * existentes
+     * --------------------------------------------------------------------------------------------------------------------------------------------------- -
+     * Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para cada um dos atributos existentes
      *
      */
     private void GeracaoPopulacaoInicial(Instances dados) throws Exception {
@@ -173,8 +172,8 @@ public class DecisionStumps {
     }
 
     /**
-     * Ordena a população pelo valor de aptidão de cada indivíduo, do maior valor para o menor, assim se eu quiser obter o
-     * melhor indivíduo desta população, acesso a posição 0 do array de indivíduos
+     * Ordena a população pelo valor de aptidão de cada indivíduo, do maior valor para o menor, assim se eu quiser obter o melhor indivíduo desta população,
+     * acesso a posição 0 do array de indivíduos
      */
     public void ordenaPopulacao() {
         //Ordernar os registros crescente
@@ -191,16 +190,18 @@ public class DecisionStumps {
             for (Arvores arvore : arvores) {
                 //Percorrer todas as instâncias para avaliação da árvore selecionada
                 for (int i = 0; i < avaliacao.numInstances() - 1; i++) {
-                    //Percorrer todos os atributos da instancia
+                    //Percorrer todos os atributos da instancia selecionada no momento
                     for (int j = 0; j < avaliacao.instance(i).numAttributes() - 1; j++) {
-                        //Se o nome do Atributo for igual entra no próximo nível senão vai pra o próximo
+                        //Se o nome do Atributo Raiz for igual ao atributo avaliado, entra no próximo nível senão vai pra a próxima árvore
                         if (arvore.getNomeAtr().equals(avaliacao.instance(i).attribute(j).name())) {
                             //Entra no nivel
                             new Processamento().AtribuicaoClasseNodoFolha(arvore, avaliacao);
 
+                            //Se já processou o atributo sai fora do for
+                            break;
+
                         }
-                        //Se já processou o atributo sai fora do for
-                        break;
+
                     }
 
                 }
@@ -246,28 +247,28 @@ public class DecisionStumps {
         //Declaração Variáveis e Objetos
         int iTeste = (int) ((int) dados.numInstances() * 0.3);
         int iValidacao = iTeste + (int) ((int) dados.numInstances() * 0.35);
-        Instances temp = new Instances(dados, 0);
+        Instances regs = new Instances(dados, 0);
 
         //"A" - Avaliação(Teste) - 30% 
         switch (tipo) {
             case "A":
                 //Alimentar a classificador de Teste "A" - Avaliação(Teste) - 30% 
                 for (int t = 0; t < iTeste; t++) {
-                    temp.add(dados.instance(new Random().nextInt(dados.numInstances() - 1)));
+                    regs.add(dados.instance(Processamento.mt.nextInt(dados.numInstances() - 1)));
 
                 }
                 break;
 
             case "V": //Alimentar a classificador de Validação - "V" - Validação - 35% 
                 for (int t = iTeste; t < iValidacao; t++) {
-                    temp.add(dados.instance(new Random().nextInt(dados.numInstances() - 1)));
+                    regs.add(dados.instance(Processamento.mt.nextInt(dados.numInstances() - 1)));
 
                 }
                 break;
 
             case "T": //Alimentar a classificador de Treinamento - "T" - Treinamento - 35% 
-                for (int t = iValidacao; t < dados.numInstances(); t++) {
-                    temp.add(dados.instance(new Random().nextInt(dados.numInstances() - 1)));
+                for (int t = iValidacao; t < dados.numInstances() - 1; t++) {
+                    regs.add(dados.instance(Processamento.mt.nextInt(dados.numInstances() - 1)));
 
                 }
                 break;
@@ -275,7 +276,7 @@ public class DecisionStumps {
         }
 
         //Definir o retorno dos dados
-        return temp;
+        return regs;
 
     }
 
@@ -291,16 +292,20 @@ public class DecisionStumps {
             for (Arvores arvore : arvores) {
                 //Percorrer todas as instâncias para avaliação da árvore selecionada
                 for (int i = 0; i < validacao.numInstances() - 1; i++) {
-                    //Percorrer todos os atributos da instancia
+                    //Percorrer todos os atributos da instância
                     for (int j = 0; j < validacao.instance(i).numAttributes() - 1; j++) {
-                        //Se o nome do Atributo for igual entra no próximo nível senão vai pra o próximo
+                        //Se o nome do Atributo for igual ao da instância selecionada entra no próximo nível senão vai p/ a próxima instância,
+                        //devido a possibilidade de ter-se atributos que não existem na seleção
                         if (arvore.getNomeAtr().equals(validacao.instance(i).attribute(j).name())) {
-                            //Efetuará o Cálculo do Fitness para o indivíduo
+                            //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
+                            //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness do(s) indivíduo(s)
                             ValidacaoParaCalculoFitnessPopulacao(arvore, validacao);
 
+                            //Se já processou o atributo sai fora do for
+                            break;
+
                         }
-                        //Se já processou o atributo sai fora do for
-                        break;
+                        
                     }
 
                 }

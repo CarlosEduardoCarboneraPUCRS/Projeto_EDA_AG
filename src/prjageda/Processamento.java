@@ -147,7 +147,7 @@ public class Processamento {
         return populacao;
 
     }
-    
+
     private List<Arvores> SelecaoPorTorneio(List<Arvores> arvores) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
@@ -160,8 +160,6 @@ public class Processamento {
         }
 
         //Ordenar as árvores selecionadas aleatóriamente
-        
-
         //Definir o retorno
         return selecao;
 
@@ -205,7 +203,7 @@ public class Processamento {
          */
         PosicionarMaiorNivel(indiv1, 1);
         PosicionarMaiorNivel(indiv2, 1);
-        
+
         //Adicionar os indivíduos
         individuos.add(indiv1);
         individuos.add(indiv2);
@@ -262,9 +260,8 @@ public class Processamento {
     //<editor-fold defaultstate="collapsed" desc="FUNÇÕES PERTINENTES AOS MÉTODOS DE CROSSOVER">       
     /**
      *
-     * 1° Passo - Avaliação do Individuo informado - O mesmo deverá ter pelo menos 1 das arestas válidas(com nível maior que
-     * 2° Passo - Atualizar a variável passada por parâmetro(declarada antes da chamada do método), atualizada por referência
-     * 3° Passo - Setar nulo ao nodo informado
+     * 1° Passo - Avaliação do Individuo informado - O mesmo deverá ter pelo menos 1 das arestas válidas(com nível maior que 2° Passo - Atualizar a variável
+     * passada por parâmetro(declarada antes da chamada do método), atualizada por referência 3° Passo - Setar nulo ao nodo informado
      * -----------------------------------------------------------------------------------------------------------------------
      *
      * @param individuo Indivíduo que sofrerá a mutação
@@ -290,9 +287,8 @@ public class Processamento {
 
     /**
      * Incluir o nodo selecionado em algum dos nodos folhas da árvore informada
-     * -------------------------------------------------------------------------------------------------------------------------
-     * 1° Passo - Percorrer a árvore até o nodo mais profundo, selecionando aleatóriamente a aresta 2° Passo - Efetua a
-     * inclusão do Nodo na Sub-Árvore
+     * ------------------------------------------------------------------------------------------------------------------------- 1° Passo - Percorrer a árvore
+     * até o nodo mais profundo, selecionando aleatóriamente a aresta 2° Passo - Efetua a inclusão do Nodo na Sub-Árvore
      *
      * @param individuo -Individuo que sofrerá o Crossover
      * @param no - Nodo a ser incluso no indvíduo
@@ -356,8 +352,8 @@ public class Processamento {
     public void AtribuicaoClasseNodoFolha(Arvores individuo, Instances avaliacao) {
         //Se o nó não for nulo
         if (individuo != null) {
-            //Percorrer todas as arestas do nodo selecionado
-            for (int i = 0; i < individuo.getArestas().size(); i++) {
+            //Percorrer TODAS as arestas do indivíduo selecionado para atribuir uma classe as folhas
+            for (int i = 0; i < individuo.getArestas().size() -1; i++) {
                 //Se a aresta selecionada não for nula pesquisa pela mesma
                 if (individuo.getArestas(i).getNodo() != null) {
                     //Chamada recursiva da função passando como parâmetros a aresta selecionada
@@ -365,41 +361,46 @@ public class Processamento {
 
                 } else //Chegou em um nodo folha
                 {
-                    //Percorrer as amostras de avaliação e todas as suas arestas, SE ENCONTRAR ALGUMA ARESTA IGUAL                   
-                    //atribui a classe a aresta atual
-                    for (int j = 0; j < avaliacao.numInstances(); j++) {
-                        //Se o nome do Atributo Classe for igual ao nome do atributo selecionado
-                        if (individuo.getNomeAtr().equals(avaliacao.instance(j).attribute(j).name())) {
-                            /*
-                             Se o tipo do atributo for numérico SENÃO será Nominal
-                             */
-                            if (avaliacao.instance(j).attribute(j).isNumeric()) {
-                                //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-                                if (Double.valueOf(individuo.getArestas(i).getAtributo()).equals(
-                                        avaliacao.instance(j).classValue())) {
-                                    //Atribuir a classe a qual o nodo folha pertence
-                                    individuo.getArestas(i).setClasse(avaliacao.instance(j).classAttribute().value(
-                                            (int) avaliacao.instance(j).classValue()));
-
-                                }
-
-                            } else {
-                                //Percorrer todos as arestas do atributo
-                                for (int k = 0; k < avaliacao.instance(j).numValues(); k++) {
+                    /*
+                     Percorrer as amostras de avaliação e todas as suas arestas, SE ENCONTRAR ALGUMA ARESTA IGUAL atribui a classe a aresta atual e SAI FORA DA 
+                     PESQUISA, ou seja, se atribuido ALGUMA o mesmo finaliza o processamento p/ a aresta
+                     */
+                    for (int j = 0; j < avaliacao.numInstances() - 1; j++) {
+                        //Percorrer todos os atributos da instancia selecionada no momento
+                        for (int k = 0; k < avaliacao.instance(j).numAttributes() - 1; k++) {
+                            //Se o nome do Atributo Classe for igual ao nome do atributo selecionado
+                            if (individuo.getNomeAtr().equals(avaliacao.instance(j).attribute(k).name())) {
+                                //Se o tipo do atributo for "Numérico" SENÃO será "Nominal"
+                                if (avaliacao.instance(j).attribute(k).isNumeric()) {
                                     //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-                                    if (individuo.getArestas(i).getAtributo().equals(avaliacao.instance(j).attribute(j).value(k))) {
-                                        //Atribuir a classe a qual o nodo folha pertence
-                                        individuo.getArestas(i).setClasse(avaliacao.instance(j).classAttribute().name());
-                                        
+                                    if (Double.valueOf(individuo.getArestas(i).getAtributo()).equals(avaliacao.instance(j).classValue())) {
+                                        //Atribuir a classe a qual o nodo folha pertencerá
+                                        individuo.getArestas(i).setClasse(avaliacao.instance(j).classAttribute().value((int) avaliacao.instance(j).classValue()));
+                                        //sair fora do FOR
+                                        break;
+
+                                    }
+
+                                } else {
+                                    //Percorrer todos os valores existentes da da instância selecionada
+                                    for (int l = 0; l < avaliacao.instance(j).numValues() - 1; l++) {
+                                        //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
+                                        if (individuo.getArestas(i).getAtributo().equals(avaliacao.instance(j).attribute(k).value(l))) {
+                                            //Atribuir a classe a qual o nodo folha pertencerá
+                                            individuo.getArestas(i).setClasse(avaliacao.instance(j).classAttribute().name());
+                                            //sair fora do FOR
+                                            break;
+
+                                        }
+
                                     }
 
                                 }
-                                //Atualizar a quantidade de ocorrências em 1 para calculo do Fitness
-                                //individuo.AtualizarQtdOcorr(1);
+
+                                //Se já processou o atributo sai fora do FOR DOS ATRIBUTOS
+                                break;
 
                             }
-                            //Se já processou o atributo sai fora
-                            break;
 
                         }
 
