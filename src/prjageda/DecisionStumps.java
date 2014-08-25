@@ -9,10 +9,10 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Definição Atributos e Métodos Construtores da Classe">    
     public static final int profundidade = 2;
-    public static final int quantidade = 1;
+    public static final int quantidade = 10;
     public static final double TxCrossover = 0.3;
     private static final int geracoes = 10;
-    private double qtdOcorr = 0;
+    private int qtdOcorr = 0;
     private List<Arvores> arvores;
 
     public DecisionStumps() {
@@ -121,7 +121,7 @@ public class DecisionStumps {
             //Declaração Variáveis e Objetos
 
             //percorrer todas as arestas do indivíduo
-            for (int i = 0; i < arvore.getArestas().size(); i++) {
+            for (int i = 0; i < arvore.getArestas().size() - 1; i++) {
                 //------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 // Comentado pois para fins de teste serã testados todos os níveis da árvore                
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
@@ -220,13 +220,16 @@ public class DecisionStumps {
      */
     private void CalculoFitnessPopulacao(Instances dados) throws Exception {
         try {
+            //Declaração Variáveis e Objetos  - Variável "validacao" contendo as instâncias p/ Validação e Cálculo do Fitness da árvore
+            Instances validacao = FormatacaoFonteDados(dados, "V");
+
             //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
-            ValidacaoNodoFolhasParaCalculoFitness(dados);
+            ValidacaoNodoFolhasParaCalculoFitness(dados, validacao);
 
             //Percorrer todas as árvres existentes e calcula o fitnes de cada uma delas
             for (Arvores arvore : arvores) {
-                //Calcular o Fitness e setar na propriedade o valor
-                arvore.setFitness(1 - (arvore.getQtdOcorr() / dados.numInstances()));
+                //Calcular E Setar o Valor do Fitness
+                arvore.setFitness(1 - ((double) arvore.getQtdOcorr() / validacao.numInstances()));
 
             }
 
@@ -288,43 +291,19 @@ public class DecisionStumps {
     /**
      * Vaidação dos dados para o cálculo do fitness da população
      */
-    private void ValidacaoNodoFolhasParaCalculoFitness(Instances dados) throws Exception {
+    private void ValidacaoNodoFolhasParaCalculoFitness(Instances dados, Instances validacao) throws Exception {
         try {
-            //Declaração Variáveis e Objetos  - Variável "validacao" contendo as instâncias p/ Validação e Cálculo do Fitness da árvore
-            Instances validacao = FormatacaoFonteDados(dados, "V");
-
             //Percorrer todas as árores existentes e Atualiza a quantidade de ocorrências
-            for (Arvores arvore : arvores) {
+            for (Arvores arv : arvores) {
                 //Inicializações
                 InicializarQtdOcorrencias();
 
-                //Percorrer todas as instâncias para avaliação da árvore selecionada
-                for (int i = 0; i < validacao.numInstances() - 1; i++) {
-                    //Percorrer todos os atributos da instância
-                    for (int j = 0; j < validacao.instance(i).numAttributes() - 1; j++) {
-                        /**
-                         * OBSERVAÇÃO.: O for é devido as classes do WEKA não permitirem de que apartir da instância selecionada PEGAR um atributo em específico, a pesquisa é feita
-                         * somente pelo índice do atributo e NÃO PELO NOME DO MESMO
-                         * ---------------------------------------------------------------------------------------------------------------------------------------------------------
-                         */
-                        //Se o nome do Atributo for igual ao da instância selecionada entra no próximo nível senão vai p/ a próxima instância,
-                        //devido a possibilidade de ter-se atributos que não existem na seleção
-                        if (validacao.instance(i).attribute(j).name().equals(arvore.getNomeAtr())) {
-                            //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
-                            //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness do(s) indivíduo(s)
-                            ValidacaoParaCalculoFitnessPopulacao(arvore, validacao);
-
-                            //Se já processou o atributo sai fora do for
-                            break;
-
-                        }
-
-                    }
-
-                }
+                //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
+                //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness do(s) indivíduo(s)
+                ValidacaoParaCalculoFitnessPopulacao(arv, validacao);
 
                 //Atualizar a Quantidade de ocorrências
-                arvore.setFitness(qtdOcorrencias());
+                arv.setQtdOcorr(qtdOcorrencias());
 
             }
 
@@ -344,7 +323,7 @@ public class DecisionStumps {
         //Se o nó não for nulo
         if (arv != null) {
             //Percorrer todas as arestas do nodo selecionado
-            for (int i = 0; i < arv.getArestas().size(); i++) {
+            for (int i = 0; i < arv.getArestas().size() - 1; i++) {
                 //Se a aresta selecionada não for nula pesquisa pela mesma
                 if (arv.getArestas(i).getNodo() != null) {
                     //Chamada recursiva da função passando como parâmetros a aresta selecionada
@@ -364,20 +343,22 @@ public class DecisionStumps {
                             //Se o nome do Atributo Classe for igual ao nome do atributo selecionado
                             if (avaliacao.instance(j).attribute(k).name().equals(arv.getNomeAtr())) {
                                 //SE o atributo for "Numérico" SENÃO o atributo será "Nominal"
-                                if (avaliacao.instance(j).attribute(j).isNumeric()) {
+                                if (avaliacao.instance(j).attribute(k).isNumeric()) {
                                     //Se o VALOR DO ATRIBUTO FOR IGUAL AO VALOR DO ATRIBUTO da instância selecionada
                                     if (Double.valueOf(arv.getArestas(i).getAtributo()).equals(avaliacao.instance(j).classValue())) {
                                         //Atualizar a quantidade de ocorrências em 1 para Cálculo do Fitness
+                                        arv.AtualizarQtdOcorr(1);
                                         AtualizarQtdOcorr(1);
 
                                     }
 
                                 } else {
                                     //Percorrer todos as arestas do atributo
-                                    for (int l = 0; l < avaliacao.instance(j).numValues(); l++) {
+                                    for (int l = 0; l < avaliacao.instance(j).numValues() - 1; l++) {
                                         //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-                                        if (avaliacao.instance(j).attribute(j).value(l).equals(arv.getArestas(i).getAtributo())) {
+                                        if (avaliacao.instance(j).attribute(k).value(l).equals(arv.getArestas(i).getAtributo())) {
                                             //Atualizar a quantidade de ocorrências em 1 para Cálculo do Fitness
+                                            arv.AtualizarQtdOcorr(1);
                                             AtualizarQtdOcorr(1);
 
                                         }
@@ -408,7 +389,7 @@ public class DecisionStumps {
 
     }
 
-    private double qtdOcorrencias() {
+    private int qtdOcorrencias() {
         //Definir o retorno
         return this.qtdOcorr;
 
