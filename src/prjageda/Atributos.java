@@ -1,24 +1,30 @@
 package prjageda;
 
+import java.util.ArrayList;
+
 public class Atributos {
 
     //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
     private String atributo;
-    private String classe;
+    private String classeDominante;
+    private ArrayList<Classes> classes;
+
     private Arvores nodo;
 
     public Atributos() {
         //setar o atributo
         this.atributo = "";
-        this.classe = "";
+        this.classeDominante = "";
         this.nodo = null; //propriedade para a Sub-Árvore
+        this.classes = null;
     }
 
-    public Atributos(String atr, Arvores no, String cls) {
+    public Atributos(String atr, Arvores no, String clsDominante, ArrayList<Classes> cls) {
         //setar o atributo
         this.atributo = atr;
         this.nodo = no;
-        this.classe = cls;
+        this.classeDominante = clsDominante;
+        this.classes = cls;
 
     }
     //</editor-fold>    
@@ -44,12 +50,20 @@ public class Atributos {
         atr.setNodo(arv);
     }
 
-    public String getClasse() {
-        return classe;
+    public String getClasseDominante() {
+        return classeDominante;
     }
 
-    public void setClasse(String classe) {
-        this.classe = classe;
+    public void setClasseDominante(String classe) {
+        this.classeDominante = classe;
+    }
+
+    public ArrayList<Classes> getClasses() {
+        return classes;
+    }
+
+    public void setClasses(ArrayList<Classes> classes) {
+        this.classes = classes;
     }
     //</editor-fold>        
 }

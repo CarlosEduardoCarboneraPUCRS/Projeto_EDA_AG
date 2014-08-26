@@ -12,6 +12,7 @@ public class Arvores implements Comparable<Arvores> {
     private List<Atributos> arestas;
 
     //</editor-fold>
+    
     //<editor-fold defaultstate="collapsed" desc="2° Métodos Inicializadores da classe e Get´s E Set´s">
     public Arvores() {
         //Inicializações
@@ -94,10 +95,11 @@ public class Arvores implements Comparable<Arvores> {
     //<editor-fold defaultstate="collapsed" desc="3° Métodos de Ordenação dos registros">
     @Override
     public int compareTo(Arvores obj) {
-        //Efetuar a ordenação dos registros
+        //Efetuar a ordenação dos registros crescente, por exemplo.: 0.1, 0.2, 0.3...1.0
         return (this.getFitness() < obj.getFitness()) ? -1 : (this.getFitness() > obj.getFitness()) ? 1 : 0;
 
     }
 
     //</editor-fold>    
+    
 }
