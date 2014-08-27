@@ -10,7 +10,7 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Definição Atributos e Métodos Construtores da Classe">    
     public static final int profundidade = 2;
-    public static final int quantidade = 1;
+    public static final int quantidade = 5;
     public static final double TxCrossover = 0.3;
     private static final int geracoes = 10;
     //private static final int nroFolds = 10;
@@ -80,7 +80,8 @@ public class DecisionStumps {
     }
 
     /**
-     * Geração da População Inicial Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para cada um dos atributos existentes
+     * Geração da População Inicial Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para
+     * cada um dos atributos existentes
      *
      * @param dados - Leitura obtida apartir de um arquivo .arff
      * @throws java.lang.Exception
@@ -231,7 +232,8 @@ public class DecisionStumps {
     }
 
     /**
-     * Efetuar o cálculo do fitness de cada um dos árvores (Após o processamento das instâncias(dataset) de validação), onde todas as inscidências das classes foram calculadas
+     * Efetuar o cálculo do fitness de cada um dos árvores (Após o processamento das instâncias(dataset) de validação), onde
+     * todas as inscidências das classes foram calculadas
      *
      * @param dados - Dataset de dados a serem avaliados(definição do espaço amostral)
      */
@@ -398,10 +400,23 @@ public class DecisionStumps {
                     //Percorrer as arestas (se encontrou o valor correspondente da aresta)
                     for (Atributos aresta : nodo.getArestas()) {
                         //Se o valor contido for igual ao pesquisado
-                        if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))){
-                            
+                        if (Double.valueOf(aresta.getAtributo()).equals(avaliacao.classValue())) {
+                            //Se for um nodo folha
+                            if (aresta.getNodo() == null) {
+                                if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                                    //Atualizar a quantidade
+                                    AtualizarQtdOcorr(1);
+                                }
+                            } else {
+                                //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                                ValidacaoParaCalculoFitnessPopulacao(aresta.getNodo(), avaliacao);
+
+                            }
+                            //Sair do FOR de arestas
+                            break;
+
                         }
-                        
+
                     }
 
                     //Sair do FOR dos atributos
@@ -476,7 +491,6 @@ public class DecisionStumps {
 //        }
 //
 //    }
-
     //</editor-fold> 
     //<editor-fold defaultstate="collapsed" desc="Ordenação População em Ordem Crescente - Avaliados p/ Fitness">    
     public void ordenaPopulacao() {
