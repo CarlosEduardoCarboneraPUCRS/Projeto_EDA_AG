@@ -92,6 +92,7 @@ public class Arvores implements Comparable<Arvores> {
     
     
     //</editor-fold>    
+    
     //<editor-fold defaultstate="collapsed" desc="3° Métodos de Ordenação dos registros">
     @Override
     public int compareTo(Arvores obj) {

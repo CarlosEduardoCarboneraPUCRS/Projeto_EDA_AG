@@ -8,7 +8,6 @@ public class Atributos {
     private String atributo;
     private String classeDominante;
     private ArrayList<Classes> classes;
-
     private Arvores nodo;
 
     public Atributos() {

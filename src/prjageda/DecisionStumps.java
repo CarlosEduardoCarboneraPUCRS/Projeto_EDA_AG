@@ -10,12 +10,12 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Definição Atributos e Métodos Construtores da Classe">    
     public static final int profundidade = 2;
-    public static final int quantidade = 5;
-    public static final double TxCrossover = 0.3;
+    public static final int quantidade = 1;
+    public static final double TxCrossover = 0.9;
     private static final int geracoes = 10;
-    //private static final int nroFolds = 10;
     private int qtdOcorr = 0;
     private List<Arvores> arvores;
+    //private static final int nroFolds = 10;
 
     public DecisionStumps() {
     }
@@ -64,9 +64,6 @@ public class DecisionStumps {
                 //Cria nova populacao, utilizando o elitismo
                 arvores = new Processamento().NovaGeracaoArvores(dados, arvores, true);
 
-                //Definir a qual classe pertencem os nodos folhas
-                TreinamentoNodoFolhas(dados);
-
                 //Calculo do Fitness e Ordenação da População após o Cálculo do Fitness
                 CalculoFitnessPopulacao(dados);
 
@@ -80,8 +77,7 @@ public class DecisionStumps {
     }
 
     /**
-     * Geração da População Inicial Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para
-     * cada um dos atributos existentes
+     * Geração da População Inicial Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para cada um dos atributos existentes
      *
      * @param dados - Leitura obtida apartir de um arquivo .arff
      * @throws java.lang.Exception
@@ -102,7 +98,7 @@ public class DecisionStumps {
                 //Declaração Variáveis e Objetos
                 ArrayList<Arvores> temp = new ArrayList<>();
 
-                //Adicionar todos os nodos e arestas respectivamente de cada doa tributos lido do dataset
+                //Adicionar todos os nodos e arestas respectivamente de cada da tributos do dataset
                 temp.addAll(ProcessamentoNodos(dados));
 
                 //Declaração Objetos - Definir o nodo raiz (sorteado aleatóriamente)
@@ -116,10 +112,7 @@ public class DecisionStumps {
 
             }
 
-            //Definir a qual classe pertencem os nodos folhas
-            TreinamentoNodoFolhas(dados);
-
-            //Cálculo do Fitness e Ordenação da População
+            //Cálculo do Fitness (Utiliza as instâncias de dados para Teste e Validação) e Ordenação da População
             CalculoFitnessPopulacao(dados);
 
         } catch (Exception e) {
@@ -142,21 +135,18 @@ public class DecisionStumps {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //
-                //
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
                 //if (Processamento.mt.nextBoolean()) {
-                //
-                //
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS
-                //Aqui descomentar ---------------------------------------------APENAS PARA FAZER A GERACAO DE TODOS OS NÍVEIS                                
-                //Declaração variáveis e Objetos
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
+                //Declaração Variáveis e Objetos
                 ArrayList<Arvores> nodos = new ArrayList<>();
 
                 //Adicionar os nodos originais, isto é devido ao java trabalhar APENAS com a referência dos mesmos
@@ -176,7 +166,7 @@ public class DecisionStumps {
 
     }
 
-    private ArrayList<Arvores> ProcessamentoNodos(Instances dados) {
+    public ArrayList<Arvores> ProcessamentoNodos(Instances dados) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> nodos = new ArrayList<>();
 
@@ -187,11 +177,10 @@ public class DecisionStumps {
          por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
          */
         for (int i = 0; i < dados.numAttributes(); i++) {
-            //1° Passo - Processar todos os Atributos (Binários e Nominais)
-            // - 1° Parâmetro - Nome do atributo
-            // - 2° Parâmetro - Instâncias e a posição do Atributo
-            nodos.add(new Arvores(dados.instance(0).attribute(i).name(),
-                    new Processamento().ProcessamentoInstancias(dados, i)));
+            //1° Passo     - Processar todos os Atributos (Binários e Nominais)
+            //2° Parâmetro - Nome do atributo
+            //3° Parâmetro - Instâncias e a posição do Atributo
+            nodos.add(new Arvores(dados.instance(0).attribute(i).name(), new Processamento().ProcessamentoInstancias(dados, i)));
 
         }
 
@@ -216,8 +205,14 @@ public class DecisionStumps {
 
             //Percorrer todas as árvores existentes para atribuição das classes e quantidades dos nodos folhas
             for (Arvores arvore : arvores) {
-                //Processamento das arestas da árvore selecionada p/ atribuição da classe pertencente
-                proc.AtribuicaoClasseNodosFolhas(arvore, treino);
+
+                //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
+                //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
+                for (int i = 0; i < treino.numInstances(); i++) {
+                    //Atualizar(Calcular) a quantidade de ocorrências dos atributos na árvore
+                    proc.AtribuicaoClasseNodosFolhas(arvore, treino.instance(i));
+
+                }
 
                 //Definição da Classe majoritária de cada um dos nodos "Folhas" da árvore
                 proc.DefinicaoClasseMajoritariaNodosFolhas(arvore);
@@ -232,14 +227,16 @@ public class DecisionStumps {
     }
 
     /**
-     * Efetuar o cálculo do fitness de cada um dos árvores (Após o processamento das instâncias(dataset) de validação), onde
-     * todas as inscidências das classes foram calculadas
+     * Efetuar o cálculo do fitness de cada um dos árvores (Após o processamento das instâncias(dataset) de validação), onde todas as inscidências das classes foram calculadas
      *
      * @param dados - Dataset de dados a serem avaliados(definição do espaço amostral)
      */
     private void CalculoFitnessPopulacao(Instances dados) throws Exception {
         try {
-            //Declaração Variáveis e Objetos  - Variável "validacao" contendo as instâncias p/ Validação e Cálculo do Fitness da árvore
+            //Efetuar o treinamento - Definir a qual classe pertencem os nodos folhas
+            TreinamentoNodoFolhas(dados);
+
+            //Declaração Variáveis e Objetos - "validacao" contendo as instâncias p/ Validação e Cálculo do Fitness da Árvore
             Instances validacao = FormatacaoFonteDados(dados, "V");
 
             //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
@@ -263,10 +260,8 @@ public class DecisionStumps {
     }
 
     /**
-     *
      * @param dados = Instância de Dados a serem processados
      * @param tipo = "T" - Treinamento - 30%, "V" - Validação - 35%, "Z" - Teste - 35%
-     *
      */
     private Instances FormatacaoFonteDados(Instances dados, String tipo) throws Exception {
         //Declaração Variáveis e Objetos
@@ -274,6 +269,17 @@ public class DecisionStumps {
         int iValidacao = iTreinamento + (int) ((int) dados.numInstances() * 0.35);
         Instances regs = new Instances(dados, 0);
 
+        
+        //---Remover esta linha
+        //---Remover esta linha
+        //---Remover esta linha
+        //---Remover esta linha
+        iTreinamento = 10;
+        //---Remover esta linha
+        //---Remover esta linha
+        //---Remover esta linha
+        //---Remover esta linha
+        
         //"T" - Treinamento - 30% 
         switch (tipo) {
             case "T":
@@ -372,12 +378,14 @@ public class DecisionStumps {
                 //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
                 //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
                 for (int i = 0; i < validacao.numInstances(); i++) {
+                    //Atualizar(Calcular) a quantidade de ocorrências dos atributos na árvore
                     ValidacaoParaCalculoFitnessPopulacao(arv, validacao.instance(i));
 
                 }
 
                 //Atualizar a Quantidade de ocorrências
                 arv.setQtdOcorr(qtdOcorrencias());
+
             }
 
         } catch (Exception e) {
@@ -403,10 +411,13 @@ public class DecisionStumps {
                         if (Double.valueOf(aresta.getAtributo()).equals(avaliacao.classValue())) {
                             //Se for um nodo folha
                             if (aresta.getNodo() == null) {
+                                //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIA do Nodo
                                 if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
                                     //Atualizar a quantidade
                                     AtualizarQtdOcorr(1);
+
                                 }
+
                             } else {
                                 //Chamada recursiva da função passando como parâmetros a aresta selecionada
                                 ValidacaoParaCalculoFitnessPopulacao(aresta.getNodo(), avaliacao);
@@ -429,69 +440,8 @@ public class DecisionStumps {
         }
 
     }
-
-//    public void ValidacaoParaCalculoFitnessPopulacao(Arvores arv, Instances avaliacao) {
-//        //Se o nó não for nulo
-//        if (arv != null) {
-//            //Percorrer todas as arestas do nodo selecionado
-//            for (int i = 0; i < arv.getArestas().size(); i++) {
-//                //Se a aresta selecionada não for nula pesquisa pela mesma
-//                if (arv.getArestas(i).getNodo() != null) {
-//                    //Chamada recursiva da função passando como parâmetros a aresta selecionada
-//                    ValidacaoParaCalculoFitnessPopulacao(arv.getArestas(i).getNodo(), avaliacao);
-//
-//                } else //Chegou em um nodo folha
-//                {
-//                    //Percorrer as amostras de avaliação e todas as suas arestas, SE ENCONTRAR ALGUMA ARESTA IGUAL atribui a classe a aresta atual
-//                    for (int j = 0; j < avaliacao.numInstances(); j++) {
-//                        // OBSERVAÇÃO.: O for é devido as classes do WEKA não permitirem de que apartir da instância selecionada PEGAR um atributo em específico, a pesquisa é feita
-//                        // somente pelo índice do atributo e NÃO PELO NOME DO MESMO
-//                        // ---------------------------------------------------------------------------------------------------------------------------------------------------------
-//                        //Percorrer todos os atributos da instância selecionada
-//                        for (int k = 0; k < avaliacao.instance(j).numAttributes() - 1; k++) {
-//                            //Se o nome do Atributo Classe for igual ao nome do atributo selecionado
-//                            if (avaliacao.instance(j).attribute(k).name().equals(arv.getNomeAtr())) {
-//                                //SE o atributo for "Numérico" SENÃO o atributo será "Nominal"
-//                                if (avaliacao.instance(j).attribute(k).isNumeric()) {
-//                                    //Se o VALOR DO ATRIBUTO FOR IGUAL AO VALOR DO ATRIBUTO da instância selecionada
-//                                    if (Double.valueOf(arv.getArestas(i).getAtributo()).equals(avaliacao.instance(j).classValue())) {
-//                                        //Atualizar a quantidade de ocorrências em 1 para Cálculo do Fitness
-//                                        arv.AtualizarQtdOcorr(1);
-//                                        AtualizarQtdOcorr(1);
-//
-//                                    }
-//
-//                                } else {
-//                                    //Percorrer todos as arestas do atributo
-//                                    for (int l = 0; l < avaliacao.instance(j).numValues(); l++) {
-//                                        //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-//                                        if (avaliacao.instance(j).attribute(k).value(l).equals(arv.getArestas(i).getAtributo())) {
-//                                            //Atualizar a quantidade de ocorrências em 1 para Cálculo do Fitness
-//                                            arv.AtualizarQtdOcorr(1);
-//                                            AtualizarQtdOcorr(1);
-//
-//                                        }
-//
-//                                    }
-//
-//                                }
-//                                //Se PROCESSOU o atributo sai fora do laço
-//                                break;
-//
-//                            }
-//
-//                        }
-//
-//                    }
-//
-//                }
-//
-//            }
-//
-//        }
-//
-//    }
     //</editor-fold> 
+
     //<editor-fold defaultstate="collapsed" desc="Ordenação População em Ordem Crescente - Avaliados p/ Fitness">    
     public void ordenaPopulacao() {
         //Ordenar a população EM ORDEM CRESCENTE pelo valor do Fitness, por exemplo.: 0.2, 0.3, 0.4,...1.0
