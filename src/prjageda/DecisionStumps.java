@@ -10,7 +10,7 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Definição Atributos e Métodos Construtores da Classe">    
     public static final int profundidade = 2;
-    public static final int quantidade = 1;
+    public static final int quantidade = 10;
     public static final double TxCrossover = 0.9;
     private static final int geracoes = 10;
     private int qtdOcorr = 0;
@@ -39,33 +39,27 @@ public class DecisionStumps {
     }
 
     //</editor-fold> 
-    //<editor-fold defaultstate="collapsed" desc="Funções Destinadas a Geração da População">    
-    /**
-     * Processamento Geral - Todas as Fases do Ciclo até a última geração
-     *
-     * @param dados - Leitura obtida apartir de um arquivo .arff
-     */
-    public void ProcessamentoDS(Instances dados) {
+    public void AlGeDecTree(Instances dados) {
         try {
-            //Declaração Objetos
+            //Declaração Variáveis e Objetos
+            Instances treino = FormatacaoFonteDados(dados, "T");
+            Instances validacao = FormatacaoFonteDados(dados, "V");
+            arvores = new ArrayList<>();
             int geracao = 1;
 
-            //Inicialização do Objeto
-            arvores = new ArrayList<>();
-
             //Efetuar a Geração da População Inicial
-            GeracaoPopulacaoInicial(dados);
+            GeracaoPopulacaoInicial(dados, treino, validacao);
 
-            //Laço até o critério de parada ser atingido
+            //Efetuar a geração das novas populações
             while (geracao < geracoes) {
-                //Atualizar o número de Gerações
+                //Atualizar a Geração
                 geracao++;
 
-                //Cria nova populacao, utilizando o elitismo
+                //Gerar a nova populacao, utilizando o elitismo (2 indivíduos)
                 arvores = new Processamento().NovaGeracaoArvores(dados, arvores, true);
 
-                //Calculo do Fitness e Ordenação da População após o Cálculo do Fitness
-                CalculoFitnessPopulacao(dados);
+                //Calcular o Fitness e após Ordenar Crescentemente
+                CalculoFitnessPopulacao(dados, treino, validacao);
 
             }
 
@@ -76,32 +70,14 @@ public class DecisionStumps {
 
     }
 
-    /**
-     * Geração da População Inicial Cada Individuo da população será uma Árvore c/ Sub-Árvores - Esta possibilidade será para cada um dos atributos existentes
-     *
-     * @param dados - Leitura obtida apartir de um arquivo .arff
-     * @throws java.lang.Exception
-     */
-    private void GeracaoPopulacaoInicial(Instances dados) throws Exception {
+    private void GeracaoPopulacaoInicial(Instances dados, Instances treino, Instances validacao) throws Exception {
         try {
-            //Percorrer a quantidade de Individuos p/serem gerados
+            //Percorrer a quantidade de árvores informado
             for (int i = 0; i < quantidade; i++) {
-                /*
-                 Adicionar o Indivíduo - Árvore Gerada c/ Sub-Arvores, aonde o nível Pai é selecionado aleatóriamente
-                
-                 Definição dos Parâmetros
-                 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                 1° Parâmetro - Nivel atual de profundidade da Árvore
-                 2° Parâmetro - Lista de Nodos Disponíveis para Sorteio
-                 3° Parâmetro - Nodo Sorteado p/ ser o Nodo Raiz
-                 */
-                //Declaração Variáveis e Objetos
-                ArrayList<Arvores> temp = new ArrayList<>();
+                //Gerar cada uma das árvores e as arestas respectivamente (Sendo 1 Árvore X Atributo)
+                ArrayList<Arvores> temp = ProcessamentoNodos(dados);
 
-                //Adicionar todos os nodos e arestas respectivamente de cada da tributos do dataset
-                temp.addAll(ProcessamentoNodos(dados));
-
-                //Declaração Objetos - Definir o nodo raiz (sorteado aleatóriamente)
+                //Selecionar o nodo raiz (sorteado aleatóriamente)
                 Arvores arv = temp.get(Processamento.mt.nextInt(dados.numAttributes() - 1));
 
                 //Geração da árvore ATÉ a profundidade estabelecida
@@ -112,8 +88,8 @@ public class DecisionStumps {
 
             }
 
-            //Cálculo do Fitness (Utiliza as instâncias de dados para Teste e Validação) e Ordenação da População
-            CalculoFitnessPopulacao(dados);
+            //Calcular o Fitness e após Ordenar Crescentemente
+            CalculoFitnessPopulacao(dados, treino, validacao);
 
         } catch (Exception e) {
             throw e;
@@ -122,13 +98,6 @@ public class DecisionStumps {
 
     }
 
-    /**
-     * Geração das Populações apartir da População Inicial
-     *
-     * @param dados - Leitura obtida apartir de um arquivo .arff
-     * @param prof - Definir a profundidade máxima da árvore
-     * @param arvore - Nodo Raiz p/ geração da população
-     */
     public void GerarPopulacaoArvores(Instances dados, int prof, Arvores arvore) {
         //Condição de Parada - Se o grau de profundidade máxima
         if (prof <= profundidade) {
@@ -191,21 +160,13 @@ public class DecisionStumps {
     //</editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Funções Destinadas a Avaliação da População">    
-    /**
-     * Definição das classes dos nodos folhas da(s) árvore(s) geradas
-     *
-     * @param dados - Dataset de dados a serem avaliados(definição do espaço amostral)
-     *
-     */
-    private void TreinamentoNodoFolhas(Instances dados) throws Exception {
+    private void TreinamentoNodoFolhas(Instances dados, Instances treino) throws Exception {
         try {
-            //Declaração Variáveis e Objetos - Variável "treino" contendo as instâncias p/ Treinamento dos Nodos Folhas
-            Instances treino = FormatacaoFonteDados(dados, "T");
+            //Declaração Variáveis e Objetos
             Processamento proc = new Processamento();
 
             //Percorrer todas as árvores existentes para atribuição das classes e quantidades dos nodos folhas
             for (Arvores arvore : arvores) {
-
                 //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
                 //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
                 for (int i = 0; i < treino.numInstances(); i++) {
@@ -226,18 +187,10 @@ public class DecisionStumps {
 
     }
 
-    /**
-     * Efetuar o cálculo do fitness de cada um dos árvores (Após o processamento das instâncias(dataset) de validação), onde todas as inscidências das classes foram calculadas
-     *
-     * @param dados - Dataset de dados a serem avaliados(definição do espaço amostral)
-     */
-    private void CalculoFitnessPopulacao(Instances dados) throws Exception {
+    private void CalculoFitnessPopulacao(Instances dados, Instances treino, Instances validacao) throws Exception {
         try {
-            //Efetuar o treinamento - Definir a qual classe pertencem os nodos folhas
-            TreinamentoNodoFolhas(dados);
-
-            //Declaração Variáveis e Objetos - "validacao" contendo as instâncias p/ Validação e Cálculo do Fitness da Árvore
-            Instances validacao = FormatacaoFonteDados(dados, "V");
+            //Efetuar o treinamento - Definir quais classes pertencem os nodos folhas
+            TreinamentoNodoFolhas(dados, treino);
 
             //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
             ValidacaoNodoFolhasParaCalculoFitness(validacao);
@@ -259,27 +212,12 @@ public class DecisionStumps {
 
     }
 
-    /**
-     * @param dados = Instância de Dados a serem processados
-     * @param tipo = "T" - Treinamento - 30%, "V" - Validação - 35%, "Z" - Teste - 35%
-     */
     private Instances FormatacaoFonteDados(Instances dados, String tipo) throws Exception {
         //Declaração Variáveis e Objetos
         int iTreinamento = (int) ((int) dados.numInstances() * 0.3);
         int iValidacao = iTreinamento + (int) ((int) dados.numInstances() * 0.35);
         Instances regs = new Instances(dados, 0);
 
-        
-        //---Remover esta linha
-        //---Remover esta linha
-        //---Remover esta linha
-        //---Remover esta linha
-        iTreinamento = 10;
-        //---Remover esta linha
-        //---Remover esta linha
-        //---Remover esta linha
-        //---Remover esta linha
-        
         //"T" - Treinamento - 30% 
         switch (tipo) {
             case "T":
@@ -311,63 +249,8 @@ public class DecisionStumps {
         //Definir o retorno
         return regs;
 
-        /*  
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder        
-         //Estratificação dos dados
-         regs.stratify(nroFolds);
-
-         //Declaração Variáveis e Objetos
-         Instances proc = new Instances(dados, 0);
-
-         //Percorrer o Nro de Folds informado
-         for (int n = 0; n < nroFolds; n++) {
-         //Declaração Variáveis e Objetos
-         Instances treinamento = regs.trainCV(nroFolds, n);
-         Instances teste = regs.testCV(nroFolds, n);
-
-         switch (tipo) {
-         case "T":
-         for (int i = 0; i < teste.numInstances(); i++) {
-         proc.add(teste.instance(i));
-
-         }
-         break;
-
-         case "V":
-         for (int i = 0; i < treinamento.numInstances(); i++) {
-         proc.add(treinamento.instance(i));
-
-         }
-         break;
-
-         case "Z":
-         for (int i = 0; i < treinamento.numInstances(); i++) {
-         proc.add(treinamento.instance(i));
-
-         }
-         break;
-
-         }
-
-         }
-
-         //Definir o retorno dos dados
-         return proc;
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder
-         => Aqui ver com o professor Rodrigo de como proceder        
-         */
     }
 
-    /**
-     * Vaidação dos dados para o cálculo do fitness da população
-     */
     private void ValidacaoNodoFolhasParaCalculoFitness(Instances validacao) throws Exception {
         try {
             //Percorrer todas as árores existentes e Atualiza a quantidade de ocorrências
