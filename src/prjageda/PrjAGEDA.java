@@ -18,7 +18,7 @@ public class PrjAGEDA {
             - Retornar a Árvore com todas as suas Sub-Árvores
          4° - Geração das População Inicial até atingir 1000 indivíduos criados 
         */
-        new DecisionStumps().AlGeDecTree(new Processamento(arquivo).LeituraArquivo());
+        new DecisionStumps().ALGAD(new Processamento(arquivo).LeituraArquivo());
 
     }
     

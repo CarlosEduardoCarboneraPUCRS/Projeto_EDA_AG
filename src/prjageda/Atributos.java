@@ -50,7 +50,7 @@ public class Atributos {
     }
 
     public String getClasseDominante() {
-        return classeDominante;
+        return this.classeDominante;
     }
 
     public void setClasseDominante(String classe) {
@@ -58,7 +58,7 @@ public class Atributos {
     }
 
     public ArrayList<Classes> getClasses() {
-        return classes;
+        return this.classes;
     }
 
     public void setClasses(ArrayList<Classes> classes) {

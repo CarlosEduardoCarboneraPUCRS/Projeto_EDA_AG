@@ -32,18 +32,18 @@ public class Arvores implements Comparable<Arvores> {
 
     }
 
-    public String getNomeAtr() {
+    public String getNomeAtributo() {
         return this.nomeAtr;
 
     }
 
-    public void setNomeAtr(String nomeAtr) {
+    public void setNomeAtributo(String nomeAtr) {
         this.nomeAtr = nomeAtr;
 
     }
 
     public List<Atributos> getArestas() {
-        return arestas;
+        return this.arestas;
 
     }
 
@@ -69,7 +69,7 @@ public class Arvores implements Comparable<Arvores> {
     }
 
     public double getFitness() {
-        return fitness;
+        return this.fitness;
 
     }
 
@@ -78,15 +78,15 @@ public class Arvores implements Comparable<Arvores> {
 
     }
 
-    public int getQtdOcorr() {
+    public int getQtdOcorrencias() {
         return this.qtdOcorr;
     }
 
-    public void setQtdOcorr(int qtd) {
+    public void setQtdOcorrencias(int qtd) {
         this.qtdOcorr = qtd;
     }
     
-    public void AtualizarQtdOcorr(int qtd) {
+    public void AtuQtdOcorrencias(int qtd) {
         this.qtdOcorr += qtd;
     }
     

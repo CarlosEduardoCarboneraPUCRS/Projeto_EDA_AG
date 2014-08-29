@@ -20,30 +20,30 @@ public class DecisionStumps {
     public DecisionStumps() {
     }
 
-    private void ZerarQtdOcorr() {
-        //Setar a propriedade
+    private void ZerarQtdOcorrencias() {
+        //Zerar a quantidade
         this.qtdOcorr = 0;
 
     }
 
-    private int qtdOcorrencias() {
-        //Definir o retorno
+    private int getQtdOcorrencias() {
+        //Retornar a quantidade
         return this.qtdOcorr;
 
     }
 
-    private void AtualizarQtdOcorr(int qtd) {
+    private void AtualizarQtdOcorrencias(int quantidade) {
         //Atualizar a quantidade de ocorrências
-        this.qtdOcorr += qtd;
+        this.qtdOcorr += quantidade;
 
     }
 
     //</editor-fold> 
-    public void AlGeDecTree(Instances dados) {
+    //Tradução da Sigla - ALGAD - "AL"goritmo "G"enético de "A"rvore de "D"ecisão
+    public void ALGAD(Instances dados) {
         try {
             //Declaração Variáveis e Objetos
-            Instances treino = FormatacaoFonteDados(dados, "T");
-            Instances validacao = FormatacaoFonteDados(dados, "V");
+            Instances treino = FormatacaoFonteDados(dados, "T"), validacao = FormatacaoFonteDados(dados, "V");
             arvores = new ArrayList<>();
             int geracao = 1;
 
@@ -59,7 +59,7 @@ public class DecisionStumps {
                 arvores = new Processamento().NovaGeracaoArvores(dados, arvores, true);
 
                 //Calcular o Fitness e após Ordenar Crescentemente
-                CalculoFitnessPopulacao(dados, treino, validacao);
+                CalculoFitnessPopulacao(treino, validacao);
 
             }
 
@@ -89,7 +89,7 @@ public class DecisionStumps {
             }
 
             //Calcular o Fitness e após Ordenar Crescentemente
-            CalculoFitnessPopulacao(dados, treino, validacao);
+            CalculoFitnessPopulacao(treino, validacao);
 
         } catch (Exception e) {
             throw e;
@@ -118,7 +118,7 @@ public class DecisionStumps {
                 //Declaração Variáveis e Objetos
                 ArrayList<Arvores> nodos = new ArrayList<>();
 
-                //Adicionar os nodos originais, isto é devido ao java trabalhar APENAS com a referência dos mesmos
+                //Adicionar os árvores originais, isto é devido ao java trabalhar APENAS com a referência dos objetos, assim a cada geração deve-se RECARREGAR as árvores originais
                 nodos.addAll(ProcessamentoNodos(dados));
 
                 // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
@@ -160,7 +160,7 @@ public class DecisionStumps {
     //</editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Funções Destinadas a Avaliação da População">    
-    private void TreinamentoNodoFolhas(Instances dados, Instances treino) throws Exception {
+    private void TreinamentoNodoFolhas(Instances treino) throws Exception {
         try {
             //Declaração Variáveis e Objetos
             Processamento proc = new Processamento();
@@ -187,10 +187,10 @@ public class DecisionStumps {
 
     }
 
-    private void CalculoFitnessPopulacao(Instances dados, Instances treino, Instances validacao) throws Exception {
+    private void CalculoFitnessPopulacao(Instances treino, Instances validacao) throws Exception {
         try {
             //Efetuar o treinamento - Definir quais classes pertencem os nodos folhas
-            TreinamentoNodoFolhas(dados, treino);
+            TreinamentoNodoFolhas(treino);
 
             //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
             ValidacaoNodoFolhasParaCalculoFitness(validacao);
@@ -198,7 +198,7 @@ public class DecisionStumps {
             //Percorrer todas as árvres existentes e calcula o fitnes de cada uma delas
             for (Arvores arvore : arvores) {
                 //Calcular E Setar o Valor do Fitness
-                arvore.setFitness(1 - ((double) arvore.getQtdOcorr() / validacao.numInstances()));
+                arvore.setFitness(1 - ((double) arvore.getQtdOcorrencias() / validacao.numInstances()));
 
             }
 
@@ -256,18 +256,18 @@ public class DecisionStumps {
             //Percorrer todas as árores existentes e Atualiza a quantidade de ocorrências
             for (Arvores arv : arvores) {
                 //Zerar a quantidade de Ocorrências
-                ZerarQtdOcorr();
+                ZerarQtdOcorrencias();
 
                 //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
                 //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
                 for (int i = 0; i < validacao.numInstances(); i++) {
                     //Atualizar(Calcular) a quantidade de ocorrências dos atributos na árvore
-                    ValidacaoParaCalculoFitnessPopulacao(arv, validacao.instance(i));
+                    ValidacaoCalculoFitnessGeracao(arv, validacao.instance(i));
 
                 }
 
                 //Atualizar a Quantidade de ocorrências
-                arv.setQtdOcorr(qtdOcorrencias());
+                arv.setQtdOcorrencias(getQtdOcorrencias());
 
             }
 
@@ -278,36 +278,34 @@ public class DecisionStumps {
 
     }
 
-    public void ValidacaoParaCalculoFitnessPopulacao(Arvores nodo, Instance avaliacao) {
-        //Se o nó não for nulo
-        if (nodo != null) {
+    public void ValidacaoCalculoFitnessGeracao(Arvores arvore, Instance avaliacao) {
+        //Se o árvore não for nula
+        if (arvore != null) {
             //OBSERVAÇÃO.: O for é devido as classes do WEKA não permitirem de que apartir da instância selecionada PEGAR um atributo em específico, a pesquisa é feita
             //somente pelo índice do atributo e NÃO PELO NOME DO MESMO
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //Percorrer todos os atributos da instância selecionada
             for (int k = 0; k < avaliacao.numAttributes() - 1; k++) {
                 //Encontrou o mesmo atributos que o pesquisado
-                if (avaliacao.attribute(k).name().equals(nodo.getNomeAtr())) {
+                if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
                     //Percorrer as arestas (se encontrou o valor correspondente da aresta)
-                    for (Atributos aresta : nodo.getArestas()) {
+                    for (Atributos aresta : arvore.getArestas()) {
                         //Se o valor contido for igual ao pesquisado
                         if (Double.valueOf(aresta.getAtributo()).equals(avaliacao.classValue())) {
                             //Se for um nodo folha
                             if (aresta.getNodo() == null) {
-                                //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIA do Nodo
+                                //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
                                 if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                    //Atualizar a quantidade
-                                    AtualizarQtdOcorr(1);
+                                    //Atualizar a quantidade (Somar 1)
+                                    AtualizarQtdOcorrencias(1);
 
                                 }
 
                             } else {
                                 //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                                ValidacaoParaCalculoFitnessPopulacao(aresta.getNodo(), avaliacao);
+                                ValidacaoCalculoFitnessGeracao(aresta.getNodo(), avaliacao);
 
                             }
-                            //Sair do FOR de arestas
-                            break;
 
                         }
 
@@ -323,7 +321,6 @@ public class DecisionStumps {
         }
 
     }
-    //</editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="Ordenação População em Ordem Crescente - Avaliados p/ Fitness">    
     public void ordenaPopulacao() {
