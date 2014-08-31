@@ -71,18 +71,28 @@ public class Processamento {
         ArrayList<Atributos> registros = new ArrayList<>();
 
         /**
-         * 1 - Avaliar se o Atributo é Numérico ou Nominal 1.1 - Se Numérico a árvore terá 2 arestas(Árvore será bifurcada) 1.2 - Se Categórico terá o número de arestas em função
-         * da quantidade de atributos encontrados no dataset
+         * 1 - Avaliar se o Atributo é Numérico ou Nominal 1.1 - Se Numérico a árvore terá 2 arestas(Árvore será bifurcada)
+         * 1.2 - Se Categórico terá o número de arestas em função da quantidade de atributos encontrados no dataset
          * -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
          */
         if (dados.attribute(posicao).isNumeric()) {
-            //Percorre todas as Classes Encontradas 
-            for (int pos = 0; pos < dados.numClasses(); pos++) {
-                //Adicionar as Arestas
-                registros.add(new Atributos(String.valueOf(pos), null, "", null));
+            //Declaração Variáveis e Objetos
+            double media = CalcularMediaAtributo(dados, posicao);
 
-            }
+            //Para atributo numéricos, SEMPRE será bifurcada, assim :
+            //Atributo 0 - Sempre será MENOR a Média        
+            //Atributo 1 - Sempre será MAIOR OU IGUAL a Média        
+            registros.add(new Atributos(String.valueOf(arredondar(media, 2, 1)), null, "", null));
+            registros.add(new Atributos(String.valueOf(arredondar(media + 0.01, 2, 1)), null, "", null));
 
+            /*
+             //Percorre todas as Classes Encontradas 
+             for (int pos = 0; pos < dados.numClasses(); pos++) {
+             //Adicionar as Arestas
+             registros.add(new Atributos(String.valueOf(pos), null, "", null));
+
+             }
+             */
         } else {
             //Percorrer a Quantidade de Atributos existentes
             for (int i = 0; i < dados.attribute(posicao).numValues(); i++) {
@@ -350,78 +360,82 @@ public class Processamento {
             for (int k = 0; k < avaliacao.numAttributes(); k++) {
                 //Se o nome do Atributo Classe for igual ao nome do atributo da instância (Raiz ou nodo folha)
                 if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
-                    //Percorrer as arestas da  arvore
-                    for (int i = 0; i < arvore.getArestas().size(); i++) {
-                        //Se o valor da aresta for igual ao valor do atributo selecionado
-                        if (Double.valueOf(arvore.getArestas(i).getAtributo()).equals(avaliacao.classValue())) {
-                            //Se não for um nodo RAIZ, efetua a chamada recursiva da função até chegar em um nodo raiz
-                            if (arvore.getArestas(i).getNodo() != null) {
-                                //Chama a função recursivamente passando o nodo da aresta
-                                AtribuicaoClasseNodosFolhas(arvore.getArestas(i).getNodo(), avaliacao);
+                    //Se o atributo for Numérico
+                    if (avaliacao.attribute(k).isNumeric()) {
+                        //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
+                        int pos = Double.valueOf(arvore.getArestas(0).getAtributo()) <= avaliacao.classValue() ? 0 : 1;
 
-                            } else {
+                        //Se não for um nodo RAIZ, efetua a chamada recursiva da função até chegar em um nodo raiz
+                        if (arvore.getArestas(pos).getNodo() != null) {
+                            //Chama a função recursivamente passando o nodo da aresta
+                            AtribuicaoClasseNodosFolhas(arvore.getArestas(pos).getNodo(), avaliacao);
+
+                        } else {
+                            //Declaração Variáveis e Objetos
+                            ArrayList<Classes> classes = new ArrayList<>();
+
+                            //Se a Classe for vazia Inclui o mesmo (Sendo o 1° Registro)
+                            if (arvore.getArestas(pos).getClasses() == null) {
+                                //Adicionar a Nova classe 
+                                classes.add(new Classes(avaliacao.classAttribute().value((int) avaliacao.classValue()), 1));
+
+                                //Atribuir as classes e sair fora da execução para a aresta selecionada
+                                arvore.getArestas(pos).setClasses(classes);
+
+                            } else //Já Existem Registros na Classe, irá atualizar o mesmo
+                            {
                                 //Declaração Variáveis e Objetos
-                                ArrayList<Classes> classes = new ArrayList<>();
+                                boolean bOk = false;
+                                classes = arvore.getArestas(pos).getClasses();
 
-                                //Se a Classe for vazia Inclui o mesmo (Sendo o 1° Registro)
-                                if (arvore.getArestas(i).getClasses() == null) {
-                                    //Adicionar a Nova classe 
-                                    classes.add(new Classes(avaliacao.classAttribute().value((int) avaliacao.classValue()), 1));
+                                //Percorre TODAS as classes do Nodo
+                                for (Classes classe : classes) {
+                                    //Se o valor da aresta FOR IGUAL AO VALOR DO ATRIBUTO DA INSTÂNCIA                                            
+                                    //Se o "VALOR" da classe DA INSTÂNCIA SELECIONADA FOR IGUAL a da classe informada atualiza a quantidade
+                                    if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(classe.getNome())) {
+                                        //Atualizar a quantidade (Adicionando 1) de registros X Atributo - Para Definir a Classe dominante
+                                        classe.atualizarQtd(1);
+                                        bOk = true;
 
-                                    //Atribuir as classes e sair fora da execução para a aresta selecionada
-                                    arvore.getArestas(i).setClasses(classes);
+                                    }
 
-                                } else //Já Existem Registros na Classe, irá atualizar o mesmo
-                                {
-                                    //Declaração Variáveis e Objetos
-                                    boolean bOk = false;
-                                    classes = arvore.getArestas(i).getClasses();
+                                }
 
-                                    //Percorre TODAS as classes do Nodo
-                                    for (Classes classe : classes) {
-                                        //Se o tipo do atributo for NÃO NUMÉRICO SENÃO SERÁ NOMINAL
-                                        if (avaliacao.attribute(k).isNumeric()) {
-                                            //Se o valor da aresta FOR IGUAL AO VALOR DO ATRIBUTO DA INSTÂNCIA                                            
-                                            //Se o "VALOR" da classe DA INSTÂNCIA SELECIONADA FOR IGUAL a da classe informada atualiza a quantidade
-                                            if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(classe.getNome())) {
-                                                //Atualizar a quantidade (Adicionando 1) de registros X Atributo - Para Definir a Classe dominante
-                                                classe.atualizarQtd(1);
-                                                bOk = true;
+                                //Se não existe o atributo inclui o mesmo
+                                if (!bOk) {
+                                    //Se não for nulo (ser o último)
+                                    if (avaliacao.classAttribute() != null) {
+                                        //Adicionar a Nova classe e atualizar a quantidade
+                                        classes.add(new Classes(avaliacao.classAttribute().value((int) avaliacao.classValue()), 1));
 
-                                            }
+                                    }
 
-                                        } else {
-                                            //Percorrer todos os valores existentes da instância selecionada
-                                            for (int l = 0; l < avaliacao.numValues(); l++) {
-                                                //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-                                                if (arvore.getArestas(i).getAtributo().equals(avaliacao.attribute(k).value(l))) {
-                                                    if (classe.getNome().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                                        //Atualizar a quantidade de registros X Atributo - Para Definir a Classe dominante
-                                                        classe.atualizarQtd(1);
-                                                        bOk = true;
+                                }
+                                //Atribuir as classes e sair fora da execução para a aresta selecionada
+                                arvore.getArestas(pos).setClasses(classes);
 
-                                                    }
+                            }
 
-                                                }
+                        }
+                    } else { //Se for categórico
+                        //Percorrer todas as arestas da arvore
+                        for (int i = 0; i < arvore.getArestas().size(); i++) {
+                            //Declaração Variáveis e Objetos
+                            ArrayList<Classes> classes = arvore.getArestas(i).getClasses();
 
-                                            }
+                            //Percorrer todas as classes da Aresta
+                            for (Classes classe : classes) {
+                                //Percorrer todos os valores existentes da instância selecionada
+                                for (int l = 0; l < avaliacao.numValues(); l++) {
+                                    //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
+                                    if (arvore.getArestas(i).getAtributo().equals(avaliacao.attribute(k).value(l))) {
+                                        if (classe.getNome().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                                            //Atualizar a quantidade de registros X Atributo - Para Definir a Classe dominante
+                                            classe.atualizarQtd(1);
 
                                         }
 
                                     }
-
-                                    //Se não existe o atributo inclui o mesmo
-                                    if (!bOk) {
-                                        //Se não for nulo (ser o último)
-                                        if (avaliacao.classAttribute() != null) {
-                                            //Adicionar a Nova classe e atualizar a quantidade
-                                            classes.add(new Classes(avaliacao.classAttribute().value((int) avaliacao.classValue()), 1));
-
-                                        }
-
-                                    }
-                                    //Atribuir as classes e sair fora da execução para a aresta selecionada
-                                    arvore.getArestas(i).setClasses(classes);
 
                                 }
 
@@ -430,8 +444,6 @@ public class Processamento {
                         }
 
                     }
-                    //Se processou o atributo sai fora do laço
-                    break;
 
                 }
 
@@ -495,6 +507,40 @@ public class Processamento {
 
         }
 
+    }
+    //</editor-fold>        
+
+    //<editor-fold defaultstate="collapsed" desc="CALCULAR VALOR MÉDIO DA ÁRVORE">    
+    private double CalcularMediaAtributo(Instances dados, int pos) {
+        //Declaração Variáveis e objetos
+        double media = 0d;
+
+        //Percorrer todos as instâncias
+        for (int i = 0; i < dados.numInstances(); i++) {
+            media += dados.instance(i).value(pos);
+        }
+
+        //definir o retorno
+        return arredondar(media / dados.numInstances(), 2, 1);
+
+    }
+
+    /**
+     * Parâmetros: 1 - Valor a arredondar. 2 - Quantidade de casas depois da vírgula. 3 - Arredondar para cima ou para baixo?
+     *
+     * Para cima = 0 (ceil) Para baixo = 1 ou qualquer outro inteiro (floor)
+     *
+     */
+    double arredondar(double valor, int casas, int ceilOrFloor) {
+        double arredondado = valor;
+
+        arredondado *= (Math.pow(10, casas));
+
+        arredondado = ceilOrFloor == 0 ? Math.ceil(arredondado) : Math.floor(arredondado);
+
+        arredondado /= (Math.pow(10, casas));
+
+        return arredondado;
     }
     //</editor-fold> 
 

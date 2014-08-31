@@ -85,13 +85,12 @@ public class Arvores implements Comparable<Arvores> {
     public void setQtdOcorrencias(int qtd) {
         this.qtdOcorr = qtd;
     }
-    
+
     public void AtuQtdOcorrencias(int qtd) {
         this.qtdOcorr += qtd;
     }
     
-    
-    //</editor-fold>    
+    //</editor-fold>   
     
     //<editor-fold defaultstate="collapsed" desc="3° Métodos de Ordenação dos registros">
     @Override

@@ -35,34 +35,43 @@ public class Atributos {
 
     public String getAtributo() {
         return this.atributo;
+        
     }
 
     public Arvores getNodo() {
         return this.nodo;
+        
     }
 
     public void setNodo(Arvores nodo) {
         this.nodo = nodo;
+        
     }
 
     public void setNodo(Atributos atr, Arvores arv) {
         atr.setNodo(arv);
+        
     }
 
     public String getClasseDominante() {
         return this.classeDominante;
+        
     }
 
     public void setClasseDominante(String classe) {
         this.classeDominante = classe;
+        
     }
 
     public ArrayList<Classes> getClasses() {
         return this.classes;
+        
     }
 
     public void setClasses(ArrayList<Classes> classes) {
         this.classes = classes;
+        
     }
     //</editor-fold>        
+    
 }

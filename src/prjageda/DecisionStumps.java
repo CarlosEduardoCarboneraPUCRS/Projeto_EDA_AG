@@ -10,7 +10,7 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="Definição Atributos e Métodos Construtores da Classe">    
     public static final int profundidade = 2;
-    public static final int quantidade = 10;
+    public static final int quantidade = 1;
     public static final double TxCrossover = 0.9;
     private static final int geracoes = 10;
     private int qtdOcorr = 0;
@@ -198,7 +198,7 @@ public class DecisionStumps {
             //Percorrer todas as árvres existentes e calcula o fitnes de cada uma delas
             for (Arvores arvore : arvores) {
                 //Calcular E Setar o Valor do Fitness
-                arvore.setFitness(1 - ((double) arvore.getQtdOcorrencias() / validacao.numInstances()));
+                arvore.setFitness(new Processamento().arredondar(1 - ((double) arvore.getQtdOcorrencias() / validacao.numInstances()), 2, 1));
 
             }
 
@@ -288,10 +288,30 @@ public class DecisionStumps {
             for (int k = 0; k < avaliacao.numAttributes() - 1; k++) {
                 //Encontrou o mesmo atributos que o pesquisado
                 if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
-                    //Percorrer as arestas (se encontrou o valor correspondente da aresta)
-                    for (Atributos aresta : arvore.getArestas()) {
-                        //Se o valor contido for igual ao pesquisado
-                        if (Double.valueOf(aresta.getAtributo()).equals(avaliacao.classValue())) {
+                    //Se o atributo for Numérico
+                    if (avaliacao.attribute(k).isNumeric()) {
+                        //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
+                        int pos = Double.valueOf(arvore.getArestas(0).getAtributo()) <= avaliacao.classValue() ? 0 : 1;
+
+                        //Se for um nodo folha
+                        if (arvore.getArestas(pos).getNodo() == null) {
+                            //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
+                            if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                                //Atualizar a quantidade (Somar 1)
+                                AtualizarQtdOcorrencias(1);
+
+                            }
+
+                        } else {
+                            //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                            ValidacaoCalculoFitnessGeracao(arvore.getArestas(pos).getNodo(), avaliacao);
+
+                        }
+
+                    } else {
+                        //Percorrer todas as arestas
+                        for (Atributos aresta : arvore.getArestas()) {
+
                             //Se for um nodo folha
                             if (aresta.getNodo() == null) {
                                 //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
@@ -310,9 +330,6 @@ public class DecisionStumps {
                         }
 
                     }
-
-                    //Sair do FOR dos atributos
-                    break;
 
                 }
 
