@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Atributos {
 
-    //<editor-fold defaultstate="collapsed" desc="Atributos da classe e Métodos Construtores da classe">    
+    //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     private String atributo;
     private String classeDominante;
     private ArrayList<Classes> classes;
@@ -28,7 +28,7 @@ public class Atributos {
     }
     //</editor-fold>    
 
-    //<editor-fold defaultstate="collapsed" desc="Métodos Get´s e Set´s">                
+    //<editor-fold defaultstate="collapsed" desc="2° Definição dos Get´s e Set´s e demais métodos">        
     public void setAtributo(String atributo) {
         this.atributo = atributo;
     }

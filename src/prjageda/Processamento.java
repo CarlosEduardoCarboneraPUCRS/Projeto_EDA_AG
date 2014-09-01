@@ -8,7 +8,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class Processamento {
 
-    //<editor-fold defaultstate="collapsed" desc="ATRIBUTOS E MÉTODO CONSTRUTOR DA CLASSE">    
+    //<editor-fold defaultstate="collapsed" desc="Declaração Atributos e Método(s) Construtor(es) da Classe">    
     private String caminhoDados;
     private Arvores arvTemporaria = null;
 
@@ -17,9 +17,10 @@ public class Processamento {
 
     //Configuração para mutação do indivíduo
     private static final int limMax = 100;
-    private static final int limInfMutacao = 1;
+    private static final int limInfMutacao = 10;
     private static final int limSupMutacao = 5;
     private static final int profMutacao = 2;
+    private static final int qtdSelTorneio = 2;
 
     public String getCaminhoDados() {
         return caminhoDados;
@@ -40,7 +41,7 @@ public class Processamento {
     }
     //</editor-fold>        
 
-    //<editor-fold defaultstate="collapsed" desc="MÉTODOS DE PROCESSAMENTO DIVERSOS">        
+    //<editor-fold defaultstate="collapsed" desc="Métodos de Processamento Diversos">        
     public Instances LeituraArquivo() {
         //Declaração Variáveis e Objetos
         Instances dados = null;
@@ -70,31 +71,21 @@ public class Processamento {
         //Declaração Variáveis e Objetos
         ArrayList<Atributos> registros = new ArrayList<>();
 
-        /**
-         * 1 - Avaliar se o Atributo é Numérico ou Nominal 1.1 - Se Numérico a árvore terá 2 arestas(Árvore será bifurcada)
-         * 1.2 - Se Categórico terá o número de arestas em função da quantidade de atributos encontrados no dataset
-         * -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-         */
+        //1 - Avaliar se o Atributo é Numérico ou Nominal 
+        //  - 1.1 - Se Numérico a árvore terá 2 arestas (Árvore será bifurcada) 
+        //  - 1.2 - Se Categórico terá o número de arestas em função da quantidade de atributos encontrados no dataset
         if (dados.attribute(posicao).isNumeric()) {
             //Declaração Variáveis e Objetos
-            double media = CalcularMediaAtributo(dados, posicao);
+            double valorMedia = CalcularMediaAtributo(dados, posicao);
 
-            //Para atributo numéricos, SEMPRE será bifurcada, assim :
-            //Atributo 0 - Sempre será MENOR a Média        
-            //Atributo 1 - Sempre será MAIOR OU IGUAL a Média        
-            registros.add(new Atributos(String.valueOf(arredondar(media, 2, 1)), null, "", null));
-            registros.add(new Atributos(String.valueOf(arredondar(media + 0.01, 2, 1)), null, "", null));
+            //Para atributo numéricos, SEMPRE será bifurcada, assim: 
+            // Aresta 0 - Sempre será MENOR OU IGUAL a Média Calculada
+            // Aresta 1 - Sempre será MAIOR que a Média Calculada
+            registros.add(new Atributos(String.valueOf(arredondar(valorMedia, 4, 1)), null, "", null));
+            registros.add(new Atributos(String.valueOf(arredondar(valorMedia, 4, 1) + 0.01), null, "", null));
 
-            /*
-             //Percorre todas as Classes Encontradas 
-             for (int pos = 0; pos < dados.numClasses(); pos++) {
-             //Adicionar as Arestas
-             registros.add(new Atributos(String.valueOf(pos), null, "", null));
-
-             }
-             */
         } else {
-            //Percorrer a Quantidade de Atributos existentes
+            //Percorrer a Quantidade de Atributos existentes e adicionando os mesmos
             for (int i = 0; i < dados.attribute(posicao).numValues(); i++) {
                 //Adicionar as Arestas
                 registros.add(new Atributos(dados.attribute(posicao).value(i), null, "", null));
@@ -145,7 +136,7 @@ public class Processamento {
         }
 
         //Efetuar Mutação dos indivíduos (se selecionado pelo critério do %), Exceto p/ as árvores obtidas por Eletismo
-        for (int i = 2; i < populacao.size(); i++) {
+        for (int i = qtdSelTorneio; i < populacao.size(); i++) {
             //Sortear um valor até o limite máximo permitido
             int perc = mt.nextInt(limMax);
 
@@ -196,6 +187,8 @@ public class Processamento {
         //Adicionar os indivíduos c/ o "CROSSOVER" efetuado e limpar o objeto
         populacao.add(arv1);
         populacao.add(arv2);
+
+        //Liberar o Objeto
         arvTemporaria = null;
 
         //Definir o retorno
@@ -204,7 +197,7 @@ public class Processamento {
     }
     //</editor-fold>        
 
-    //<editor-fold defaultstate="collapsed" desc="FUNÇÕES PERTINENTES AOS MÉTODOS DE MUTAÇÃO">   
+    //<editor-fold defaultstate="collapsed" desc="Funções Pertinentes aos métodos de Mutação">   
     private void MutacaoArvores(Arvores arvore, String tipo, int nivel, Instances dados) {
         //Se a árvore não for nula
         if (arvore != null) {
@@ -250,7 +243,7 @@ public class Processamento {
     }
     //</editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="FUNÇÕES PERTINENTES AOS MÉTODOS DE CROSSOVER">       
+    //<editor-fold defaultstate="collapsed" desc="Funções destinadas ao Crossover">
     //Remover uma Sub-Árvore da Árvore atual e setar nulo a mesma
     public void RemoverNodoNaOrigemSetandoNuloERetornandoArvore(Arvores arvore, int nivel) {
         //Declaração Variáveis e Objetos
@@ -264,7 +257,7 @@ public class Processamento {
             //Se o nodo da aresta selecionada aleatóriamente não for nulo processa o mesmo
             if (arvore.getArestas(pos).getNodo() != null) {
                 //Chamada da função para processamento do nodo selecionado
-                PosicionarNivelNodoOrigem(arvore.getArestas(pos).getNodo(), nivel + 1);
+                PosicionarMaiorNivelNodoOrigemESetarNulo(arvore.getArestas(pos).getNodo(), nivel + 1);
 
                 //Sair do for
                 break;
@@ -278,6 +271,7 @@ public class Processamento {
 
     }
 
+    //Incluir uma SubÁrvore na Árvore de Destino
     public void IncluirSubArvoreNaArvoreDestino(Arvores arvore) {
         //Declaração Variáveis e Objetos
         int iCont = 0;
@@ -304,6 +298,7 @@ public class Processamento {
 
     }
 
+    //Pesquisar um nodo folha da árvore de destino p/ inserção da Sub-Árvore
     public void PesquisarPosicaoArvoreDestino(Arvores arvore) {
         //Se o nó não for nulo
         if (arvore != null) {
@@ -325,7 +320,8 @@ public class Processamento {
 
     }
 
-    private void PosicionarNivelNodoOrigem(Arvores arvore, int nivel) {
+    //Posicionar o nodo no maior nível e Setar Nulo a ele (Aresta soretada aleatóriamente)
+    private void PosicionarMaiorNivelNodoOrigemESetarNulo(Arvores arvore, int nivel) {
         //Se o nó não for nulo
         if (arvore != null) {
             //Selecionar uma posição aleatóriamente
@@ -334,7 +330,7 @@ public class Processamento {
             //Se a primeira aresta não for nula pesquisa pela mesma
             if (arvore.getArestas(posicao).getNodo() != null) {
                 //Chamada recursiva da função até atinbgir o último nível
-                PosicionarNivelNodoOrigem(arvore.getArestas(posicao).getNodo(), nivel + 1);
+                PosicionarMaiorNivelNodoOrigemESetarNulo(arvore.getArestas(posicao).getNodo(), nivel + 1);
 
                 //Se atingiu o NÍVEL DE PROFUNDIDADE ESTABELECIDO, atribui a árvore a variável e seta nulo a mesma
                 if (nivel == DecisionStumps.profundidade) {
@@ -353,6 +349,7 @@ public class Processamento {
 
     }
 
+    //Atribui ao nodo folha a(s) classe(s) a qual pertence, se não existe atribui a mesma senão atualiza a quantidade em um unidade(caso exista a mesma)
     public void AtribuicaoClasseNodosFolhas(Arvores arvore, Instance avaliacao) {
         //Se o árvore não for nula
         if (arvore != null) {
@@ -360,33 +357,33 @@ public class Processamento {
             for (int k = 0; k < avaliacao.numAttributes(); k++) {
                 //Se o nome do Atributo Classe for igual ao nome do atributo da instância (Raiz ou nodo folha)
                 if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
-                    //Se o atributo for Numérico
+                    //Se o atributo for Numérico (BIFURCAÇÃO)
                     if (avaliacao.attribute(k).isNumeric()) {
                         //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
-                        int pos = Double.valueOf(arvore.getArestas(0).getAtributo()) <= avaliacao.classValue() ? 0 : 1;
+                        int posicao = arredondar(avaliacao.value(k), 4, 1) <= Double.valueOf(arvore.getArestas(0).getAtributo()) ? 0 : 1;
 
                         //Se não for um nodo RAIZ, efetua a chamada recursiva da função até chegar em um nodo raiz
-                        if (arvore.getArestas(pos).getNodo() != null) {
+                        if (arvore.getArestas(posicao).getNodo() != null) {
                             //Chama a função recursivamente passando o nodo da aresta
-                            AtribuicaoClasseNodosFolhas(arvore.getArestas(pos).getNodo(), avaliacao);
+                            AtribuicaoClasseNodosFolhas(arvore.getArestas(posicao).getNodo(), avaliacao);
 
                         } else {
                             //Declaração Variáveis e Objetos
                             ArrayList<Classes> classes = new ArrayList<>();
 
                             //Se a Classe for vazia Inclui o mesmo (Sendo o 1° Registro)
-                            if (arvore.getArestas(pos).getClasses() == null) {
+                            if (arvore.getArestas(posicao).getClasses() == null) {
                                 //Adicionar a Nova classe 
                                 classes.add(new Classes(avaliacao.classAttribute().value((int) avaliacao.classValue()), 1));
 
                                 //Atribuir as classes e sair fora da execução para a aresta selecionada
-                                arvore.getArestas(pos).setClasses(classes);
+                                arvore.getArestas(posicao).setClasses(classes);
 
                             } else //Já Existem Registros na Classe, irá atualizar o mesmo
                             {
                                 //Declaração Variáveis e Objetos
                                 boolean bOk = false;
-                                classes = arvore.getArestas(pos).getClasses();
+                                classes = arvore.getArestas(posicao).getClasses();
 
                                 //Percorre TODAS as classes do Nodo
                                 for (Classes classe : classes) {
@@ -412,7 +409,7 @@ public class Processamento {
 
                                 }
                                 //Atribuir as classes e sair fora da execução para a aresta selecionada
-                                arvore.getArestas(pos).setClasses(classes);
+                                arvore.getArestas(posicao).setClasses(classes);
 
                             }
 
@@ -453,7 +450,7 @@ public class Processamento {
 
     }
 
-//Irá percorrer todos os Nodos da árvore(avaliando SOMENTE os nodos folhas)
+    //Irá percorrer todos os Nodos da árvore(avaliando SOMENTE os nodos folhas) 
     public void DefinicaoClasseMajoritariaNodosFolhas(Arvores arvore) {
         //Se o árvore não for nula
         if (arvore != null) {
@@ -510,7 +507,7 @@ public class Processamento {
     }
     //</editor-fold>        
 
-    //<editor-fold defaultstate="collapsed" desc="CALCULAR VALOR MÉDIO DA ÁRVORE">    
+    //<editor-fold defaultstate="collapsed" desc="Calcular o Valor Médio da Árvores(arestas) - Para Atributos Numéricos">    
     private double CalcularMediaAtributo(Instances dados, int pos) {
         //Declaração Variáveis e objetos
         double media = 0d;
@@ -518,30 +515,32 @@ public class Processamento {
         //Percorrer todos as instâncias
         for (int i = 0; i < dados.numInstances(); i++) {
             media += dados.instance(i).value(pos);
+
         }
 
-        //definir o retorno
-        return arredondar(media / dados.numInstances(), 2, 1);
+        //Definir o Retorno
+        return arredondar(media / dados.numInstances(), 4, 1);
 
     }
 
-    /**
-     * Parâmetros: 1 - Valor a arredondar. 2 - Quantidade de casas depois da vírgula. 3 - Arredondar para cima ou para baixo?
-     *
-     * Para cima = 0 (ceil) Para baixo = 1 ou qualquer outro inteiro (floor)
-     *
-     */
-    double arredondar(double valor, int casas, int ceilOrFloor) {
+    // Parâmetros: 1 - Valor a arredondar. 
+    //             2 - Quantidade de casas depois da vírgula. 
+    //             3 - Arredondar para cima ou para baixo?
+    // Para Cima  = 0 (ceil) 
+    // Para Baixo = 1 ou qualquer outro inteiro (floor)
+    double arredondar(double valor, int casas, int ACimaouABaixo) {
+        //Declaração Variáveis e objetos
         double arredondado = valor;
 
+        //Atribuições do Cálculo
         arredondado *= (Math.pow(10, casas));
-
-        arredondado = ceilOrFloor == 0 ? Math.ceil(arredondado) : Math.floor(arredondado);
-
+        arredondado = (ACimaouABaixo == 0 ? Math.ceil(arredondado) : Math.floor(arredondado));
         arredondado /= (Math.pow(10, casas));
 
+        //Definir o Retorno
         return arredondado;
+
     }
-    //</editor-fold> 
+    //</editor-fold>        
 
 }

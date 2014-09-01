@@ -8,18 +8,21 @@ import weka.core.Instances;
 
 public class DecisionStumps {
 
-    //<editor-fold defaultstate="collapsed" desc="Definição Atributos e Métodos Construtores da Classe">    
+    //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
+    public static final int quantidade = 10;
     public static final int profundidade = 2;
-    public static final int quantidade = 1;
     public static final double TxCrossover = 0.9;
     private static final int geracoes = 10;
-    private int qtdOcorr = 0;
+    private static final int nroFolds = 3;
     private List<Arvores> arvores;
-    //private static final int nroFolds = 10;
+
+    private int qtdOcorr = 0;
 
     public DecisionStumps() {
     }
+    //</editor-fold> 
 
+    //<editor-fold defaultstate="collapsed" desc="2° Métodos Inicializadores da classe e Get´s E Set´s">    
     private void ZerarQtdOcorrencias() {
         //Zerar a quantidade
         this.qtdOcorr = 0;
@@ -39,11 +42,13 @@ public class DecisionStumps {
     }
 
     //</editor-fold> 
-    //Tradução da Sigla - ALGAD - "AL"goritmo "G"enético de "A"rvore de "D"ecisão
-    public void ALGAD(Instances dados) {
+    //<editor-fold defaultstate="collapsed" desc="3° Definição dos Métodos pertinentes a Geração da População">
+    //Tradução da Sigla - AlGenArDe - "Al"goritmo "Ge"nético de "Ar"vore de "De"cisão
+    public void AlGenArDe(Instances dados) {
         try {
             //Declaração Variáveis e Objetos
-            Instances treino = FormatacaoFonteDados(dados, "T"), validacao = FormatacaoFonteDados(dados, "V");
+            Instances treino = FormatacaoFonteDados(dados, "T");
+            Instances validacao = FormatacaoFonteDados(dados, "V");
             arvores = new ArrayList<>();
             int geracao = 1;
 
@@ -159,8 +164,8 @@ public class DecisionStumps {
     }
     //</editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="Funções Destinadas a Avaliação da População">    
-    private void TreinamentoNodoFolhas(Instances treino) throws Exception {
+    //<editor-fold defaultstate="collapsed" desc="4° Definição dos Métodos e Funções Destinadas a Avaliação da População">    
+    private void TreinamentoNodosFolhas(Instances treino) throws Exception {
         try {
             //Declaração Variáveis e Objetos
             Processamento proc = new Processamento();
@@ -177,7 +182,7 @@ public class DecisionStumps {
 
                 //Definição da Classe majoritária de cada um dos nodos "Folhas" da árvore
                 proc.DefinicaoClasseMajoritariaNodosFolhas(arvore);
-
+                
             }
 
         } catch (Exception e) {
@@ -190,7 +195,7 @@ public class DecisionStumps {
     private void CalculoFitnessPopulacao(Instances treino, Instances validacao) throws Exception {
         try {
             //Efetuar o treinamento - Definir quais classes pertencem os nodos folhas
-            TreinamentoNodoFolhas(treino);
+            TreinamentoNodosFolhas(treino);
 
             //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
             ValidacaoNodoFolhasParaCalculoFitness(validacao);
@@ -198,7 +203,7 @@ public class DecisionStumps {
             //Percorrer todas as árvres existentes e calcula o fitnes de cada uma delas
             for (Arvores arvore : arvores) {
                 //Calcular E Setar o Valor do Fitness
-                arvore.setFitness(new Processamento().arredondar(1 - ((double) arvore.getQtdOcorrencias() / validacao.numInstances()), 2, 1));
+                arvore.setFitness(new Processamento().arredondar(1 - ((double) arvore.getQtdOcorrencias() / validacao.numInstances()), 4, 1));
 
             }
 
@@ -214,34 +219,25 @@ public class DecisionStumps {
 
     private Instances FormatacaoFonteDados(Instances dados, String tipo) throws Exception {
         //Declaração Variáveis e Objetos
-        int iTreinamento = (int) ((int) dados.numInstances() * 0.3);
-        int iValidacao = iTreinamento + (int) ((int) dados.numInstances() * 0.35);
         Instances regs = new Instances(dados, 0);
 
-        //"T" - Treinamento - 30% 
+        //Estratificar os dados e divisão em 3 folds
+        dados.stratify(nroFolds);
+
         switch (tipo) {
             case "T":
-                //"T" - Treinamento - 30%  - Alimentar o classificador
-                for (int t = 0; t < iTreinamento; t++) {
-                    regs.add(dados.instance(Processamento.mt.nextInt(dados.numInstances() - 1)));
-
-                }
+                //"T" - Treinamento - 30% 
+                regs = dados.testCV(nroFolds, 0);
                 break;
 
             case "V":
-                //"V" - Validação - 35%  - Alimentar o classificador
-                for (int t = iTreinamento; t < iValidacao; t++) {
-                    regs.add(dados.instance(Processamento.mt.nextInt(dados.numInstances() - 1)));
-
-                }
+                //"V" - Validação - 35%
+                regs = dados.trainCV(nroFolds, 1);
                 break;
 
+            //"Z" - Teste - 35%
             case "Z":
-                //"Z" - Teste - 35%  - Alimentar o classificador
-                for (int t = iValidacao; t < dados.numInstances(); t++) {
-                    regs.add(dados.instance(Processamento.mt.nextInt(dados.numInstances() - 1)));
-
-                }
+                regs = dados.trainCV(nroFolds, 2);
                 break;
 
         }
@@ -291,13 +287,13 @@ public class DecisionStumps {
                     //Se o atributo for Numérico
                     if (avaliacao.attribute(k).isNumeric()) {
                         //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
-                        int pos = Double.valueOf(arvore.getArestas(0).getAtributo()) <= avaliacao.classValue() ? 0 : 1;
+                        int pos = new Processamento().arredondar(avaliacao.value(k), 4, 1) <= Double.valueOf(arvore.getArestas(0).getAtributo()) ? 0 : 1;
 
                         //Se for um nodo folha
                         if (arvore.getArestas(pos).getNodo() == null) {
                             //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
                             if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                //Atualizar a quantidade (Somar 1)
+                                //Atualizar a quantidade (Somar 1 na quantidade atual)
                                 AtualizarQtdOcorrencias(1);
 
                             }
@@ -311,12 +307,11 @@ public class DecisionStumps {
                     } else {
                         //Percorrer todas as arestas
                         for (Atributos aresta : arvore.getArestas()) {
-
                             //Se for um nodo folha
                             if (aresta.getNodo() == null) {
                                 //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
                                 if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                    //Atualizar a quantidade (Somar 1)
+                                    //Atualizar a quantidade (Somar 1 na quantidade atual)
                                     AtualizarQtdOcorrencias(1);
 
                                 }
@@ -338,8 +333,9 @@ public class DecisionStumps {
         }
 
     }
+    //</editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="Ordenação População em Ordem Crescente - Avaliados p/ Fitness">    
+    //<editor-fold defaultstate="collapsed" desc="5° Ordenação População em Ordem Crescente - Avaliados p/ Fitness">    
     public void ordenaPopulacao() {
         //Ordenar a população EM ORDEM CRESCENTE pelo valor do Fitness, por exemplo.: 0.2, 0.3, 0.4,...1.0
         Collections.sort(arvores);

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Arvores implements Comparable<Arvores> {
 
-    //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos">    
+    //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    
     private String nomeAtr;
     private double fitness;
     private int qtdOcorr;
