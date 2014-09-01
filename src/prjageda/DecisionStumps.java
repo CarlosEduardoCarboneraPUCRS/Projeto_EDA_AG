@@ -103,37 +103,29 @@ public class DecisionStumps {
 
     }
 
+    //Efetuar a Geração da População de Árvores de Decisão
     public void GerarPopulacaoArvores(Instances dados, int prof, Arvores arvore) {
         //Condição de Parada - Se o grau de profundidade máxima
         if (prof <= profundidade) {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //if (Processamento.mt.nextBoolean()) {
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Aqui descomentar  --------------------------------------------------IRÀ GERAR TODOS OS NODOS
-                //Declaração Variáveis e Objetos
-                ArrayList<Arvores> nodos = new ArrayList<>();
+                if (Processamento.mt.nextBoolean()) {
+                    //Declaração Variáveis e Objetos
+                    ArrayList<Arvores> nodos = new ArrayList<>();
 
-                //Adicionar os árvores originais, isto é devido ao java trabalhar APENAS com a referência dos objetos, assim a cada geração deve-se RECARREGAR as árvores originais
-                nodos.addAll(ProcessamentoNodos(dados));
+                    //Adicionar as árvores originais, devido ao java trabalhar APENAS com a referência dos objetos, ai a cada geração deve-se RECARREGAR as mesmas
+                    nodos.addAll(ProcessamentoNodos(dados));
 
-                // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
+                    // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
+                    // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                    arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
 
-                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
+                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                    GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
 
-                //}
+                }
+                
             }
 
         }
@@ -182,7 +174,7 @@ public class DecisionStumps {
 
                 //Definição da Classe majoritária de cada um dos nodos "Folhas" da árvore
                 proc.DefinicaoClasseMajoritariaNodosFolhas(arvore);
-                
+
             }
 
         } catch (Exception e) {
