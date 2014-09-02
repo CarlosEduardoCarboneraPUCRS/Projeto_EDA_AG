@@ -46,7 +46,6 @@ public class DecisionStumps {
     }
 
     //</editor-fold> 
-    
     //<editor-fold defaultstate="collapsed" desc="3° Definição dos Métodos pertinentes a Geração da População">
     //Tradução da Sigla - AlGenArDe - "Al"goritmo "Gen"ético de "Ar"vore de "De"cisão
     public void AlGenArDe(Instances dados) {
@@ -71,7 +70,7 @@ public class DecisionStumps {
                 //Inicialização e Atribuição das árvores
                 arvores = new ArrayList<>();
                 arvores = arvs;
-                
+
                 //Calcular o Fitness e após Ordenar Crescente
                 CalculoFitnessPopulacao(treino, validacao);
 
@@ -107,7 +106,7 @@ public class DecisionStumps {
             CalculoFitnessPopulacao(treino, validacao);
 
         } catch (Exception e) {
-            throw e;
+            System.out.println(e.getMessage());
 
         }
 
@@ -293,7 +292,7 @@ public class DecisionStumps {
                             //Chamada recursiva da função passando como parâmetros a aresta selecionada
                             ValidacaoCalculoFitnessGeracao(arvore.getArestas(pos).getNodo(), avaliacao);
 
-                        }                        
+                        }
 
                     } else {
                         //Percorrer todas as arestas
