@@ -15,7 +15,7 @@ public class Processamento {
     //Declaração de objetos
     public static final MersenneTwister mt = new MersenneTwister();
 
-    //Configuração para mutação do indivíduo
+    //Configuração para mutação da árvore
     private static final int limMax = 100;
     private static final int limInfMutacao = 10;
     private static final int limSupMutacao = 5;
@@ -42,6 +42,7 @@ public class Processamento {
     //</editor-fold>        
 
     //<editor-fold defaultstate="collapsed" desc="Métodos de Processamento Diversos">        
+    //Leitura do Arquivo
     public Instances LeituraArquivo() {
         //Declaração Variáveis e Objetos
         Instances dados = null;
@@ -81,8 +82,8 @@ public class Processamento {
             //Para atributo numéricos, SEMPRE será bifurcada, assim: 
             // Aresta 0 - Sempre será MENOR OU IGUAL a Média Calculada
             // Aresta 1 - Sempre será MAIOR que a Média Calculada
-            registros.add(new Atributos(String.valueOf(arredondar(valorMedia, 4, 1)), null, "", null));
-            registros.add(new Atributos(String.valueOf(arredondar(valorMedia, 4, 1) + 0.01), null, "", null));
+            registros.add(new Atributos(String.valueOf(Arredondar(valorMedia, DecisionStumps.qtdDecimais, 1)), null, "", null));
+            registros.add(new Atributos(String.valueOf(Arredondar(valorMedia, DecisionStumps.qtdDecimais, 1) + 0.01), null, "", null));
 
         } else {
             //Percorrer a Quantidade de Atributos existentes e adicionando os mesmos
@@ -99,10 +100,11 @@ public class Processamento {
 
     }
 
-    //Efetuar a leitura recursiva da árvore, lendo cada instância da base de dados e percorrer toda a árvore
+    //Efetuar o processamento Recursivo da Árvore, lendo cada instância da base de dados e percorrer toda a árvore
     public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, List<Arvores> arvores, boolean elitismo) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> populacao = new ArrayList<>();
+        List<Arvores> filhos;
 
         //Se tiver elitismo, adicionar (mantém) o melhor árvore da geração atual(ordenada) para a próxima geração
         if (elitismo) {
@@ -114,8 +116,8 @@ public class Processamento {
 
         //Efetua a geração da nova população equanto a população for menor que a população inicialmente estabelecida
         while (populacao.size() < DecisionStumps.quantidade) {
-            //Declaração de variáveis e objetos
-            List<Arvores> filhos = new ArrayList<>();
+            //Inicialização do Objeto
+            filhos = new ArrayList<>();
 
             //Adicionar os pais
             filhos.add(SelecaoPorTorneio(arvores));
@@ -135,14 +137,14 @@ public class Processamento {
 
         }
 
-        //Efetuar Mutação dos indivíduos (se selecionado pelo critério do %), Exceto p/ as árvores obtidas por Eletismo
+        //Efetuar Mutação das Árvores (se selecionado pelo critério do %), Exceto p/ as Árvores obtidas por Eletismo
         for (int i = qtdSelTorneio; i < populacao.size(); i++) {
             //Sortear um valor até o limite máximo permitido
             int perc = mt.nextInt(limMax);
 
             //Se extiver compreendido entre o limite Inferior E Superior
             if (perc >= limInfMutacao && perc <= limSupMutacao) {
-                //Efetuar a Mutação do indivíduo - "E"xpansão ou "S"ubtração de Nodos
+                //Efetuar a Mutação da Árvore - "E"xpansão ou "R"etração de Nodos
                 MutacaoArvores(populacao.get(i), mt.nextBoolean() ? "E" : "R", 1, dados);
 
             }
@@ -154,6 +156,7 @@ public class Processamento {
 
     }
 
+    //Effetuar a seleção por Torneio das Árvores - Seleciona-se as Árvores Aleatóriamente Ordenando-os Crescente
     private Arvores SelecaoPorTorneio(List<Arvores> arvores) {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
@@ -167,7 +170,7 @@ public class Processamento {
 
     }
 
-    //Efetuar o crossover da população de indivíduos
+    //Efetuar o crossover da população de árvores, aonde ocorre a Troca Genética de Material entre as árvores CRIANDO novas árvores
     private ArrayList<Arvores> CrossoverArvores(Arvores arv1, Arvores arv2) {
         //Declaração Variáveis e Objetos e Inicializações
         ArrayList<Arvores> populacao = new ArrayList<>();
@@ -184,7 +187,7 @@ public class Processamento {
         //Incluir o nodo removido na 1° Árvore em uma posição aleatória da 2° Árvore (desde que a posição seja um nodo folha)
         IncluirSubArvoreNaArvoreDestino(arv1);
 
-        //Adicionar os indivíduos c/ o "CROSSOVER" efetuado e limpar o objeto
+        //Adicionar as árvores c/ o "CROSSOVER" efetuado e limpar o objeto
         populacao.add(arv1);
         populacao.add(arv2);
 
@@ -198,6 +201,7 @@ public class Processamento {
     //</editor-fold>        
 
     //<editor-fold defaultstate="collapsed" desc="Funções Pertinentes aos métodos de Mutação">   
+    //Efetuar a Mutação da árvore, aonde efetua-se a troca do material genético da árvore CRIANDO uma nova árvore
     private void MutacaoArvores(Arvores arvore, String tipo, int nivel, Instances dados) {
         //Se a árvore não for nula
         if (arvore != null) {
@@ -360,7 +364,8 @@ public class Processamento {
                     //Se o atributo for Numérico (BIFURCAÇÃO)
                     if (avaliacao.attribute(k).isNumeric()) {
                         //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
-                        int posicao = arredondar(avaliacao.value(k), 4, 1) <= Double.valueOf(arvore.getArestas(0).getAtributo()) ? 0 : 1;
+                        int posicao = Arredondar(avaliacao.value(k), DecisionStumps.qtdDecimais, 1)
+                                <= Arredondar(Double.valueOf(arvore.getArestas(0).getAtributo()), DecisionStumps.qtdDecimais, 1) ? 0 : 1;
 
                         //Se não for um nodo RAIZ, efetua a chamada recursiva da função até chegar em um nodo raiz
                         if (arvore.getArestas(posicao).getNodo() != null) {
@@ -426,6 +431,7 @@ public class Processamento {
                                 for (int l = 0; l < avaliacao.numValues(); l++) {
                                     //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
                                     if (arvore.getArestas(i).getAtributo().equals(avaliacao.attribute(k).value(l))) {
+                                        //Se o nome da classe dominante for igual a classe avaliada
                                         if (classe.getNome().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
                                             //Atualizar a quantidade de registros X Atributo - Para Definir a Classe dominante
                                             classe.atualizarQtd(1);
@@ -508,6 +514,7 @@ public class Processamento {
     //</editor-fold>        
 
     //<editor-fold defaultstate="collapsed" desc="Calcular o Valor Médio da Árvores(arestas) - Para Atributos Numéricos">    
+    //Efetuar o Cálculo da média do Atributo - Sendo numérico
     private double CalcularMediaAtributo(Instances dados, int pos) {
         //Declaração Variáveis e objetos
         double media = 0d;
@@ -519,16 +526,16 @@ public class Processamento {
         }
 
         //Definir o Retorno
-        return arredondar(media / dados.numInstances(), 4, 1);
+        return Arredondar(media / dados.numInstances(), DecisionStumps.qtdDecimais, 1);
 
     }
 
-    // Parâmetros: 1 - Valor a arredondar. 
+    // Parâmetros: 1 - Valor a Arredondar. 
     //             2 - Quantidade de casas depois da vírgula. 
     //             3 - Arredondar para cima ou para baixo?
     // Para Cima  = 0 (ceil) 
     // Para Baixo = 1 ou qualquer outro inteiro (floor)
-    double arredondar(double valor, int casas, int ACimaouABaixo) {
+    double Arredondar(double valor, int casas, int ACimaouABaixo) {
         //Declaração Variáveis e objetos
         double arredondado = valor;
 

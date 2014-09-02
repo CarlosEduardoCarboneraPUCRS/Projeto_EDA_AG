@@ -7,14 +7,16 @@ public class Classes {
     private int quantidade;
     
     public Classes() {
+        //Atribuições
         this.nome = "";
         this.quantidade = 0;
 
     }
     
-    public Classes(String clsNm, int qtd) {
-        this.nome = clsNm;
-        this.quantidade = qtd;
+    public Classes(String classeNome, int quant) {
+        //Atribuições
+        this.nome = classeNome;
+        this.quantidade = quant;
 
     }
     //</editor-fold>    

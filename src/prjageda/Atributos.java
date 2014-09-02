@@ -21,8 +21,8 @@ public class Atributos {
     public Atributos(String atr, Arvores no, String clsDominante, ArrayList<Classes> cls) {
         //setar o atributo
         this.atributo = atr;
-        this.nodo = no;
         this.classeDominante = clsDominante;
+        this.nodo = no;
         this.classes = cls;
 
     }
