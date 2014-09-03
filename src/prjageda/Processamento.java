@@ -1,6 +1,7 @@
 package prjageda;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -20,7 +21,7 @@ public class Processamento {
     private static final int limInfMutacao = 10;
     private static final int limSupMutacao = 5;
     private static final int profMutacao = 2;
-    private static final int qtdSelTorneio = 2;
+    private static final int qtdSelTorneio = 10;
 
     public String getCaminhoDados() {
         return caminhoDados;
@@ -161,12 +162,18 @@ public class Processamento {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
 
-        //Selecionar 2 árvores aleatóriamente
-        selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
-        selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
+        //Enquanto não atingir o Tamanho Máximo
+        while (selecao.size() < qtdSelTorneio) {
+            //Selecionar 2 árvores aleatóriamente
+            selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
 
-        //Definir o retorno - Pelo Menor Fitness
-        return selecao.get(0).getFitness() < selecao.get(1).getFitness() ? selecao.get(0) : selecao.get(1);
+        }
+        
+        //Ordenar a População
+        Collections.sort(selecao);
+        
+        //Retornar o melhor Individuo
+        return selecao.get(0);
 
     }
 
@@ -447,6 +454,8 @@ public class Processamento {
                         }
 
                     }
+                    //Sair fora do for
+                    break;
 
                 }
 

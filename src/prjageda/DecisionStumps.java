@@ -211,11 +211,11 @@ public class DecisionStumps {
 
             }
 
-            //Ordenar a população EM ORDEM CRESCENTE, por exemplo.: 0.2, 0.3, 0.4,...1.0
-            ordenaPopulacao();
+            //Ordenar a população EM ORDEM CRESCENTE pelo valor do Fitness, por exemplo.: 0.2, 0.3, 0.4,...1.0
+            Collections.sort(arvores);
 
         } catch (Exception e) {
-            throw e;
+            System.out.println(e.getMessage());
 
         }
 
@@ -315,20 +315,14 @@ public class DecisionStumps {
                         }
 
                     }
+                    //Sair for do for
+                    break;
 
                 }
 
             }
 
         }
-
-    }
-    //</editor-fold> 
-
-    //<editor-fold defaultstate="collapsed" desc="5° Ordenação População em Ordem Crescente - Avaliados p/ Fitness">    
-    public void ordenaPopulacao() {
-        //Ordenar a população EM ORDEM CRESCENTE pelo valor do Fitness, por exemplo.: 0.2, 0.3, 0.4,...1.0
-        Collections.sort(arvores);
 
     }
     //</editor-fold> 
