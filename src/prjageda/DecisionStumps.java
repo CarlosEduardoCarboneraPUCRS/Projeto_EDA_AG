@@ -1,5 +1,11 @@
 package prjageda;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,14 +16,15 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int quantidade = 20;
+    public static final int quantidade = 30;
     public static final int profundidade = 2;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
 
     //Variáveis Privadas Estáticas
-    private static final int geracoes = 10;
+    private static final int geracoes = 100;
     private static final int nroFolds = 3;
+    private static final String localArquivos = "C:\\Geracao\\";
     private List<Arvores> arvores;
     private int qtdOcorr = 0;
 
@@ -58,6 +65,9 @@ public class DecisionStumps {
 
             //Efetuar a Geração da População Inicial
             GeracaoPopulacaoInicial(dados, treino, validacao);
+           
+            //Impressão das Árvores
+            //ImprimirPopulacao();
 
             //Efetuar a geração das novas populações
             while (geracao < geracoes) {
@@ -74,6 +84,8 @@ public class DecisionStumps {
                 //Calcular o Fitness e após Ordenar Crescente
                 CalculoFitnessPopulacao(treino, validacao);
 
+                //Impressão das Árvores
+                //ImprimirPopulacao();
             }
 
         } catch (Exception e) {
@@ -86,10 +98,13 @@ public class DecisionStumps {
     //Efetuar a Geração da População Inicial
     private void GeracaoPopulacaoInicial(Instances dados, Instances treino, Instances validacao) throws Exception {
         try {
+            //Efetuar o processamento das arestas dos Decisions Strumps (gravar em arquivo texto) p/ leitura posterior
+            ProcessamentoNodos(dados);
+
             //Percorrer a quantidade de árvores informado
             for (int i = 0; i < quantidade; i++) {
                 //Gerar cada uma das árvores e as arestas respectivamente (Sendo 1 Árvore X Atributo)
-                ArrayList<Arvores> temp = ProcessamentoNodos(dados);
+                ArrayList<Arvores> temp = LeituraNodos();
 
                 //Selecionar o nodo raiz (sorteado aleatóriamente)
                 Arvores arv = temp.get(Processamento.mt.nextInt(dados.numAttributes() - 1));
@@ -102,7 +117,7 @@ public class DecisionStumps {
 
             }
 
-            //Calcular o Fitness e após Ordenação Crescente
+            //Calcular o Fitness das árvores E após Ordenação Crescente
             CalculoFitnessPopulacao(treino, validacao);
 
         } catch (Exception e) {
@@ -113,28 +128,31 @@ public class DecisionStumps {
     }
 
     //Efetuar a Geração da População de Árvores de Decisão
-    public void GerarPopulacaoArvores(Instances dados, int prof, Arvores arvore) {
+    public void GerarPopulacaoArvores(Instances dados, int prof, Arvores arvore) throws IOException {
         //Condição de Parada - Se o grau de profundidade máxima
         if (prof <= profundidade) {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                if (Processamento.mt.nextBoolean()) {
-                    //Declaração Variáveis e Objetos
-                    ArrayList<Arvores> nodos = new ArrayList<>();
+                //------------------------------------------------------------------------------------------------------------------------------------------------------------
+                //Efetuar Processamento completo - Remover
+                //Efetuar Processamento completo - Remover
+                //Efetuar Processamento completo - Remover
+                //Efetuar Processamento completo - Remover
+                //Efetuar Processamento completo - Remover
+                //------------------------------------------------------------------------------------------------------------------------------------------------------------
+                //if (Processamento.mt.nextBoolean()) {
+                //Adicionar as árvores originais, devido ao java trabalhar APENAS com a referência dos objetos, ai a cada geração deve-se RECARREGAR as mesmas
+                ArrayList<Arvores> nodos = LeituraNodos();
 
-                    //Adicionar as árvores originais, devido ao java trabalhar APENAS com a referência dos objetos, ai a cada geração deve-se RECARREGAR as mesmas
-                    nodos.addAll(ProcessamentoNodos(dados));
+                // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
+                // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
 
-                    // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                    // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                    arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
+                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
 
-                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                    GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
-
-                }
-
+                //}
             }
 
         }
@@ -142,20 +160,85 @@ public class DecisionStumps {
     }
 
     //Processamento dos nodos - Definição das árvores e seus nodos (Numéricos - Bifurcadas / Nominais - Quantidade de arestas definida pela quantidade de classes)
-    public ArrayList<Arvores> ProcessamentoNodos(Instances dados) {
+    public void ProcessamentoNodos(Instances dados) {
         //Declaração Variáveis e Objetos
-        ArrayList<Arvores> nodos = new ArrayList<>();
+        File arquivo = new File(localArquivos + "nodos.txt");
 
-        //Processamento: PARA CADA COLUNA PERCORRE TODAS AS LINHAS
-        //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        //Percorrer TODOS os atributos (colunas) existentes e para cada atributo percorre todas as instâncias  por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
-        for (int i = 0; i < dados.numAttributes(); i++) {
-            //1° Passo     - Processar todos os Atributos (Binários e Nominais)
-            //2° Parâmetro - Nome do atributo
-            //3° Parâmetro - Instâncias e a posição do Atributo
-            nodos.add(new Arvores(dados.instance(0).attribute(i).name(), new Processamento().ProcessamentoInstancias(dados, i)));
+        //Se Existir o arquivo
+        if (arquivo.exists()) {
+            //Deleta o mesmo
+            arquivo.delete();
 
         }
+
+        //Se Existir o arquivo
+        try (FileWriter regs = new FileWriter(arquivo);
+                //Declaração Variáveis e Objetos
+                BufferedWriter escrita = new BufferedWriter(regs)) {
+
+            //Processamento: PARA CADA COLUNA PERCORRE TODAS AS LINHAS
+            //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //Percorrer TODOS os atributos (colunas) existentes e para cada atributo percorre todas as instâncias  por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
+            for (int i = 0; i < dados.numAttributes() - 1; i++) {
+                //1° Passo     - Processar todos os Atributos (Binários e Nominais)
+                //2° Parâmetro - Nome do atributo
+                //3° Parâmetro - Instâncias e a posição do Atributo
+                ArrayList<Atributos> atribs = new Processamento().ProcessamentoInstancias(dados, i);
+                String complemento = "";
+
+                //Percorrer os Atributos
+                for (Atributos atr : atribs) {
+                    //Concatenar
+                    complemento += atr.getAtributo() + ";";
+                }
+
+                //Escrever a linha
+                escrita.write(dados.instance(0).attribute(i).name().trim() + ";" + complemento.substring(0, complemento.length() - 1));
+
+                //Gerar a nova linha
+                escrita.newLine();
+
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro na impressão da árvore.: " + e.getMessage());
+
+        }
+
+    }
+
+    //Leitura dos nodos já processados - Definição das árvores e seus nodos (Numéricos - Bifurcadas / Nominais - Quantidade de arestas definida pela quantidade de classes)
+    public ArrayList<Arvores> LeituraNodos() throws IOException {
+        //Declaração Variáveis e Objetos
+        BufferedReader leitura;
+        ArrayList<Arvores> nodos;
+        ArrayList<Atributos> atributos;
+
+        try (
+                //Declaração Variáveis e Objetos
+                FileReader fileReader = new FileReader(localArquivos + "nodos.txt")) {
+
+            leitura = new BufferedReader(fileReader);
+            nodos = new ArrayList<>();
+            String linha;
+
+            while ((linha = leitura.readLine()) != null) {
+                //Declaração Variáveis e Objetos
+                String[] itens = linha.split(";");
+                atributos = new ArrayList<>();
+
+                //Adicionar os Atributos
+                atributos.add(new Atributos(itens[1], null, "", null));
+                atributos.add(new Atributos(itens[2], null, "", null));
+
+                //Adicionar o nodo
+                nodos.add(new Arvores(itens[0], atributos));
+
+            }
+        }
+
+        //Fechar o arquivo
+        leitura.close();
 
         //Definir o retorno
         return nodos;
@@ -186,7 +269,7 @@ public class DecisionStumps {
             }
 
         } catch (Exception e) {
-            throw e;
+            System.out.println(e.getMessage());
 
         }
 
@@ -254,7 +337,7 @@ public class DecisionStumps {
             }
 
         } catch (Exception e) {
-            throw e;
+            System.out.println(e.getMessage());
 
         }
 
@@ -275,9 +358,10 @@ public class DecisionStumps {
                     if (avaliacao.attribute(k).isNumeric()) {
                         //Declaração Variáveis e Objetos
                         Processamento prc = new Processamento();
+                        double valorAresta = Double.valueOf(arvore.getArestas(0).getAtributo().split(" ")[1]);
 
                         //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
-                        int pos = prc.Arredondar(avaliacao.value(k), qtdDecimais, 1) <= prc.Arredondar(Double.valueOf(arvore.getArestas(0).getAtributo()), qtdDecimais, 1) ? 0 : 1;
+                        int pos = prc.Arredondar(avaliacao.value(k), qtdDecimais, 1) <= prc.Arredondar(valorAresta, qtdDecimais, 1) ? 0 : 1;
 
                         //Se for um nodo folha
                         if (arvore.getArestas(pos).getNodo() == null) {
@@ -327,4 +411,41 @@ public class DecisionStumps {
     }
     //</editor-fold> 
 
+    //<editor-fold defaultstate="collapsed" desc="5° Definição dos Métodos p/ Impressão das Árvores">    
+//    private void ImprimirPopulacao(int prof) {
+//        //Declaração Variáveis e Objetos
+//        File arquivo = new File(localArquivos + "Arvores\\Gercao_" + prof + ".txt");
+//
+//        //Se Existir o arquivo
+//        if (arquivo.exists()) {
+//            //Deleta o mesmo
+//            arquivo.delete();
+//
+//        }
+//
+//        //Se Existir o arquivo
+//        try (FileWriter dados = new FileWriter(arquivo);
+//                //Declaração Variáveis e Objetos
+//                BufferedWriter escrita = new BufferedWriter(dados)) {
+//
+//            //Imprimir a arvore
+//            escrita.write(">>>>> IMPRIMINDO POPULACAO GERACAO.: " + prof);
+//            escrita.newLine();
+//            escrita.write("------------------------------------------------------------------------------------------------------------------------------------------------------");
+//            escrita.newLine();
+//
+//            
+//        } catch (Exception e) {
+//            System.out.println("Erro na impressão da árvore.: " + e.getMessage());
+//
+//        }
+//
+//    }
+
+//    //Efetuar a impressão da árvore informada
+//    private void ImprimirArvore() {
+//        
+//    }   
+
+//</editor-fold> 
 }
