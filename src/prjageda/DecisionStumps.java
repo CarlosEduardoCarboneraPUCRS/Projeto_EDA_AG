@@ -65,9 +65,6 @@ public class DecisionStumps {
 
             //Efetuar a Geração da População Inicial
             GeracaoPopulacaoInicial(dados, treino, validacao);
-           
-            //Impressão das Árvores
-            //ImprimirPopulacao();
 
             //Efetuar a geração das novas populações
             while (geracao < geracoes) {
@@ -84,8 +81,6 @@ public class DecisionStumps {
                 //Calcular o Fitness e após Ordenar Crescente
                 CalculoFitnessPopulacao(treino, validacao);
 
-                //Impressão das Árvores
-                //ImprimirPopulacao();
             }
 
         } catch (Exception e) {
@@ -281,6 +276,9 @@ public class DecisionStumps {
     // 3° Passo - Cálculo do Fitness da árvore 
     private void CalculoFitnessPopulacao(Instances treino, Instances validacao) throws Exception {
         try {
+            //Eliminar Classificação Nodos
+            EliminarClassificacaoNodos();
+
             //Efetuar o treinamento - Definir quais classes pertencem os nodos folhas
             TreinamentoNodosFolhas(treino);
 
@@ -411,7 +409,7 @@ public class DecisionStumps {
     }
     //</editor-fold> 
 
-    //<editor-fold defaultstate="collapsed" desc="5° Definição dos Métodos p/ Impressão das Árvores">    
+//<editor-fold defaultstate="collapsed" desc="5° Definição dos Métodos p/ Impressão das Árvores">    
 //    private void ImprimirPopulacao(int prof) {
 //        //Declaração Variáveis e Objetos
 //        File arquivo = new File(localArquivos + "Arvores\\Gercao_" + prof + ".txt");
@@ -441,11 +439,60 @@ public class DecisionStumps {
 //        }
 //
 //    }
-
 //    //Efetuar a impressão da árvore informada
 //    private void ImprimirArvore() {
 //        
 //    }   
+    
+    //Eliminar as definições da árvore (Valor Fitness, Quantidade de Ocorrência, Classe Dominante e Classes)
+    private void EliminarClassificacaoNodos() {
+        //Processar Árvores e Eliminar as definções dos Nodos Folhas
+        for (Arvores arvore : arvores) {
+            //Atualizar os Valores da Árvore
+            arvore.AtuQtdOcorrencias(0);
+            arvore.setFitness(0);
+            
+            //Processamento dos nodos folhas
+            LimparDefinicaoClassesNodosFolhas(arvore);
 
-//</editor-fold> 
+        }
+
+    }
+
+    //Eliminar a Classificação dos nodos Folhas
+    private void LimparDefinicaoClassesNodosFolhas(Arvores arv) {
+        try {
+            //Se possuir arestas
+            if (arv.getArestas() != null) {
+                //Percorre todas as arestas até encontrar o atributos selecionado
+                for (int i = 0; i < arv.getArestas().size(); i++) {
+                    //Se o nodo não for nulo
+                    if (arv.getArestas(i).getNodo() != null) {
+                        //Se for o nodo da aresta selecionado aleatóriamente
+                        if (arv.getArestas(i).getClasses() != null) {
+                            //Setar nulo 
+                            arv.getArestas(i).setClasses(null);
+                            arv.getArestas(i).setClasseDominante(null);
+
+                        } else 
+                        {
+                            //Chamada Recursiva da Função
+                            LimparDefinicaoClassesNodosFolhas(arv.getArestas(i).getNodo());
+                            
+                        }
+
+                    }
+
+                }
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+        }
+
+        //</editor-fold> 
+    }
+
 }

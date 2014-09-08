@@ -206,6 +206,7 @@ public class Processamento {
     }
 
     //</editor-fold>        
+   
     //<editor-fold defaultstate="collapsed" desc="Funções Pertinentes aos Métodos de Mutação">   
     //Efetuar a Mutação da árvore, a mesma poderá ser de "E"xpansão ou "R"edução
     private void MutacaoArvores(Arvores arvore, String tipo, Instances dados, String nomeAtr) throws IOException {
