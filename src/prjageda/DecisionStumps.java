@@ -16,7 +16,7 @@ public class DecisionStumps {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int quantidade = 30;
+    public static final int quantidade = 100;
     public static final int profundidade = 2;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;

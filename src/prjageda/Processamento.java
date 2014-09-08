@@ -145,7 +145,7 @@ public class Processamento {
                 String atributo = BuscarAtributosArvore(populacao.get(i));
 
                 //Caso a árvore possuir mais do que o nodo raiz, retornará um atributo, caso contrário nem processa
-                if (!atributo.equals("")) {
+                if (!atributo.isEmpty()) {
                     //Efetuar a Mutação da Árvore - "E"xpansão ou "R"etração de Nodos
                     MutacaoArvores(populacao.get(i), mt.nextBoolean() ? "E" : "R", dados, atributo);
 
@@ -192,22 +192,30 @@ public class Processamento {
             String atributoArv2 = BuscarAtributosArvore(arv2);
 
             //Se o atributo for válido processa SENÃO abandona o processamento
-            if (!atributoArv1.equals("")) {
+            if (!atributoArv1.isEmpty()) {
                 //Buscar um dos Atributos Selecionados Aleatóriamente e Remove a Sub-Árvore da 1° Árvore Transformando em um Nodo "Folha" na posição 
                 RemoverNodoNaOrigemSetandoNuloERetornandoArvore(arv1, atributoArv1);
 
-                //Incluir o nodo removido na 1° Árvore em uma posição aleatório da 2° Árvore (desde que a posição seja um nodo folha)
-                PesquisarPosicaoArvoreDestino(arv2);
+                //Se o atributo for válido processa SENÃO abandona o processamento
+                if (!atributoArv2.isEmpty()) {
+                    //Incluir o nodo removido na 1° Árvore em uma posição aleatório da 2° Árvore (desde que a posição seja um nodo folha)
+                    PesquisarPosicaoArvoreDestino(arv2);
+
+                }
 
             }
 
             //Se o atributo for válido processa SENÃO abandona o processamento
-            if (!atributoArv2.equals("")) {
+            if (!atributoArv2.isEmpty()) {
                 //Buscar um dos atributos selecionados aleatóriamente e Remover Sub-Árvore da 2° Árvore transformando em um nodo folha na respectiva posição 
                 RemoverNodoNaOrigemSetandoNuloERetornandoArvore(arv2, atributoArv2);
 
-                //Incluir o nodo removido na 1° Árvore em uma posição aleatória da 2° Árvore (desde que a posição seja um nodo folha)
-                PesquisarPosicaoArvoreDestino(arv1);
+                //Se o atributo for válido processa SENÃO abandona o processamento
+                if (!atributoArv1.isEmpty()) {
+                    //Incluir o nodo removido na 1° Árvore em uma posição aleatória da 2° Árvore (desde que a posição seja um nodo folha)
+                    PesquisarPosicaoArvoreDestino(arv1);
+
+                }
 
             }
 
@@ -667,11 +675,19 @@ public class Processamento {
                 //Percorrer todas as arestas
                 for (int i = 0; i < arv.getArestas().size(); i++) {
                     //Se o atributo não for nulo
-                    if (!arv.getNomeAtributo().equals("")) {
-                        //Se não contiver o atributo
-                        if (! nomesAtrs.contains(arv.getNomeAtributo())) {
+                    if (arv.getNomeAtributo() != null) {
+                        //Se for vazio Adiciona senão avalia e depois insere sim ou não
+                        if (nomesAtrs.isEmpty()) {
                             //Adicionar o nome do Atributo SE não Contiver
                             nomesAtrs.add(arv.getNomeAtributo());
+
+                        } else {
+                            //Se não contiver o atributo
+                            if (!nomesAtrs.contains(arv.getNomeAtributo())) {
+                                //Adicionar o nome do Atributo SE não Contiver
+                                nomesAtrs.add(arv.getNomeAtributo());
+
+                            }
 
                         }
 
@@ -684,6 +700,9 @@ public class Processamento {
                             }
 
                         }
+
+                    } else {
+                        System.out.println("Atributo é nulo ");
 
                     }
 
