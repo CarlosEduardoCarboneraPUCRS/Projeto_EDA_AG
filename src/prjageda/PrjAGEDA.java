@@ -31,7 +31,7 @@ public class PrjAGEDA {
         //12° - Repete-se o passo 07° Novamente
         //13° - Ordena-se a população em ordem crescente selecionando-se os 2 primeiros e leva-se p/ a próxima geração repete-se o ciclo até atingir o número máximo de gerações
         //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        new DecisionStumps().AlGenArDe(new Processamento(arquivo).LeituraArquivo());
+        new AlGEnArDe().AlGenArDe(new Processamento(arquivo).LeituraArquivo());
 
     }
     

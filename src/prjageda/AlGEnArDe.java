@@ -12,12 +12,12 @@ import java.util.List;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class DecisionStumps {
+public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
     public static final int quantidade = 100;
-    public static final int profundidade = 2;
+    public static final int profundidade = 3;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
 
@@ -26,10 +26,11 @@ public class DecisionStumps {
     private static final int nroFolds = 3;
     private static final String localArquivos = "C:\\Geracao\\";
     private List<Arvores> arvores;
+    public static BufferedWriter escrita;
     private int qtdOcorr = 0;
 
     //Método Inicializador da classe
-    public DecisionStumps() {
+    public AlGEnArDe() {
     }
     //</editor-fold> 
 
@@ -67,7 +68,7 @@ public class DecisionStumps {
             GeracaoPopulacaoInicial(dados, treino, validacao);
 
             //Imprimir as 2 melhores árvores da geração
-            ImprimirArvoresGeracao(geracao);
+            ImprimirArvoresGeracao(geracao, "H");
 
             //Efetuar a geração das novas populações
             while (geracao < geracoes) {
@@ -81,7 +82,7 @@ public class DecisionStumps {
                 CalculoFitnessPopulacao(treino, validacao);
 
                 //Imprimir as 2 melhores árvores da geração
-                ImprimirArvoresGeracao(geracao);
+                ImprimirArvoresGeracao(geracao, "H");
 
             }
 
@@ -113,7 +114,7 @@ public class DecisionStumps {
 
             //Calcular o Fitness das árvores E após Ordenação Crescente
             CalculoFitnessPopulacao(treino, validacao);
-            
+
         } catch (IOException e) {
             System.out.println(e.getMessage());
 
@@ -128,18 +129,15 @@ public class DecisionStumps {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                if (Processamento.mt.nextBoolean()) {
-                    //Adicionar as árvores originais, devido ao java trabalhar APENAS com a referência dos objetos, ai a cada geração deve-se RECARREGAR as mesmas
-                    ArrayList<Arvores> nodos = LeituraNodos();
+                //Adicionar as árvores originais, devido ao java trabalhar APENAS com a referência dos objetos, ai a cada geração deve-se RECARREGAR as mesmas
+                ArrayList<Arvores> nodos = LeituraNodos();
 
-                    // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                    // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                    arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
+                // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
+                // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
 
-                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                    GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
-
-                }
+                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
 
             }
 
@@ -162,10 +160,10 @@ public class DecisionStumps {
         //Se Existir o arquivo
         try (FileWriter regs = new FileWriter(arquivo);
                 //Declaração Variáveis e Objetos
-                BufferedWriter escrita = new BufferedWriter(regs)) {
+                BufferedWriter escr = new BufferedWriter(regs)) {
 
             //Processamento: PARA CADA COLUNA PERCORRE TODAS AS LINHAS
-            //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //Percorrer TODOS os atributos (colunas) existentes e para cada atributo percorre todas as instâncias  por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
             for (int i = 0; i < dados.numAttributes() - 1; i++) {
                 //1° Passo     - Processar todos os Atributos (Binários e Nominais)
@@ -182,10 +180,10 @@ public class DecisionStumps {
                 }
 
                 //Escrever a linha
-                escrita.write(dados.instance(0).attribute(i).name().trim() + ";" + complemento.substring(0, complemento.length() - 1));
+                escr.write(dados.instance(0).attribute(i).name().trim() + ";" + complemento.substring(0, complemento.length() - 1));
 
                 //Gerar a nova linha
-                escrita.newLine();
+                escr.newLine();
 
             }
 
@@ -207,10 +205,12 @@ public class DecisionStumps {
                 //Declaração Variáveis e Objetos
                 FileReader fileReader = new FileReader(localArquivos + "nodos.txt")) {
 
+            //Declaração Variáveis e Objetos
             leitura = new BufferedReader(fileReader);
             nodos = new ArrayList<>();
             String linha;
 
+            //Enquanto processar linhas
             while ((linha = leitura.readLine()) != null) {
                 //Declaração Variáveis e Objetos
                 String[] itens = linha.split(";");
@@ -246,7 +246,7 @@ public class DecisionStumps {
             //Percorrer todas as árvores existentes para atribuição das classes e quantidades dos nodos folhas
             for (Arvores arvore : arvores) {
                 //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
-                //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
+                //2° Passo - Executa-se as instância de treino p/ calcular o fitness da árvore(s)
                 for (int i = 0; i < treino.numInstances(); i++) {
                     //Atualizar(Calcular) a quantidade de ocorrências dos atributos na árvore
                     proc.AtribuicaoClasseNodosFolhas(arvore, treino.instance(i));
@@ -307,8 +307,8 @@ public class DecisionStumps {
 
     }
 
-    //Efetuar a Validação do nodos folhas p/ o Cálculo do Fitness, resumindo PARA cada árvore percorre-se TODAS as instâncias de Validação e efetua-se o calculo das quantidades
-    //das Classes p/ cada nodo folha
+    //Efetuar a Validação do nodos folhas p/ o Cálculo do Fitness, resumindo PARA cada árvore percorre-se TODAS as instâncias de Validação e efetua-se o calculo das 
+    //quantidades das Classes p/ cada nodo folha
     private void ValidacaoNodoFolhasParaCalculoFitness(Instances validacao) throws Exception {
         try {
             //Percorrer todas as árores existentes e Atualiza a quantidade de ocorrências
@@ -346,7 +346,7 @@ public class DecisionStumps {
             //Percorrer todos os atributos da instância selecionada
             for (int k = 0; k < avaliacao.numAttributes() - 1; k++) {
                 //Encontrou o mesmo atributos que o pesquisado
-                if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
+                if (avaliacao.attribute(k).name() == arvore.getNomeAtributo()) {
                     //Se tiver arestas válidas
                     if (arvore.getArestas() != null) {
                         //Se o atributo for Numérico
@@ -361,7 +361,7 @@ public class DecisionStumps {
                             //Se for um nodo folha
                             if (arvore.getArestas(pos).getNodo() == null) {
                                 //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                                if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                                if (arvore.getArestas(pos).getClasseDominante() == avaliacao.classAttribute().value((int) avaliacao.classValue())) {
                                     //Atualizar a quantidade (Somar 1 na quantidade atual)
                                     atuQtdOcorr(1);
 
@@ -379,7 +379,7 @@ public class DecisionStumps {
                                 //Se for um nodo folha
                                 if (aresta.getNodo() == null) {
                                     //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                                    if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                                    if (aresta.getClasseDominante() == avaliacao.classAttribute().value((int) avaliacao.classValue())) {
                                         //Atualizar a quantidade (Somar 1 na quantidade atual)
                                         atuQtdOcorr(1);
 
@@ -405,7 +405,6 @@ public class DecisionStumps {
         }
 
     }
-    //</editor-fold> 
 
     //Eliminar as definições da árvore (Valor Fitness, Quantidade de Ocorrência, Classe Dominante e Classes)
     private void EliminarClassificacaoNodos() {
@@ -425,20 +424,26 @@ public class DecisionStumps {
     //Eliminar a Classificação dos nodos Folhas
     private void LimparDefinicaoClassesNodosFolhas(Arvores arv) {
         try {
-            //Se possuir arestas
-            if (arv.getArestas() != null) {
-                //Percorre todas as arestas até encontrar o atributos selecionado
-                for (int i = 0; i < arv.getArestas().size(); i++) {
-                    //Atualizar os Atributos da Árvore
-                    arv.AtuQtdOcorrencias(0);
-                    arv.setFitness(0);
-                    arv.getArestas(i).setClasses(null);
-                    arv.getArestas(i).setClasseDominante("");
+            if (arv != null) {
+                //Se possuir arestas
+                if (arv.getArestas() != null) {
+                    //Percorre todas as arestas até encontrar o atributos selecionado
+                    for (int i = 0; i < arv.getArestas().size(); i++) {
+                        //Atualizar os Atributos da Árvore
+                        arv.setQtdOcorrencias(0);
+                        arv.setFitness(0);
+                        arv.getArestas(i).setClasses(null);
+                        arv.getArestas(i).setClasseDominante("");
 
-                    //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
-                    if (arv.getArestas(i).getNodo() != null) {
-                        //Chamada Recursiva da Função
-                        LimparDefinicaoClassesNodosFolhas(arv.getArestas(i).getNodo());
+                        //Se a aresta não for nula
+                        if (arv.getArestas(i) != null) {
+                            //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
+                            if (arv.getArestas(i).getNodo() != null) {
+                                //Chamada Recursiva da Função
+                                LimparDefinicaoClassesNodosFolhas(arv.getArestas(i).getNodo());
+
+                            }
+                        }
 
                     }
 
@@ -450,15 +455,93 @@ public class DecisionStumps {
             System.out.println(e.getMessage());
 
         }
-        //</editor-fold> 
 
     }
+    //</editor-fold> 
 
-    private void ImprimirArvoresGeracao(int geracao) {
-        //Impressão do melhor indivíduo da geração
-        System.out.println("Processando Geração.: " + geracao + " - Indivíduo.: " + arvores.get(0).getNomeAtributo() + " - Fitness.: " + arvores.get(0).getFitness());
-        System.out.println("Processando Geração.: " + geracao + " - Indivíduo.: " + arvores.get(1).getNomeAtributo() + " - Fitness.: " + arvores.get(1).getFitness());
+    //<editor-fold defaultstate="collapsed" desc="5° Definição das Funções de Impressão da Árvore">    
+    private void ImprimirArvoresGeracao(int geracao, String tipo) {
+        System.out.println("Geração.: " + geracao + " - Árvore.: " + arvores.get(0).getNomeAtributo() + " - Fitness.: " + arvores.get(0).getFitness());
+        System.out.println("Geração.: " + geracao + " - Árvore.: " + arvores.get(1).getNomeAtributo() + " - Fitness.: " + arvores.get(1).getFitness());
+
+//        //Declaração Variáveis e Objetos
+//        File arquivo = new File(localArquivos + "\\Arvores\\Arvore_" + geracao + ".txt");
+//
+//        //Se Existir o arquivo, deleta o mesmo
+//        if (arquivo.exists()) {
+//            arquivo.delete();
+//
+//        }
+//
+//        //Se Existir o arquivo
+//        try (FileWriter regs = new FileWriter(arquivo)) {
+//            //Declaração Variáveis e Objetos
+//            escrita = new BufferedWriter(regs);
+//
+//            //Finalização da Geração
+//            escrita.write(" Iniciando Impressão Geração.: " + geracao);
+//            escrita.newLine();
+//
+//            escrita.write("------------------------------------------------------------------------------------------------------------------------------------------------------");
+//            escrita.newLine();
+//
+//            //Percorrer todas as árvores
+//            for (Arvores arv : arvores) {
+//
+//                if ("V".equals(tipo)) {
+//                    //Imprimir na horizontal
+//                    //new BTreePrinter().printNode(arv);
+//
+//                } else {
+//
+//                    //Imprimir na horizontal
+//                    ImprimirArvoreHorizontal(arv, 1);
+//
+//                }
+//
+//                escrita.newLine();
+//                escrita.newLine();
+//
+//            }
+//
+//            //Finalização da Geração
+//            escrita.newLine();
+//            escrita.write("------------------------------------------------------------------------------------------------------------------------------------------------------");
+//            escrita.newLine();
+//            escrita.write(" Finalizando Impressão Geração.: " + geracao);
+//            escrita.close();
+//
+//        } catch (Exception e) {
+//            System.out.println("Erro na impressão da árvore.: " + e.getMessage());
+//
+//        }
+    }
+
+    public static void ImprimirArvoreHorizontal(Arvores arv, int level) throws IOException {
+        if (arv == null) {
+            return;
+        }
+
+        ImprimirArvoreHorizontal(arv.getArestas(1).getNodo(), level + 1);
+
+        if (level != 0) {
+            String temp = "";
+            for (int i = 0; i < level - 1; i++) {
+                temp += "|\t";
+
+            }
+            escrita.write(temp + "|-------" + arv.getNomeAtributo());
+            escrita.newLine();
+
+        } else {
+            escrita.write(arv.getNomeAtributo() + " - " + arv.getFitness());
+            escrita.newLine();
+
+        }
+
+        ImprimirArvoreHorizontal(arv.getArestas(0).getNodo(), level + 1);
 
     }
+    //</editor-fold> 
 
 }
