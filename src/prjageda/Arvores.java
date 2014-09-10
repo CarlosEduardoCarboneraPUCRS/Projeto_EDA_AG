@@ -1,18 +1,17 @@
 package prjageda;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
-public class Arvores implements Comparable<Arvores> {
+public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    
     private String nomeAtr;
     private double fitness;
     private int qtdOcorr;
-    private List<Atributos> arestas;
-
+    private ArrayList<Atributos> arestas;
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="2° Métodos Inicializadores da classe e Get´s E Set´s">
     public Arvores() {
         //Inicializações
@@ -32,6 +31,15 @@ public class Arvores implements Comparable<Arvores> {
 
     }
 
+    public Arvores(Arvores ar) {
+        //Clonar o Objeto
+        this.nomeAtr = ar.getNomeAtributo();
+        this.fitness = ar.getFitness();
+        this.qtdOcorr = ar.getQtdOcorrencias();
+        this.arestas = ar.getArestas();
+
+    }
+
     public String getNomeAtributo() {
         return this.nomeAtr;
 
@@ -42,7 +50,7 @@ public class Arvores implements Comparable<Arvores> {
 
     }
 
-    public List<Atributos> getArestas() {
+    public ArrayList<Atributos> getArestas() {
         return this.arestas;
 
     }
@@ -89,16 +97,15 @@ public class Arvores implements Comparable<Arvores> {
     public void AtuQtdOcorrencias(int qtd) {
         this.qtdOcorr += qtd;
     }
-    
     //</editor-fold>   
-    
-    //<editor-fold defaultstate="collapsed" desc="3° Métodos de Ordenação dos registros">
+
+    //<editor-fold defaultstate="collapsed" desc="3° Métodos de Ordenação dos registros e Copia Profunda">
     @Override
     public int compareTo(Arvores obj) {
         //Efetuar a ordenação dos registros crescente, por exemplo.: 0.1, 0.2, 0.3...1.0
         return (this.getFitness() < obj.getFitness()) ? -1 : (this.getFitness() > obj.getFitness()) ? 1 : 0;
 
     }
-
+    
     //</editor-fold>    
 }

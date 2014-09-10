@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -25,7 +24,7 @@ public class AlGEnArDe {
     private static final int geracoes = 100;
     private static final int nroFolds = 3;
     private static final String localArquivos = "C:\\Geracao\\";
-    private List<Arvores> arvores;
+    private ArrayList<Arvores> arvores;
     public static BufferedWriter escrita;
     private int qtdOcorr = 0;
 
@@ -74,7 +73,7 @@ public class AlGEnArDe {
             while (geracao < geracoes) {
                 //Atualizar a Geração
                 geracao++;
-
+               
                 //Inicialização e Atribuição das árvores
                 arvores = new Processamento().NovaGeracaoArvores(dados, arvores, true);
 
@@ -346,7 +345,7 @@ public class AlGEnArDe {
             //Percorrer todos os atributos da instância selecionada
             for (int k = 0; k < avaliacao.numAttributes() - 1; k++) {
                 //Encontrou o mesmo atributos que o pesquisado
-                if (avaliacao.attribute(k).name() == arvore.getNomeAtributo()) {
+                if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
                     //Se tiver arestas válidas
                     if (arvore.getArestas() != null) {
                         //Se o atributo for Numérico
@@ -361,7 +360,7 @@ public class AlGEnArDe {
                             //Se for um nodo folha
                             if (arvore.getArestas(pos).getNodo() == null) {
                                 //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                                if (arvore.getArestas(pos).getClasseDominante() == avaliacao.classAttribute().value((int) avaliacao.classValue())) {
+                                if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
                                     //Atualizar a quantidade (Somar 1 na quantidade atual)
                                     atuQtdOcorr(1);
 
@@ -379,7 +378,7 @@ public class AlGEnArDe {
                                 //Se for um nodo folha
                                 if (aresta.getNodo() == null) {
                                     //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                                    if (aresta.getClasseDominante() == avaliacao.classAttribute().value((int) avaliacao.classValue())) {
+                                    if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
                                         //Atualizar a quantidade (Somar 1 na quantidade atual)
                                         atuQtdOcorr(1);
 
@@ -542,6 +541,6 @@ public class AlGEnArDe {
         ImprimirArvoreHorizontal(arv.getArestas(0).getNodo(), level + 1);
 
     }
-    //</editor-fold> 
+    //</editor-fold>     
 
 }

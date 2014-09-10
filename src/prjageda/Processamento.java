@@ -101,16 +101,22 @@ public class Processamento {
     }
 
     //Efetuar o processamento Recursivo da Árvore, lendo cada instância da base de dados e percorrer toda a árvore
-    public List<Arvores> NovaGeracaoArvores(Instances dados, List<Arvores> arvores, boolean elitismo) throws IOException {
+    public ArrayList<Arvores> NovaGeracaoArvores(Instances dados, ArrayList<Arvores> popArvores, boolean elitismo) throws IOException, Exception {
         //Declaração Variáveis e Objetos
-        List<Arvores> populacao = new ArrayList<>();
-        List<Arvores> filhos;
+        ArrayList<Arvores> populacao = new ArrayList<>();
+        ArrayList<Arvores> filhos;
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+        //Efetuar o DeepCopy das Árvores(JÁ QUE TUDO NO JAVA É POR REFERÊNCIA)                                                                                                    //  
+        //                                                                                                                                                                        //
+        List<Arvores> listagem = ObjectUtil.deepCopyList(popArvores);                                                                                                             //  
+        //                                                                                                                                                                        //
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
         //Se tiver elitismo, adicionar (mantém) a melhor árvore da geração atual(ordenada) para a próxima geração
         if (elitismo) {
-            //Adicionar as árvores obtidas por Elitismo
-            populacao.add(arvores.get(0));
-            populacao.add(arvores.get(1));
+            //Adicionar as árvores obtidas por Elitismo (Clonar os Objetos - Cópias Profundas)
+            populacao.add((Arvores) listagem.get(0));
+            populacao.add((Arvores) listagem.get(1));
 
         }
 
@@ -120,8 +126,8 @@ public class Processamento {
             filhos = new ArrayList<>();
 
             //Adicionar os pais
-            filhos.add(SelecaoPorTorneio(arvores));
-            filhos.add(SelecaoPorTorneio(arvores));
+            filhos.add((Arvores) SelecaoPorTorneio(listagem));
+            filhos.add((Arvores) SelecaoPorTorneio(listagem));
 
             //SE Valor Gerado <= TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
             if (mt.nextDouble() <= AlGEnArDe.TxCrossover) {
@@ -145,7 +151,7 @@ public class Processamento {
                 String atributo = BuscarAtributosArvore(populacao.get(i));
 
                 //Caso a árvore possuir mais do que o nodo raiz, retornará um atributo, caso contrário nem processa
-                if (atributo != "") {
+                if (!atributo.isEmpty()) {
                     //Efetuar a Mutação da Árvore - "E"xpansão ou "R"etração de Nodos
                     MutacaoArvores(populacao.get(i), mt.nextBoolean() ? "E" : "R", dados, atributo);
 
@@ -161,23 +167,16 @@ public class Processamento {
     }
 
     //Efetuar a seleção por Torneio das Árvores - Seleciona-se as Árvores Aleatóriamente Ordenando-os Crescente
-    private Arvores SelecaoPorTorneio(List<Arvores> arvores) {
+    private Arvores SelecaoPorTorneio(List<Arvores> arvores) throws Exception {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
 
-        //Enquanto não atingir o Tamanho Máximo
-        while (selecao.size() < qtdSelTorneio) {
-            //Selecionar 2 árvores aleatóriamente
-            selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
+        //Selecionar 2 árvores aleatóriamente
+        selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
+        selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
 
-        }
-
-        //Ordenar a População
-        Collections.sort(selecao);
-
-        //Retornar o melhor Individuo
-        return selecao.get(0);
-
+        //Retornar a melhor arvore (Clonar o Objeto - Cópia Profunda)
+        return ((Arvores) (selecao.get(0).getFitness() < selecao.get(1).getFitness() ? selecao.get(0) : selecao.get(1)));
     }
 
     //Efetuar o crossover da população de árvores, aonde ocorre a Troca Genética de Material entre as árvores CRIANDO novas árvores
@@ -242,7 +241,7 @@ public class Processamento {
     private void MutacaoArvores(Arvores arvore, String tipo, Instances dados, String atributo) throws IOException {
         //SE for "E" - EXPANSÃO - Vai até um nodo FOLHA ALEATÓRIO E ADICIONA um AlGEnArDe Aleatóriamente
         //SENÃO  "R" - REDUÇÃO  - Vai até o nodo passado como parâmetro e transforma-se todos as sub-árvores abaixo em folhas
-        if (tipo == "E") {
+        if (tipo.equals("E")) {
             //Se possuir arestas válidas
             if (arvore.getArestas() != null) {
                 //Declaração Variáveis e Objetos - Selecionar uma posição aleatória
@@ -287,7 +286,7 @@ public class Processamento {
                     //Se o nodo não for nulo
                     if (arvore.getArestas(i).getNodo() != null) {
                         //Se for o Atributo Selecionado Atribuo nulo senão retorno pra pesquisa
-                        if (arvore.getArestas(i).getNodo().getNomeAtributo() == atributo) {
+                        if (arvore.getArestas(i).getNodo().getNomeAtributo().equals(atributo)) {
                             //Transformar o Nodo c/ arestas em Nodo Folha (Mutação de "REDUÇÃO") E Sair do processamento
                             arvore.getArestas(i).setNodo(null);
                             break;
@@ -307,6 +306,7 @@ public class Processamento {
         }
 
     }
+    //</editor-fold>        
 
     //<editor-fold defaultstate="collapsed" desc="Funções Destinadas ao Crossover">
     //Remover uma Sub-Árvore da Árvore atual e setar nulo a mesma
@@ -325,7 +325,7 @@ public class Processamento {
                                 //Se o nome do atributoi não for nulo
                                 if (arvore.getArestas(i).getNodo().getNomeAtributo() != null) {
                                     //Se for o nodo da aresta selecionado aleatóriamente
-                                    if (arvore.getArestas(i).getNodo().getNomeAtributo() == atributo) {
+                                    if (arvore.getArestas(i).getNodo().getNomeAtributo().equals(atributo)) {
                                         //Criar o novo objeto e atribuir o mesmo
                                         arvTemporaria = new Arvores();
                                         arvTemporaria = arvore.getArestas(i).getNodo();
@@ -406,7 +406,7 @@ public class Processamento {
             //Percorrer todos os atributos da instância selecionada (Exceto o atributo Classe)
             for (int k = 0; k < avaliacao.numAttributes(); k++) {
                 //Se o nome do Atributo Classe for igual ao nome do atributo da instância (Raiz ou nodo folha)
-                if (avaliacao.attribute(k).name() == arvore.getNomeAtributo()) {
+                if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
                     //Se o atributo for Numérico (BIFURCAÇÃO)
                     if (avaliacao.attribute(k).isNumeric()) {
                         //Se a aresta não for nula
@@ -444,7 +444,7 @@ public class Processamento {
                                     for (Classes classe : classes) {
                                         //Se o valor da aresta FOR IGUAL AO VALOR DO ATRIBUTO DA INSTÂNCIA                                            
                                         //Se o "VALOR" da classe DA INSTÂNCIA SELECIONADA FOR IGUAL a da classe informada atualiza a quantidade
-                                        if (avaliacao.classAttribute().value((int) avaliacao.classValue()) == classe.getNome()) {
+                                        if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(classe.getNome())) {
                                             //Atualizar a quantidade (Adicionando 1) de registros X Atributo - Para Definir a Classe dominante
                                             classe.atualizarQtd(1);
                                             bOk = true;
@@ -484,9 +484,9 @@ public class Processamento {
                                     //Percorrer todos os valores existentes da instância selecionada
                                     for (int l = 0; l < avaliacao.numValues(); l++) {
                                         //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-                                        if (arvore.getArestas(i).getAtributo() == avaliacao.attribute(k).value(l)) {
+                                        if (arvore.getArestas(i).getAtributo().equals(avaliacao.attribute(k).value(l))) {
                                             //Se o nome da classe dominante for igual a classe avaliada
-                                            if (classe.getNome() == avaliacao.classAttribute().value((int) avaliacao.classValue())) {
+                                            if (classe.getNome().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
                                                 //Atualizar a quantidade de registros X Atributo - Para Definir a Classe dominante
                                                 classe.atualizarQtd(1);
 
@@ -538,7 +538,7 @@ public class Processamento {
                         //Percorre todas as Classes
                         for (Classes classe : classes) {
                             //Se for a 1° Ocorrência
-                            if (NmClasseMaj == "") {
+                            if (NmClasseMaj.isEmpty()) {
                                 //Atribuições do nome da classe e da quantidade
                                 NmClasseMaj = classe.getNome();
                                 qtdClasse = classe.getQuantidade();
@@ -575,49 +575,54 @@ public class Processamento {
     //Por Exemplo Indice Gini = 1 - (Somatório Quant. Atrib. "A" / Total de Instâncias) ^ 2 - (Somatório Quant. Atrib. "N" / Total de Instâncias) ^ 2.
     private double calcularIndiceGini(Instances dados, int pos) {
         //Declaração Variáveis e objetos
-        double indiceGini = 1d, menorValor = 0d, maiorValor = 0d;
+        List<IndiceGini> valores = new ArrayList<>();
+        List<Double> indiceGini = new ArrayList<>();
+
+        /**
+         ** Creating Filter Logic
+         *
+         */
+        Filter<IndiceGini, Double> filter = new Filter<IndiceGini, Double>() {
+            @Override
+            public boolean isMatched(IndiceGini object, Double valor) {
+                return object.getValor() == valor;
+
+            }
+        };
 
         //Pegar distintamente os valores p/ calcular a média de todas as instâncias do atributo informado        
         //Adicionar os valores das instâncias na posição informada
         for (int i = 0; i < dados.numInstances(); i++) {
-            //Se for menor que o menor valor
-            if (dados.instance(i).value(pos) < menorValor) {
-                menorValor = dados.instance(i).value(pos);
-            }
+            //Se não contiver o valor Insere SENÃO Atualiza a quantidade
+            if (valores.isEmpty()) {
+                //Incluir o Valor
+                valores.add(new IndiceGini(dados.instance(i).value(pos), 1));
 
-            //Se for maior que o maior valor
-            if (dados.instance(i).value(pos) > maiorValor) {
-                maiorValor = dados.instance(i).value(pos);
-            }
+            } else {
+                List<IndiceGini> filtrados = new FilterList().filterList(valores, filter, dados.instance(i).value(pos));
 
-        }
+                if (filtrados.isEmpty()) //Adicionar 1 na quantidade de incidências e sair fora do loop
+                {
+                    filtrados.get(0).adicionar(1);
 
-        //Se for a primeira posição ou a última (poderá ser negativa)
-        double media = Arredondar((menorValor + maiorValor) / 2, AlGEnArDe.qtdDecimais, 1);
-
-        //Se a média for válida(maior que 0)
-        if (media > 0) {
-            //Como a árvore será bifurcada percorrer 2X a lista
-            for (int i = 0; i < 2; i++) {
-                //Declaração Variáveis e objetos
-                int qtdOcor = 0;
-
-                //Percorer todas as instâncias
-                for (int j = 0; j < dados.numInstances(); j++) {
-                    //Se for MENOR OU IGUAL a média ou MAIOR que a média
-                    qtdOcor += (i == 0) ? (dados.instance(j).value(pos) <= media ? 1 : 0) : (dados.instance(j).value(pos) > media ? 1 : 0);
+                } else {
+                    //Incluir o Valor
+                    filtrados.add(new IndiceGini(dados.instance(i).value(pos), 1));
 
                 }
 
-                //Subtração da Potenciação ao Quadrado da Média Calculada
-                indiceGini -= Math.pow(((double) qtdOcor / dados.numInstances()), 2);
-
             }
 
         }
 
+        //Ordenar Crescente
+        Collections.sort(valores);
+       
+        //Ordenar Crescente
+        Collections.sort(indiceGini);
+
         //Definir o Retorno (se o Índice Gini for "exatamente" 1 deverá ser 
-        return Arredondar(indiceGini == 1 ? 0 : indiceGini, AlGEnArDe.qtdDecimais, 1);
+        return Arredondar(indiceGini.get(0) == 1 ? 0 : indiceGini.get(0), AlGEnArDe.qtdDecimais, 1);
 
     }
 
