@@ -1,10 +1,5 @@
 package prjageda;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,15 +14,16 @@ public class AlGEnArDe {
     public static final int profundidade = 3;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
+    public static ArrayList<Arvores> nodos = null;
 
     //Variáveis Privadas Estáticas
     private static final int geracoes = 100;
     private static final int nroFolds = 3;
-    private static final String localArquivos = "C:\\Geracao\\";
     private ArrayList<Arvores> arvores;
-    public static BufferedWriter escrita;
     private int qtdOcorr = 0;
 
+    //private static final String localArquivos = "C:\\Geracao\\";
+    //public static BufferedWriter escrita;
     //Método Inicializador da classe
     public AlGEnArDe() {
     }
@@ -57,11 +53,25 @@ public class AlGEnArDe {
     //Tradução da Sigla - AlGenArDe - "Al"goritmo "Gen"ético de "Ar"vore de "De"cisão
     public void AlGenArDe(Instances dados) {
         try {
-            //Declaração Variáveis e Objetos
-            Instances treino = FormatacaoFonteDados(dados, "T");
-            Instances validacao = FormatacaoFonteDados(dados, "V");
+            //Estratificar os dados e divisão em 3 folds - "Treino, Validação e Teste"
+            dados.stratify(nroFolds);
+
+            //Definição da instância de "Treino"
+            Instances treino = dados.testCV(nroFolds, 0);
+            Instances tempInst = dados.trainCV(nroFolds, 0);
+
+            //Estratificar os dados e divisão em 2 folds
+            tempInst.stratify(nroFolds - 1);
+
+            //Definição das instâncias de "Validação" e "Teste""
+            Instances validacao = tempInst.testCV(nroFolds, 0);
+            Instances teste = tempInst.trainCV(nroFolds, 0);
+
             arvores = new ArrayList<>();
             int geracao = 1;
+
+            //Efetuar o processamento das Sub-Arvores e suas Aretas
+            ProcessamentoNodos(dados);
 
             //Efetuar a Geração da População Inicial
             GeracaoPopulacaoInicial(dados, treino, validacao);
@@ -73,7 +83,7 @@ public class AlGEnArDe {
             while (geracao < geracoes) {
                 //Atualizar a Geração
                 geracao++;
-               
+
                 //Inicialização e Atribuição das árvores
                 arvores = new Processamento().NovaGeracaoArvores(dados, arvores, true);
 
@@ -95,13 +105,16 @@ public class AlGEnArDe {
     //Efetuar a Geração da População Inicial
     private void GeracaoPopulacaoInicial(Instances dados, Instances treino, Instances validacao) throws Exception {
         try {
-            //Efetuar o processamento das arestas dos Decisions Strumps (gravar em arquivo texto) p/ leitura posterior
-            ProcessamentoNodos(dados);
+            //Declaração Variáveis e Objetos
+            ArrayList<Arvores> arvTemp;
 
             //Percorrer a quantidade de árvores informado
             for (int i = 0; i < quantidade; i++) {
+                //Inicialização Objetos
+                arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
+
                 //Selecionar o nodo raiz (sorteado aleatóriamente)
-                Arvores arv = LeituraNodos().get(Processamento.mt.nextInt(dados.numAttributes() - 1));
+                Arvores arv = arvTemp.get(Processamento.mt.nextInt(dados.numAttributes() - 1));
 
                 //Geração da árvore ATÉ a profundidade estabelecida
                 GerarPopulacaoArvores(dados, 1, arv);
@@ -127,13 +140,12 @@ public class AlGEnArDe {
         if (prof <= profundidade) {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
-                //Processar Sim ou Não { Inserir Sub-Árvore } - c/ 50% de Probabilidade 
-                //Adicionar as árvores originais, devido ao java trabalhar APENAS com a referência dos objetos, ai a cada geração deve-se RECARREGAR as mesmas
-                ArrayList<Arvores> nodos = LeituraNodos();
+                //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
+                ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
 
                 // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
                 // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                arvore.SetNodo(arvore.getArestas(i), nodos.get(Processamento.mt.nextInt(nodos.size())));
+                arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
 
                 //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
                 GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
@@ -146,91 +158,19 @@ public class AlGEnArDe {
 
     //Processamento dos nodos - Definição das árvores e seus nodos (Numéricos - Bifurcadas / Nominais - Quantidade de arestas definida pela quantidade de classes)
     public void ProcessamentoNodos(Instances dados) {
-        //Declaração Variáveis e Objetos
-        File arquivo = new File(localArquivos + "nodos.txt");
+        //Inicialização do Objeto
+        nodos = new ArrayList<>();
 
-        //Se Existir o arquivo
-        if (arquivo.exists()) {
-            //Deleta o mesmo
-            arquivo.delete();
-
-        }
-
-        //Se Existir o arquivo
-        try (FileWriter regs = new FileWriter(arquivo);
-                //Declaração Variáveis e Objetos
-                BufferedWriter escr = new BufferedWriter(regs)) {
-
-            //Processamento: PARA CADA COLUNA PERCORRE TODAS AS LINHAS
-            //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            //Percorrer TODOS os atributos (colunas) existentes e para cada atributo percorre todas as instâncias  por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
-            for (int i = 0; i < dados.numAttributes() - 1; i++) {
-                //1° Passo     - Processar todos os Atributos (Binários e Nominais)
-                //2° Parâmetro - Nome do atributo
-                //3° Parâmetro - Instâncias e a posição do Atributo
-                ArrayList<Atributos> atribs = new Processamento().ProcessamentoInstancias(dados, i);
-                String complemento = "";
-
-                //Percorrer os Atributos
-                for (Atributos atr : atribs) {
-                    //Concatenar
-                    complemento += atr.getAtributo() + ";";
-
-                }
-
-                //Escrever a linha
-                escr.write(dados.instance(0).attribute(i).name().trim() + ";" + complemento.substring(0, complemento.length() - 1));
-
-                //Gerar a nova linha
-                escr.newLine();
-
-            }
-
-        } catch (Exception e) {
-            System.out.println("Erro na impressão da árvore.: " + e.getMessage());
+        //Processamento: PARA CADA COLUNA PERCORRE TODAS AS LINHAS
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //Percorrer TODOS os atributos (colunas) existentes e para cada atributo percorre todas as instâncias  por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
+        for (int i = 0; i < dados.numAttributes(); i++) {
+            //1° Passo     - Processar todos os Atributos (Binários e Nominais)
+            //2° Parâmetro - Nome do atributo
+            //3° Parâmetro - Instâncias e a posição do Atributo
+            nodos.add(new Arvores(dados.instance(0).attribute(i).name(), new Processamento().ProcessamentoInstancias(dados, i)));
 
         }
-
-    }
-
-    //Leitura dos nodos já processados - Definição das árvores e seus nodos (Numéricos - Bifurcadas / Nominais - Quantidade de arestas definida pela quantidade de classes)
-    public ArrayList<Arvores> LeituraNodos() throws IOException {
-        //Declaração Variáveis e Objetos
-        BufferedReader leitura;
-        ArrayList<Arvores> nodos;
-        ArrayList<Atributos> atributos;
-
-        try (
-                //Declaração Variáveis e Objetos
-                FileReader fileReader = new FileReader(localArquivos + "nodos.txt")) {
-
-            //Declaração Variáveis e Objetos
-            leitura = new BufferedReader(fileReader);
-            nodos = new ArrayList<>();
-            String linha;
-
-            //Enquanto processar linhas
-            while ((linha = leitura.readLine()) != null) {
-                //Declaração Variáveis e Objetos
-                String[] itens = linha.split(";");
-                atributos = new ArrayList<>();
-
-                //Adicionar os Atributos
-                atributos.add(new Atributos(itens[1], null, "", null));
-                atributos.add(new Atributos(itens[2], null, "", null));
-
-                //Adicionar o nodo
-                nodos.add(new Arvores(itens[0], atributos));
-
-            }
-
-        }
-
-        //Fechar o arquivo
-        leitura.close();
-
-        //Definir o retorno
-        return nodos;
 
     }
     //</editor-fold> 
@@ -293,16 +233,6 @@ public class AlGEnArDe {
             System.out.println(e.getMessage());
 
         }
-
-    }
-
-    //Efetuar a Estratificação dos Dados
-    private Instances FormatacaoFonteDados(Instances dados, String tipo) throws Exception {
-        //Estratificar os dados e divisão em 3 folds
-        dados.stratify(nroFolds);
-
-        //Definir o retorno
-        return (tipo.equals("T")) ? dados.testCV(nroFolds, 0) : (tipo.equals("V")) ? dados.trainCV(nroFolds, 1) : dados.trainCV(nroFolds, 2);
 
     }
 
@@ -516,31 +446,30 @@ public class AlGEnArDe {
 //        }
     }
 
-    public static void ImprimirArvoreHorizontal(Arvores arv, int level) throws IOException {
-        if (arv == null) {
-            return;
-        }
-
-        ImprimirArvoreHorizontal(arv.getArestas(1).getNodo(), level + 1);
-
-        if (level != 0) {
-            String temp = "";
-            for (int i = 0; i < level - 1; i++) {
-                temp += "|\t";
-
-            }
-            escrita.write(temp + "|-------" + arv.getNomeAtributo());
-            escrita.newLine();
-
-        } else {
-            escrita.write(arv.getNomeAtributo() + " - " + arv.getFitness());
-            escrita.newLine();
-
-        }
-
-        ImprimirArvoreHorizontal(arv.getArestas(0).getNodo(), level + 1);
-
-    }
+//    public static void ImprimirArvoreHorizontal(Arvores arv, int level) throws IOException {
+//        if (arv == null) {
+//            return;
+//        }
+//
+//        ImprimirArvoreHorizontal(arv.getArestas(1).getNodo(), level + 1);
+//
+//        if (level != 0) {
+//            String temp = "";
+//            for (int i = 0; i < level - 1; i++) {
+//                temp += "|\t";
+//
+//            }
+//            escrita.write(temp + "|-------" + arv.getNomeAtributo());
+//            escrita.newLine();
+//
+//        } else {
+//            escrita.write(arv.getNomeAtributo() + " - " + arv.getFitness());
+//            escrita.newLine();
+//
+//        }
+//
+//        ImprimirArvoreHorizontal(arv.getArestas(0).getNodo(), level + 1);
+//
+//    }
     //</editor-fold>     
-
 }

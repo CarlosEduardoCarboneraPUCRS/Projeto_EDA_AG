@@ -1,22 +1,24 @@
 package prjageda;
 
+import java.util.ArrayList;
+
 public class IndiceGini implements Comparable<IndiceGini> {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     private double valor;
-    private int quantidade;
+    private ArrayList<Classes> clsAtribruto;
 
     public IndiceGini() {
         //setar o atributo
         this.valor = 0d;
-        this.quantidade = 0;
+        this.clsAtribruto = null;
 
     }
 
-    public IndiceGini(double vlr, int qtd) {
+    public IndiceGini(double vlr, ArrayList<Classes> cls) {
         //setar o atributo
         this.valor = vlr;
-        this.quantidade = qtd;
+        this.clsAtribruto = cls;
 
     }
     //</editor-fold>        
@@ -30,24 +32,23 @@ public class IndiceGini implements Comparable<IndiceGini> {
         this.valor = valor;
     }
 
-    public int getQuantidade() {
-        return quantidade;
+    public ArrayList<Classes> getClsAtribruto() {
+        return clsAtribruto;
+        
     }
 
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
-    }
-
-    public void adicionar(int quant) {
-        this.quantidade += quant;
-
+    public void setClsAtribruto(ArrayList<Classes> clsAtribruto) {
+        this.clsAtribruto = clsAtribruto;
+        
     }
     //</editor-fold>
     
+    //<editor-fold defaultstate="collapsed" desc="3° Definição Métodos de Ordenação">
     @Override
     public int compareTo(IndiceGini o) {
         return (this.valor == ((IndiceGini) o).getValor()) ? 0 : (this.valor > (((IndiceGini) o).getValor())) ? 1 : -1;
         
     }
+    //</editor-fold>
 
 }

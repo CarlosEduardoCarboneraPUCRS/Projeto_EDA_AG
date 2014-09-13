@@ -20,7 +20,6 @@ public class Processamento {
 
     //Configuração para mutação da árvore
     private static final double percMutacao = 0.05; //5% de Possibilidade de Mutação
-    private static final int qtdSelTorneio = 10;
 
     public String getCaminhoDados() {
         return caminhoDados;
@@ -105,16 +104,13 @@ public class Processamento {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> populacao = new ArrayList<>();
         ArrayList<Arvores> filhos;
-        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
         //Efetuar o DeepCopy das Árvores(JÁ QUE TUDO NO JAVA É POR REFERÊNCIA)                                                                                                    //  
-        //                                                                                                                                                                        //
         List<Arvores> listagem = ObjectUtil.deepCopyList(popArvores);                                                                                                             //  
-        //                                                                                                                                                                        //
-        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
         //Se tiver elitismo, adicionar (mantém) a melhor árvore da geração atual(ordenada) para a próxima geração
         if (elitismo) {
-            //Adicionar as árvores obtidas por Elitismo (Clonar os Objetos - Cópias Profundas)
+            //Adicionar as árvores obtidas por Elitismo
             populacao.add((Arvores) listagem.get(0));
             populacao.add((Arvores) listagem.get(1));
 
@@ -171,9 +167,9 @@ public class Processamento {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
 
-        //Selecionar 2 árvores aleatóriamente
-        selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
-        selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
+        //COPIAR 2 árvores Selecionadas Aleatóriamente
+        selecao.add(ObjectUtil.deepCopy(arvores.get(mt.nextInt(arvores.size() - 1))));
+        selecao.add(ObjectUtil.deepCopy(arvores.get(mt.nextInt(arvores.size() - 1))));
 
         //Retornar a melhor arvore (Clonar o Objeto - Cópia Profunda)
         return ((Arvores) (selecao.get(0).getFitness() < selecao.get(1).getFitness() ? selecao.get(0) : selecao.get(1)));
@@ -249,13 +245,13 @@ public class Processamento {
 
                 //Se a aresta selecionada não for nula
                 if (arvore.getArestas(posicao) != null) {
+                    //Declaração Variáveis e Objetos
+                    ArrayList<Arvores> temp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(AlGEnArDe.nodos);
+
                     //Se a aresta selecionada não for nula
                     if (arvore.getArestas(posicao).getNodo() != null) {
                         //Se atingiu o MAIOR NÍVEL de profundidade da árvore (O último nodo da aresta DEVERÁ SER nulo) - Avaliando a aresta SELECIONADA aleatóriamente
                         if (arvore.getArestas(posicao).getNodo().getArestas(posicao).getNodo() == null) {
-                            //Declaração Variáveis e Objetos
-                            ArrayList<Arvores> temp = new AlGEnArDe().LeituraNodos();
-
                             //Selecionar aleatóriamente uma árvore p/ ser incluida no nodo raiz e Adicionar o nodo na aresta selecionada
                             arvore.getArestas(posicao).getNodo().getArestas(posicao).setNodo(temp.get(Processamento.mt.nextInt(temp.size() - 1)));
 
@@ -266,9 +262,6 @@ public class Processamento {
                         }
 
                     } else {
-                        //Declaração Variáveis e Objetos
-                        ArrayList<Arvores> temp = new AlGEnArDe().LeituraNodos();
-
                         //Se o nodo for nulo, seleciona uma Decision Stump aleatóriamente p/ ser incluida no nodo folha
                         arvore.getArestas(posicao).setNodo(temp.get(Processamento.mt.nextInt(temp.size() - 1)));
 
@@ -405,7 +398,7 @@ public class Processamento {
         if (arvore != null) {
             //Percorrer todos os atributos da instância selecionada (Exceto o atributo Classe)
             for (int k = 0; k < avaliacao.numAttributes(); k++) {
-                //Se o nome do Atributo Classe for igual ao nome do atributo da instância (Raiz ou nodo folha)
+                //Se o nome do Atributo Classe for igual ao nome do atributo da instância (Raiz ou nodo folha) - DEVIDO A NÃO TER ACESSO PELO NOME DO ATRIBUTO
                 if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
                     //Se o atributo for Numérico (BIFURCAÇÃO)
                     if (avaliacao.attribute(k).isNumeric()) {
@@ -414,7 +407,7 @@ public class Processamento {
                             //Declaração Variáveis e Objetos
                             double valorAresta = Double.valueOf(arvore.getArestas(0).getAtributo().split(" ")[1]);
 
-                            //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
+                            //Se o valor da posição FOR MENOR OU IGUAL ao valor do atributo selecionado (Então posição igual a 0 SENAO 1)
                             int posicao = Arredondar(avaliacao.value(k), AlGEnArDe.qtdDecimais, 1) <= Arredondar(valorAresta, AlGEnArDe.qtdDecimais, 1) ? 0 : 1;
 
                             //Se não for um nodo RAIZ, efetua a chamada recursiva da função até chegar em um nodo raiz
@@ -437,7 +430,7 @@ public class Processamento {
                                 } else //Já Existem Registros na Classe, irá atualizar o mesmo
                                 {
                                     //Declaração Variáveis e Objetos
-                                    boolean bOk = false;
+                                    boolean processar = false;
                                     classes = arvore.getArestas(posicao).getClasses();
 
                                     //Percorre TODAS as classes do Nodo
@@ -447,14 +440,14 @@ public class Processamento {
                                         if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(classe.getNome())) {
                                             //Atualizar a quantidade (Adicionando 1) de registros X Atributo - Para Definir a Classe dominante
                                             classe.atualizarQtd(1);
-                                            bOk = true;
+                                            processar = true;
 
                                         }
 
                                     }
 
-                                    //Se não existe o atributo inclui o mesmo
-                                    if (!bOk) {
+                                    //Se não existe a CLASSE avaliada insere a mesma
+                                    if (!processar) {
                                         //Se não for nulo (ser o último)
                                         if (avaliacao.classAttribute() != null) {
                                             //Adicionar a Nova classe e atualizar a quantidade
@@ -463,6 +456,7 @@ public class Processamento {
                                         }
 
                                     }
+
                                     //Atribuir as classes e sair fora da execução para a aresta selecionada
                                     arvore.getArestas(posicao).setClasses(classes);
 
@@ -502,6 +496,7 @@ public class Processamento {
                         }
 
                     }
+
                     //Sair fora do for
                     break;
 
@@ -532,23 +527,23 @@ public class Processamento {
                     //Se não for nulo
                     if (classes != null) {
                         //Declaração Variáveis e Objetos
-                        String NmClasseMaj = "";
-                        double qtdClasse = 0;
+                        String clsDominante = "";
+                        double qtdOcorrCls = 0;
 
                         //Percorre todas as Classes
                         for (Classes classe : classes) {
                             //Se for a 1° Ocorrência
-                            if (NmClasseMaj.isEmpty()) {
+                            if (clsDominante.isEmpty()) {
                                 //Atribuições do nome da classe e da quantidade
-                                NmClasseMaj = classe.getNome();
-                                qtdClasse = classe.getQuantidade();
+                                clsDominante = classe.getNome();
+                                qtdOcorrCls = classe.getQuantidade();
 
                             } else {
                                 //Se a quantidade for MAIOR que a ATUAL ALTERA a classe SENÃO mantém a mesma
-                                if (classe.getQuantidade() > qtdClasse) {
+                                if (classe.getQuantidade() > qtdOcorrCls) {
                                     //Atribuições do nome da classe e da quantidade
-                                    NmClasseMaj = classe.getNome();
-                                    qtdClasse = classe.getQuantidade();
+                                    clsDominante = classe.getNome();
+                                    qtdOcorrCls = classe.getQuantidade();
 
                                 }
 
@@ -557,7 +552,7 @@ public class Processamento {
                         }
 
                         //Setar a classe Majoritária
-                        arvore.getArestas(i).setClasseDominante(NmClasseMaj);
+                        arvore.getArestas(i).setClasseDominante(clsDominante);
 
                     }
 
@@ -577,12 +572,11 @@ public class Processamento {
         //Declaração Variáveis e objetos
         List<IndiceGini> valores = new ArrayList<>();
         List<Double> indiceGini = new ArrayList<>();
+        List<IndiceGini> filtrados;
+        ArrayList<Classes> regs;
 
-        /**
-         ** Creating Filter Logic
-         *
-         */
-        Filter<IndiceGini, Double> filter = new Filter<IndiceGini, Double>() {
+        //Criar o filtro lógico
+        Filter<IndiceGini, Double> filtro = new Filter<IndiceGini, Double>() {
             @Override
             public boolean isMatched(IndiceGini object, Double valor) {
                 return object.getValor() == valor;
@@ -590,24 +584,51 @@ public class Processamento {
             }
         };
 
-        //Pegar distintamente os valores p/ calcular a média de todas as instâncias do atributo informado        
-        //Adicionar os valores das instâncias na posição informada
+        //Pegar distintamente os valores p/ calcular a média de todas as instâncias do atributo informado, adicionar os valores das instâncias na posição informada
         for (int i = 0; i < dados.numInstances(); i++) {
-            //Se não contiver o valor Insere SENÃO Atualiza a quantidade
-            if (valores.isEmpty()) {
+            //Filtragem das ocorrências pelo Atributo "Valor"
+            filtrados = new FilterList().filterList(valores, filtro, dados.instance(i).value(pos));
+            String clsAtributo = dados.instance(i).classAttribute().value((int) dados.instance(i).classValue());
+            
+            //Se não encontrou registros, inclui o mesmo
+            if (filtrados.isEmpty()) {
+                //Criação do Objeto
+                regs = new ArrayList<>();
+
+                //Adicionar as propriedades
+                regs.add(new Classes(clsAtributo, 1));
+
                 //Incluir o Valor
-                valores.add(new IndiceGini(dados.instance(i).value(pos), 1));
+                valores.add(new IndiceGini(dados.instance(i).value(pos), regs));
 
             } else {
-                List<IndiceGini> filtrados = new FilterList().filterList(valores, filter, dados.instance(i).value(pos));
+                //Declaração Variáveis e Objetos
+                boolean bOk = false;
 
-                if (filtrados.isEmpty()) //Adicionar 1 na quantidade de incidências e sair fora do loop
-                {
-                    filtrados.get(0).adicionar(1);
+                //Somente poderá encontrar um registro e ai percorre as suas classes
+                for (Classes atr : filtrados.get(0).getClsAtribruto()) {
+                    //Se o atributo for igual
+                    if (atr.getNome().equals(clsAtributo))
+                     {
+                        //Atualizar a quantidade, e sair fora da pesquisa
+                        atr.atualizarQtd(1);
+                        bOk = true;
+                        break;
 
-                } else {
+                    }
+
+                }
+
+                //Se não for nenhum deles
+                if (!bOk) {
+                    //Criação do Objeto
+                    regs = new ArrayList<>();
+
+                    //Adicionar as propriedades
+                    regs.add(new Classes(dados.instance(i).classAttribute().value((int) dados.instance(i).classValue()), 1));
+
                     //Incluir o Valor
-                    filtrados.add(new IndiceGini(dados.instance(i).value(pos), 1));
+                    valores.add(new IndiceGini(dados.instance(i).value(pos), regs));
 
                 }
 
@@ -615,14 +636,19 @@ public class Processamento {
 
         }
 
-        //Ordenar Crescente
+        //Ordenar Crescente dos atributos
         Collections.sort(valores);
-       
-        //Ordenar Crescente
+
+        //Percorrer os itens da classe
+        for (IndiceGini item : valores) {
+
+        }
+
+        //Ordenar os indices em ordem crescente
         Collections.sort(indiceGini);
 
-        //Definir o Retorno (se o Índice Gini for "exatamente" 1 deverá ser 
-        return Arredondar(indiceGini.get(0) == 1 ? 0 : indiceGini.get(0), AlGEnArDe.qtdDecimais, 1);
+        //Definir o Retorno (se o Índice Gini for "exatamente" 1 deverá ser 0)
+        return indiceGini.get(0) == 1 ? 0 : indiceGini.get(0);
 
     }
 
@@ -631,7 +657,7 @@ public class Processamento {
     //             3 - Arredondar para cima ou para baixo?
     // Para Cima  = 0 (ceil) 
     // Para Baixo = 1 ou qualquer outro inteiro (floor)
-    double Arredondar(double valor, int casas, int ACimaouABaixo) {
+    public double Arredondar(double valor, int casas, int ACimaouABaixo) {
         //Declaração Variáveis e objetos
         double arredondado = valor;
 
