@@ -64,8 +64,8 @@ public class AlGEnArDe {
             tempInst.stratify(nroFolds - 1);
 
             //Definição das instâncias de "Validação" e "Teste""
-            Instances validacao = tempInst.testCV(nroFolds, 0);
-            Instances teste = tempInst.trainCV(nroFolds, 0);
+            Instances validacao = tempInst.testCV(nroFolds - 1, 0);
+            Instances teste = tempInst.trainCV(nroFolds - 1, 0);
 
             arvores = new ArrayList<>();
             int geracao = 1;
@@ -164,7 +164,7 @@ public class AlGEnArDe {
         //Processamento: PARA CADA COLUNA PERCORRE TODAS AS LINHAS
         //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         //Percorrer TODOS os atributos (colunas) existentes e para cada atributo percorre todas as instâncias  por exemplo: Atributo 0, Atributo 1, Atributo 2,...Atributo N-1
-        for (int i = 0; i < dados.numAttributes(); i++) {
+        for (int i = 0; i < dados.numAttributes() - 1; i++) {
             //1° Passo     - Processar todos os Atributos (Binários e Nominais)
             //2° Parâmetro - Nome do atributo
             //3° Parâmetro - Instâncias e a posição do Atributo

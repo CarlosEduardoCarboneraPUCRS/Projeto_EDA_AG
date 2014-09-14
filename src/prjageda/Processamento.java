@@ -575,21 +575,15 @@ public class Processamento {
         List<IndiceGini> filtrados;
         ArrayList<Classes> regs;
 
-        //Criar o filtro lógico
-        Filter<IndiceGini, Double> filtro = new Filter<IndiceGini, Double>() {
-            @Override
-            public boolean isMatched(IndiceGini object, Double valor) {
-                return object.getValor() == valor;
-
-            }
-        };
+        //Criar o filtro lógico (Através de Expressão Lambda)
+        Filter<IndiceGini, Double> filtro = (IndiceGini object, Double valor) -> object.getValor() == valor;
 
         //Pegar distintamente os valores p/ calcular a média de todas as instâncias do atributo informado, adicionar os valores das instâncias na posição informada
         for (int i = 0; i < dados.numInstances(); i++) {
             //Filtragem das ocorrências pelo Atributo "Valor"
             filtrados = new FilterList().filterList(valores, filtro, dados.instance(i).value(pos));
             String clsAtributo = dados.instance(i).classAttribute().value((int) dados.instance(i).classValue());
-            
+
             //Se não encontrou registros, inclui o mesmo
             if (filtrados.isEmpty()) {
                 //Criação do Objeto
@@ -608,8 +602,7 @@ public class Processamento {
                 //Somente poderá encontrar um registro e ai percorre as suas classes
                 for (Classes atr : filtrados.get(0).getClsAtribruto()) {
                     //Se o atributo for igual
-                    if (atr.getNome().equals(clsAtributo))
-                     {
+                    if (atr.getNome().equals(clsAtributo)) {
                         //Atualizar a quantidade, e sair fora da pesquisa
                         atr.atualizarQtd(1);
                         bOk = true;
@@ -621,14 +614,9 @@ public class Processamento {
 
                 //Se não for nenhum deles
                 if (!bOk) {
-                    //Criação do Objeto
-                    regs = new ArrayList<>();
-
                     //Adicionar as propriedades
-                    regs.add(new Classes(dados.instance(i).classAttribute().value((int) dados.instance(i).classValue()), 1));
-
-                    //Incluir o Valor
-                    valores.add(new IndiceGini(dados.instance(i).value(pos), regs));
+                    filtrados.get(0).getClsAtribruto().add(
+                            new Classes(dados.instance(i).classAttribute().value((int) dados.instance(i).classValue()), 1));
 
                 }
 
@@ -639,8 +627,31 @@ public class Processamento {
         //Ordenar Crescente dos atributos
         Collections.sort(valores);
 
-        //Percorrer os itens da classe
+        //Percorrer os valores cadastrados
         for (IndiceGini item : valores) {
+            //Declaração Variáveis e objetos
+            int total = 0;
+            double indGini = 1d;
+
+            if (item.getClsAtribruto() != null) {
+                //Percorrer todos os itens
+                for (Classes clsItem : item.getClsAtribruto()) {
+                    //Totalizar a quantidade
+                    total += clsItem.getQuantidade();
+
+                }
+
+                //Percorrer todos os itens
+                for (Classes cls : item.getClsAtribruto()) {
+                    //Calcular o Indice Gini
+                    indGini -= Math.pow(((double) cls.getQuantidade() / total), 2);
+
+                }
+
+            }
+
+            //Adicionar o Indice Gini Calculado
+            indiceGini.add(Arredondar(indGini, AlGEnArDe.qtdDecimais, 1));
 
         }
 
