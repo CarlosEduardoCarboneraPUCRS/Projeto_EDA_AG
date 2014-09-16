@@ -14,7 +14,7 @@ public class Atributos {
         //setar o atributo
         this.atributo = "";
         this.classeDominante = "";
-        this.nodo = null; //propriedade para a Sub-Árvore
+        this.nodo = null; 
         this.classes = null;
     }
 

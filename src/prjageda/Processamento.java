@@ -1,11 +1,7 @@
 package prjageda;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import weka.core.Instance;
@@ -17,7 +13,7 @@ public class Processamento {
     //<editor-fold defaultstate="collapsed" desc="Declaração Atributos e Método(s) Construtor(es) da Classe">    
     private String caminhoDados;
     private Arvores arvTemporaria = null;
-    private String nomesAtrs = "";
+    private ArrayList<String> nomesAtrs = null;
 
     //Declaração de objetos
     public static final MersenneTwister mt = new MersenneTwister();
@@ -127,7 +123,7 @@ public class Processamento {
                 //Inicialização do Objeto            
                 filhos = new ArrayList<>();
 
-                //Adicionar os pais
+                //Adicionar as Árvores pais
                 filhos.add((Arvores) SelecaoPorTorneio(listagem));
                 filhos.add((Arvores) SelecaoPorTorneio(listagem));
 
@@ -145,9 +141,9 @@ public class Processamento {
 
             }
 
-            //Efetuar Mutação das Árvores (se selecionado pelo critério do %), Exceto p/ as Árvores obtidas por Eletismo
+            //Efetuar Mutação das Árvores (se selecionado pelo critério do %), Exceto p/ as Árvores obtidas por Elitismo
             for (int i = 2; i < populacao.size(); i++) {
-                //Se for MENOR OU IGUAL ao limite Superior (Valor >= 0 E Valor <= Limite Superior)
+                //Se for MENOR OU IGUAL ao Limite Superior (Valor < Limite Superior)
                 if (Arredondar(mt.nextDouble(), 2, 1) < Processamento.percMutacao) {
                     //Declaração Variáveis e Objetos
                     String atributo = BuscarAtributosArvore(populacao.get(i));
@@ -162,7 +158,10 @@ public class Processamento {
                 }
 
             }
+
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+
         }
 
         //Definição do retorno da função
@@ -250,7 +249,7 @@ public class Processamento {
             //Se possuir arestas válidas
             if (arvore.getArestas() != null) {
                 //Declaração Variáveis e Objetos - Selecionar uma posição aleatória
-                int posicao = arvore.getArestas().size() == 1 ? 0 : mt.nextInt(arvore.getArestas().size() - 1);
+                int posicao = arvore.getArestas().size() <= 1 ? 0 : mt.nextInt(arvore.getArestas().size() - 1);
 
                 //Se a aresta selecionada não for nula
                 if (arvore.getArestas(posicao) != null) {
@@ -323,7 +322,7 @@ public class Processamento {
                         if (arvore.getArestas(i) != null) {
                             //Se o nodo não for nulo
                             if (arvore.getArestas(i).getNodo() != null) {
-                            //Se o nome do atributoi não for nulo
+                                //Se o nome do atributoi não for nulo
                                 //Se for o nodo da aresta selecionado aleatóriamente
                                 if (arvore.getArestas(i).getNodo().getNomeAtributo().equals(atributo)) {
                                     //Criar o Objeto e Inicializar o mesmo
@@ -332,11 +331,10 @@ public class Processamento {
 
                                     //Setar nulo p/ a sub-árvore selecionada
                                     arvore.getArestas(i).setNodo(null);
-                                    
                                     arvore.getArestas(i).setClasses(null);
                                     arvore.getArestas(i).setClasseDominante("");
 
-                                    //Sair do for 
+                                    //Sair do for
                                     break;
 
                                 } else {
@@ -352,7 +350,7 @@ public class Processamento {
                     }
 
                 }
-                
+
             }
 
         } catch (Exception e) {
@@ -368,7 +366,7 @@ public class Processamento {
             //Se possuir arestas
             if (arvore.getArestas() != null) {
                 //Selecionar uma posição aleatóriamente (Não importa qual, pois é inclusão de um novo nodo)
-                int posicao = arvore.getArestas().size() == 1 ? 0 : mt.nextInt(arvore.getArestas().size() - 1);
+                int posicao = arvore.getArestas().size() <= 1 ? 0 : mt.nextInt(arvore.getArestas().size() - 1);
 
                 //Se o Nodo da Aresta não for nulo, existem Sub-Árvores
                 if (arvore.getArestas(posicao).getNodo() != null) {
@@ -668,7 +666,7 @@ public class Processamento {
         Collections.sort(indice);
 
         //Definir o Retorno (se o Índice Gini for "exatamente" 1 deverá ser 0)
-        return indice.get(0) == 1 ? 0 : indice.get(0);
+        return indice.get(0) <= 1 ? 0 : indice.get(0);
 
     }
 
@@ -694,102 +692,83 @@ public class Processamento {
     private String BuscarAtributosArvore(Arvores arv) {
         //Declaração Variáveis e Objetos e Inicializações
         String nomeatributo = "";
-        nomesAtrs = "";
+        nomesAtrs = new ArrayList<>();
 
         try {
-            //Processar os atributos existentes na árvore
-            processarNomesAtributos(arv);
+            //Chamada Recursiva p/ montagem dos atributos da árvore
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //processarNomesAtributos(arv);
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            //Aqui descomentar ------------------------------------------------------------------------------------------------------
+            nomesAtrs.add("a01");
+            nomesAtrs.add("a14");
+            nomesAtrs.add("a15");
+            nomesAtrs.add("a23");
+            nomesAtrs.add("a05");
+            nomesAtrs.add("a10");
+            nomesAtrs.add("a12");
+            nomesAtrs.add("a30");
+            nomesAtrs.add("a25");
+            nomesAtrs.add("a20");
+            nomesAtrs.add("a25");
+            nomesAtrs.add("a16");
 
             //Se for diferente de nulo(carregou algum atribuito)
-            if (!nomesAtrs.isEmpty()) {
-                //Declaração Variáveis e Objetos
-                String[] tempAtr = nomesAtrs.split(",");
-                ArrayList<String> atributos = new ArrayList<>();
-
-                //Adicionar as propriedades
-                atributos.addAll(Arrays.asList(tempAtr));
+            //Se possuir Árvores 
+            if (nomesAtrs.size() > 0) {
+                //Não poderá retornar o nodo raiz, por isto a exclusão do nodo na posição 0, sendo assim remove-se o nodo raiz
+                nomesAtrs.remove(0);
 
                 //Se possuir Árvores 
-                if (atributos.size() > 0) {
-                    //Não poderá retornar o nodo raiz, por isto a exclusão do nodo na posição 0, sendo assim remove-se o nodo raiz
-                    atributos.remove(0);
-
-                    //Se possuir Árvores 
-                    if (atributos.size() > 0) {
-                        //Se o tamanho for 1, pega o único existente (sem sorteio) SENÃO Sortear um entre os possíveis
-                        nomeatributo = (atributos.size() == 1) ? atributos.get(0) : atributos.get(mt.nextInt(atributos.size() - 1));
-
-                    }
+                if (nomesAtrs.size() > 0) {
+                    //Se o tamanho for 1, pega o único existente (sem sorteio) SENÃO Sortear um entre os possíveis
+                    nomeatributo = (nomesAtrs.size() <= 1) ? nomesAtrs.get(0) : nomesAtrs.get(mt.nextInt(nomesAtrs.size() - 1));
 
                 }
 
             }
 
-            //Definir o retorno
-            return nomeatributo;
-
         } catch (Exception e) {
-            return "";
+            return "Erro Atributos.: " + e.getMessage();
 
         }
+
+        //Definir o retorno
+        return nomeatributo;
 
     }
 
     //Localizar os atributos(nomes) existentes na árvore, aonde será sorteado um deles para mutação (EXCETO o nodo Raiz)
     private void processarNomesAtributos(Arvores arv) {
-        try {
-            if (arv != null) {
-                //Se possuir arestas válidas
-                if (arv.getArestas() != null) {
-                    //Percorrer todas as arestas
-                    for (int i = 0; i < arv.getArestas().size(); i++) {
-                        //Se for vazio Adiciona senão avalia e depois insere sim ou não
-                        if (nomesAtrs.isEmpty()) {
-                            //Adicionar o nome do Atributo SE não Contiver
-                            nomesAtrs += String.valueOf(arv.getNomeAtributo()) + ",";
+        if (arv != null) {
+            //Se possuir arestas válidas
+            if (arv.getArestas() != null) {
+                //Percorrer todas as arestas
+                for (int i = 0; i < arv.getArestas().size(); i++) {
+                    //Se for vazio Adiciona senão avalia e depois insere sim ou não
+                    if (nomesAtrs.isEmpty()) {
+                        //Adicionar o nome do Atributo SE não Contiver
+                        nomesAtrs.add(String.valueOf(arv.getNomeAtributo()));
 
-                        } else {
-                            //Se o Objeto não for nulo
-                            if (!String.valueOf(nomesAtrs).trim().equals("") || !String.valueOf(nomesAtrs).equals("null")) {
-                                //Se o atributio não for nulo
-                                if (arv.getNomeAtributo() != null) {
-                                    //Declaração Variáveis e Objetos
-                                    String[] atributos = nomesAtrs.split(",");
-                                    boolean bInc = true;
-
-                                    for (String atributo : atributos) {
-                                        //Se for igual
-                                        if (atributo.equals(String.valueOf(arv.getNomeAtributo()))) {
-                                            //Atribuições
-                                            bInc = false;
-                                            break;
-
-                                        }
-
-                                    }
-
-                                    //Se não contiver o atributo
-                                    if (!bInc) {
-                                        //Adicionar o nome do Atributo SE não Contiver
-                                        nomesAtrs += String.valueOf(arv.getNomeAtributo()) + ",";
-
-                                    }
-
-                                }
-
-                            } else {
-
-                                nomesAtrs = "";
-
-                            }
-
-                        }
-
-                        if (arv.getArestas(i) != null) {
-                            //Se o nodo não for nulo
-                            if (arv.getArestas(i).getNodo() != null) {
-                                //Chamada recursiva da árvore
-                                processarNomesAtributos(arv.getArestas(i).getNodo());
+                    } else {
+                        //Se o atributio não for nulo
+                        if (arv.getNomeAtributo() != null) {
+                            if (!nomesAtrs.contains(arv.getNomeAtributo())) {
+                                //Adicionar o Atributo
+                                nomesAtrs.add(arv.getNomeAtributo());
 
                             }
 
@@ -797,16 +776,16 @@ public class Processamento {
 
                     }
 
+                    //Chamada recursiva da árvore passando o nodo selecionado
+                    processarNomesAtributos(arv.getArestas(i).getNodo());
+
                 }
 
             }
 
-        } catch (Exception e) {
-            System.out.println(e.getCause());
-
         }
 
     }
-//</editor-fold>        
 
+//</editor-fold>        
 }

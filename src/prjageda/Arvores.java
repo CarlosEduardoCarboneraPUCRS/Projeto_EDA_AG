@@ -16,7 +16,7 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
     public Arvores() {
         //Inicializações
         this.nomeAtr = "";
-        this.fitness = 0.0;
+        this.fitness = 0d;
         this.qtdOcorr = 0;
         this.arestas = null;
 
@@ -25,7 +25,7 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
     public Arvores(String nome, ArrayList<Atributos> galhos) {
         //Atribuições
         this.nomeAtr = nome;
-        this.fitness = 0.0;
+        this.fitness = 0d;
         this.qtdOcorr = 0;
         this.arestas = galhos;
 
@@ -50,7 +50,7 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
 
     }
 
-    public ArrayList<Atributos> getArestas() {
+    public ArrayList<Atributos> getArestas() {       
         return this.arestas;
 
     }
@@ -106,6 +106,6 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
         return (this.getFitness() < obj.getFitness()) ? -1 : (this.getFitness() > obj.getFitness()) ? 1 : 0;
 
     }
-    
+
     //</editor-fold>    
 }

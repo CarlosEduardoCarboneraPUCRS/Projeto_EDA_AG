@@ -1,8 +1,6 @@
 package prjageda;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,8 +11,8 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int quantidade = 100;
-    public static final int profundidade = 3;
+    public static final int quantidade = 10;
+    public static final int profundidade = 4;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
     public static ArrayList<Arvores> nodos = null;
@@ -25,9 +23,9 @@ public class AlGEnArDe {
     private static final int nroFolds = 3;
     private int qtdOcorr = 0;
 
-    private static final String localArquivos = "C:\\Geracao\\";
+    //private static final String localArquivos = "C:\\Geracao\\";
     public static BufferedWriter escrita;
-    
+
     //Método Inicializador da classe
     public AlGEnArDe() {
     }
@@ -69,12 +67,12 @@ public class AlGEnArDe {
 
             //Definição das instâncias de "Validação" e "Teste""
             Instances validacao = tempInst.testCV(nroFolds - 1, 0);
-            Instances teste = tempInst.trainCV(nroFolds - 1, 0);
+            //Instances teste = tempInst.trainCV(nroFolds - 1, 0);
 
             arvores = new ArrayList<>();
             int geracao = 1;
 
-            //Efetuar o processamento das Sub-Arvores e suas Aretas
+            //Efetuar o processamento das Sub-Arvores e suas Aretas (COM TODAS AS INSTÂNCIAS DE DADOS)
             ProcessamentoNodos(dados);
 
             //Efetuar a Geração da População Inicial, informar a quantidade de atributos MENOS o atributos classe
@@ -144,18 +142,19 @@ public class AlGEnArDe {
         if (prof <= profundidade) {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
-                //Gerar as Sub-Árvores com 50% de probabilidade
-                //if (Processamento.mt.nextBoolean()) {
-                    //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
-                    ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
+                //Gerar as Sub-Árvores com 50% de probabilidade                
+                if (Processamento.mt.nextBoolean()) {
+                //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
+                ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
 
                     // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                    // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                    arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
+                // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
 
-                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                    GerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
-                //}
+                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                GerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
+                
+                }
 
             }
 
@@ -331,7 +330,8 @@ public class AlGEnArDe {
 
                         }
                         //Sair for do for
-                        break;
+                        return;
+
                     }
 
                 }
@@ -368,17 +368,20 @@ public class AlGEnArDe {
                         //Atualizar os Atributos da Árvore
                         arv.setQtdOcorrencias(0);
                         arv.setFitness(0);
-                        arv.getArestas(i).setClasses(null);
-                        arv.getArestas(i).setClasseDominante("");
 
                         //Se a aresta não for nula
                         if (arv.getArestas(i) != null) {
+                            //Atribuições
+                            arv.getArestas(i).setClasses(null);
+                            arv.getArestas(i).setClasseDominante("");
+
                             //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
                             if (arv.getArestas(i).getNodo() != null) {
                                 //Chamada Recursiva da Função
                                 LimparDefinicaoClassesNodosFolhas(arv.getArestas(i).getNodo());
 
                             }
+                            
                         }
 
                     }
