@@ -1,5 +1,8 @@
 package prjageda;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,15 +18,16 @@ public class AlGEnArDe {
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
     public static ArrayList<Arvores> nodos = null;
+    public static ArrayList<Arvores> arvores = null;
 
     //Variáveis Privadas Estáticas
     private static final int geracoes = 100;
     private static final int nroFolds = 3;
-    private ArrayList<Arvores> arvores;
     private int qtdOcorr = 0;
 
-    //private static final String localArquivos = "C:\\Geracao\\";
-    //public static BufferedWriter escrita;
+    private static final String localArquivos = "C:\\Geracao\\";
+    public static BufferedWriter escrita;
+    
     //Método Inicializador da classe
     public AlGEnArDe() {
     }
@@ -73,8 +77,8 @@ public class AlGEnArDe {
             //Efetuar o processamento das Sub-Arvores e suas Aretas
             ProcessamentoNodos(dados);
 
-            //Efetuar a Geração da População Inicial
-            GeracaoPopulacaoInicial(dados, treino, validacao);
+            //Efetuar a Geração da População Inicial, informar a quantidade de atributos MENOS o atributos classe
+            GeracaoPopulacaoInicial(dados.instance(0).numAttributes() - 1, treino, validacao);
 
             //Imprimir as 2 melhores árvores da geração
             ImprimirArvoresGeracao(geracao, "H");
@@ -85,7 +89,7 @@ public class AlGEnArDe {
                 geracao++;
 
                 //Inicialização e Atribuição das árvores
-                arvores = new Processamento().NovaGeracaoArvores(dados, arvores, true);
+                arvores = new Processamento().NovaGeracaoArvores(dados, true);
 
                 //Calcular o Fitness e após Ordenar Crescente
                 CalculoFitnessPopulacao(treino, validacao);
@@ -103,7 +107,7 @@ public class AlGEnArDe {
     }
 
     //Efetuar a Geração da População Inicial
-    private void GeracaoPopulacaoInicial(Instances dados, Instances treino, Instances validacao) throws Exception {
+    private void GeracaoPopulacaoInicial(int nroAtributos, Instances treino, Instances validacao) throws Exception {
         try {
             //Declaração Variáveis e Objetos
             ArrayList<Arvores> arvTemp;
@@ -114,10 +118,10 @@ public class AlGEnArDe {
                 arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
 
                 //Selecionar o nodo raiz (sorteado aleatóriamente)
-                Arvores arv = arvTemp.get(Processamento.mt.nextInt(dados.numAttributes() - 1));
+                Arvores arv = arvTemp.get(Processamento.mt.nextInt(nroAtributos));
 
                 //Geração da árvore ATÉ a profundidade estabelecida
-                GerarPopulacaoArvores(dados, 1, arv);
+                GerarPopulacaoArvores(nroAtributos, 1, arv);
 
                 //Adicionar a Árvore Gerada
                 arvores.add(arv);
@@ -135,20 +139,23 @@ public class AlGEnArDe {
     }
 
     //Efetuar a Geração da População de Árvores de Decisão
-    public void GerarPopulacaoArvores(Instances dados, int prof, Arvores arvore) throws IOException {
+    public void GerarPopulacaoArvores(int nroAtributos, int prof, Arvores arvore) throws IOException {
         //Condição de Parada - Se o grau de profundidade máxima
         if (prof <= profundidade) {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
-                //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
-                ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
+                //Gerar as Sub-Árvores com 50% de probabilidade
+                //if (Processamento.mt.nextBoolean()) {
+                    //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
+                    ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
 
-                // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
+                    // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
+                    // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                    arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
 
-                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                GerarPopulacaoArvores(dados, prof + 1, arvore.getArvoreApartirAresta(i));
+                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                    GerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
+                //}
 
             }
 
@@ -438,7 +445,7 @@ public class AlGEnArDe {
 //            escrita.write("------------------------------------------------------------------------------------------------------------------------------------------------------");
 //            escrita.newLine();
 //            escrita.write(" Finalizando Impressão Geração.: " + geracao);
-//            escrita.close();
+////            escrita.close();
 //
 //        } catch (Exception e) {
 //            System.out.println("Erro na impressão da árvore.: " + e.getMessage());
@@ -446,30 +453,30 @@ public class AlGEnArDe {
 //        }
     }
 
-//    public static void ImprimirArvoreHorizontal(Arvores arv, int level) throws IOException {
-//        if (arv == null) {
-//            return;
-//        }
-//
-//        ImprimirArvoreHorizontal(arv.getArestas(1).getNodo(), level + 1);
-//
-//        if (level != 0) {
-//            String temp = "";
-//            for (int i = 0; i < level - 1; i++) {
-//                temp += "|\t";
-//
-//            }
-//            escrita.write(temp + "|-------" + arv.getNomeAtributo());
-//            escrita.newLine();
-//
-//        } else {
-//            escrita.write(arv.getNomeAtributo() + " - " + arv.getFitness());
-//            escrita.newLine();
-//
-//        }
-//
-//        ImprimirArvoreHorizontal(arv.getArestas(0).getNodo(), level + 1);
-//
-//    }
+    public static void ImprimirArvoreHorizontal(Arvores arv, int level) throws IOException {
+        if (arv == null) {
+            return;
+        }
+
+        ImprimirArvoreHorizontal(arv.getArestas(1).getNodo(), level + 1);
+
+        if (level != 0) {
+            String temp = "";
+            for (int i = 0; i < level - 1; i++) {
+                temp += "|\t";
+
+            }
+            escrita.write(temp + "|-------" + arv.getNomeAtributo());
+            escrita.newLine();
+
+        } else {
+            escrita.write(arv.getNomeAtributo() + " - " + arv.getFitness());
+            escrita.newLine();
+
+        }
+
+        ImprimirArvoreHorizontal(arv.getArestas(0).getNodo(), level + 1);
+
+    }
     //</editor-fold>     
 }
