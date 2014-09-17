@@ -11,7 +11,7 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int quantidade = 10;
+    public static final int quantidade = 100;
     public static final int profundidade = 4;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
@@ -58,7 +58,7 @@ public class AlGEnArDe {
             //Estratificar os dados e divisão em 3 folds - "Treino, Validação e Teste"
             dados.stratify(nroFolds);
 
-            //Definição da instância de "Treino"
+            //Definição da instância de "Treino", "Validação" e "Teste"
             Instances treino = dados.testCV(nroFolds, 0);
             Instances tempInst = dados.trainCV(nroFolds, 0);
 
@@ -67,10 +67,10 @@ public class AlGEnArDe {
 
             //Definição das instâncias de "Validação" e "Teste""
             Instances validacao = tempInst.testCV(nroFolds - 1, 0);
-            //Instances teste = tempInst.trainCV(nroFolds - 1, 0);
+            Instances teste = tempInst.trainCV(nroFolds - 1, 0);
 
             arvores = new ArrayList<>();
-            int geracao = 1;
+            int geracaoAtual = 1;
 
             //Efetuar o processamento das Sub-Arvores e suas Aretas (COM TODAS AS INSTÂNCIAS DE DADOS)
             ProcessamentoNodos(dados);
@@ -79,12 +79,12 @@ public class AlGEnArDe {
             GeracaoPopulacaoInicial(dados.instance(0).numAttributes() - 1, treino, validacao);
 
             //Imprimir as 2 melhores árvores da geração
-            ImprimirArvoresGeracao(geracao, "H");
+            ImprimirMelhorArvoreGeracao(geracaoAtual, "H");
 
             //Efetuar a geração das novas populações
-            while (geracao < geracoes) {
+            while (geracaoAtual < geracoes) {
                 //Atualizar a Geração
-                geracao++;
+                geracaoAtual++;
 
                 //Inicialização e Atribuição das árvores
                 arvores = new Processamento().NovaGeracaoArvores(dados, true);
@@ -93,7 +93,7 @@ public class AlGEnArDe {
                 CalculoFitnessPopulacao(treino, validacao);
 
                 //Imprimir as 2 melhores árvores da geração
-                ImprimirArvoresGeracao(geracao, "H");
+                ImprimirMelhorArvoreGeracao(geracaoAtual, "H");
 
             }
 
@@ -144,16 +144,16 @@ public class AlGEnArDe {
             for (int i = 0; i < arvore.getArestas().size(); i++) {
                 //Gerar as Sub-Árvores com 50% de probabilidade                
                 if (Processamento.mt.nextBoolean()) {
-                //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
-                ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
+                    //Tratamento dos nodos (Geração das Sub-Árvores e Atributos)
+                    ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
 
                     // 1°) Sortear um Nodo(Árvore) Qualquer Aleatóriamente p/ Inserção                   
-                // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
-                arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
+                    // 2°) Inserir na aresta a Árvore Selecionada Aleatóriamente(No Atributo Nodo)
+                    arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
 
-                //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                GerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
-                
+                    //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
+                    GerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
+
                 }
 
             }
@@ -199,7 +199,10 @@ public class AlGEnArDe {
                 }
 
                 //Definição da Classe majoritária de cada um dos nodos "Folhas" da árvore
-                proc.DefinicaoClasseMajoritariaNodosFolhas(arvore);
+                for (int i = 0; i < arvore.getArestas().size(); i++) {
+                    proc.DefinicaoClasseMajoritariaNodosFolhas(arvore, i);
+
+                }
 
             }
 
@@ -275,65 +278,78 @@ public class AlGEnArDe {
     public void ValidacaoCalculoFitnessGeracao(Arvores arvore, Instance avaliacao) {
         //Se o árvore não for nula
         if (arvore != null) {
-            //OBSERVAÇÃO.: O for é devido as classes do WEKA não permitirem de que apartir da instância selecionada PEGAR um atributo em específico, a pesquisa é feita
-            //somente pelo índice do atributo e NÃO PELO NOME DO MESMO
-            //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            //Percorrer todos os atributos da instância selecionada
-            for (int k = 0; k < avaliacao.numAttributes() - 1; k++) {
-                //Encontrou o mesmo atributos que o pesquisado
-                if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
-                    //Se tiver arestas válidas
-                    if (arvore.getArestas() != null) {
-                        //Se o atributo for Numérico
-                        if (avaliacao.attribute(k).isNumeric()) {
-                            //Declaração Variáveis e Objetos
-                            Processamento prc = new Processamento();
-                            double valorAresta = Double.valueOf(arvore.getArestas(0).getAtributo().split(" ")[1]);
+            //Declaração Variáveis e Objetos
+            int posicao = 0;
 
-                            //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
-                            int pos = prc.Arredondar(avaliacao.value(k), qtdDecimais, 1) <= prc.Arredondar(valorAresta, qtdDecimais, 1) ? 0 : 1;
-
-                            //Se for um nodo folha
-                            if (arvore.getArestas(pos).getNodo() == null) {
-                                //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                                if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                    //Atualizar a quantidade (Somar 1 na quantidade atual)
-                                    atuQtdOcorr(1);
-
-                                }
-
-                            } else {
-                                //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                                ValidacaoCalculoFitnessGeracao(arvore.getArestas(pos).getNodo(), avaliacao);
-
-                            }
-
-                        } else {
-                            //Percorrer todas as arestas
-                            for (Atributos aresta : arvore.getArestas()) {
-                                //Se for um nodo folha
-                                if (aresta.getNodo() == null) {
-                                    //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                                    if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                        //Atualizar a quantidade (Somar 1 na quantidade atual)
-                                        atuQtdOcorr(1);
-
-                                    }
-
-                                } else {
-                                    //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                                    ValidacaoCalculoFitnessGeracao(aresta.getNodo(), avaliacao);
-
-                                }
-
-                            }
-
-                        }
-                        //Sair for do for
-                        return;
+            //Se tiver arestas válidas
+            if (arvore.getArestas() != null) {
+                //OBSERVAÇÃO.: O "for" é devido as classes do WEKA não permitirem de que apartir da instância selecionada PEGAR um atributo em específico, a pesquisa é feita
+                //             somente pelo índice do atributo e NÃO PELO NOME DO MESMO
+                //------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                //Percorrer todos os atributos da instância selecionada
+                for (int k = 0; k < avaliacao.numAttributes() - 1; k++) {
+                    //Encontrou o mesmo atributos que o pesquisado
+                    if (avaliacao.attribute(k).name().equals(arvore.getNomeAtributo())) {
+                        posicao = k;
+                        break;
 
                     }
 
+                }
+
+                //Se o atributo for Numérico
+                if (avaliacao.attribute(posicao).isNumeric()) {
+                    //Declaração Variáveis e Objetos
+                    Processamento prc = new Processamento();
+                    double valorAresta = Double.valueOf(arvore.getArestas(0).getAtributo().split(" ")[1]);
+
+                    //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
+                    int pos = prc.Arredondar(avaliacao.value(posicao), qtdDecimais, 1) <= prc.Arredondar(valorAresta, qtdDecimais, 1) ? 0 : 1;
+
+                    //Se for um nodo folha
+                    if (arvore.getArestas(pos).getNodo() == null) {
+                        //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
+                        if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                            //Atualizar a quantidade (Somar 1 na quantidade atual)
+                            atuQtdOcorr(1);
+
+                        }
+
+                    } else {
+                        //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                        ValidacaoCalculoFitnessGeracao(arvore.getArestas(pos).getNodo(), avaliacao);
+
+                    }
+
+                } else {
+                    /*    
+                     Aqui Rever  ------------------------------------------------
+                     Aqui Rever  ------------------------------------------------
+                     Aqui Rever  ------------------------------------------------
+                     Aqui Rever  ------------------------------------------------
+                     //Percorrer todas as arestas
+                     for (Atributos aresta : arvore.getArestas()) {
+                     //Se for um nodo folha
+                     if (aresta.getNodo() == null) {
+                     //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
+                     if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                     //Atualizar a quantidade (Somar 1 na quantidade atual)
+                     atuQtdOcorr(1);
+
+                     }
+
+                     } else {
+                     //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                     ValidacaoCalculoFitnessGeracao(aresta.getNodo(), avaliacao);
+
+                     }
+
+                     }
+                     Aqui Rever  ------------------------------------------------
+                     Aqui Rever  ------------------------------------------------
+                     Aqui Rever  ------------------------------------------------
+                     Aqui Rever  ------------------------------------------------
+                     */
                 }
 
             }
@@ -346,43 +362,50 @@ public class AlGEnArDe {
     private void EliminarClassificacaoNodos() {
         //Processar Árvores e Eliminar as definções dos Nodos Folhas
         for (Arvores arvore : arvores) {
-            //Atualizar os Valores da Árvore
-            arvore.AtuQtdOcorrencias(0);
-            arvore.setFitness(0);
-
             //Processamento dos nodos folhas
-            LimparDefinicaoClassesNodosFolhas(arvore);
+            LimparDefinicaoClassesNodosFolhas(arvore, 0);
 
         }
 
     }
 
     //Eliminar a Classificação dos nodos Folhas
-    private void LimparDefinicaoClassesNodosFolhas(Arvores arv) {
+    private void LimparDefinicaoClassesNodosFolhas(Arvores arv, int posicao) {
         try {
             if (arv != null) {
+                //Atualizar os Atributos da Árvore
+                arv.setQtdOcorrencias(0);
+                arv.setFitness(0);
+
                 //Se possuir arestas
                 if (arv.getArestas() != null) {
-                    //Percorre todas as arestas até encontrar o atributos selecionado
-                    for (int i = 0; i < arv.getArestas().size(); i++) {
-                        //Atualizar os Atributos da Árvore
-                        arv.setQtdOcorrencias(0);
-                        arv.setFitness(0);
+                    //Se a aresta não for nula
+                    if (arv.getArestas(posicao) != null) {
+                        //Atribuições
+                        arv.getArestas(posicao).setClasses(null);
+                        arv.getArestas(posicao).setClasseDominante("");
 
-                        //Se a aresta não for nula
-                        if (arv.getArestas(i) != null) {
-                            //Atribuições
-                            arv.getArestas(i).setClasses(null);
-                            arv.getArestas(i).setClasseDominante("");
+                        //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
+                        if (arv.getArestas(posicao).getNodo() != null) {
+                            //Chamada Recursiva da Função Avaliando a posição Atual
+                            LimparDefinicaoClassesNodosFolhas(arv.getArestas(posicao).getNodo(), posicao);
 
-                            //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
-                            if (arv.getArestas(i).getNodo() != null) {
-                                //Chamada Recursiva da Função
-                                LimparDefinicaoClassesNodosFolhas(arv.getArestas(i).getNodo());
+                            //Se a próxima aresta não for nula
+                            if (arv.getArestas(posicao + 1) != null) {
+                                //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
+                                if (arv.getArestas(posicao + 1).getNodo() != null) {
+                                    //Chamada Recursiva da Função
+                                    LimparDefinicaoClassesNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
+
+                                }
 
                             }
-                            
+
                         }
+
+                    } else //Chamada Recursiva da Função
+                    {
+                        LimparDefinicaoClassesNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
 
                     }
 
@@ -399,12 +422,12 @@ public class AlGEnArDe {
     //</editor-fold> 
 
     //<editor-fold defaultstate="collapsed" desc="5° Definição das Funções de Impressão da Árvore">    
-    private void ImprimirArvoresGeracao(int geracao, String tipo) {
+    private void ImprimirMelhorArvoreGeracao(int geracao, String tipo) {
         System.out.println("Geração.: " + geracao + " - Árvore.: " + arvores.get(0).getNomeAtributo() + " - Fitness.: " + arvores.get(0).getFitness());
-        System.out.println("Geração.: " + geracao + " - Árvore.: " + arvores.get(1).getNomeAtributo() + " - Fitness.: " + arvores.get(1).getFitness());
+        //System.out.println("Geração.: " + geracaoAtual + " - Árvore.: " + arvores.get(1).getNomeAtributo() + " - Fitness.: " + arvores.get(1).getFitness());
 
 //        //Declaração Variáveis e Objetos
-//        File arquivo = new File(localArquivos + "\\Arvores\\Arvore_" + geracao + ".txt");
+//        File arquivo = new File(localArquivos + "\\Arvores\\Arvore_" + geracaoAtual + ".txt");
 //
 //        //Se Existir o arquivo, deleta o mesmo
 //        if (arquivo.exists()) {
@@ -418,7 +441,7 @@ public class AlGEnArDe {
 //            escrita = new BufferedWriter(regs);
 //
 //            //Finalização da Geração
-//            escrita.write(" Iniciando Impressão Geração.: " + geracao);
+//            escrita.write(" Iniciando Impressão Geração.: " + geracaoAtual);
 //            escrita.newLine();
 //
 //            escrita.write("------------------------------------------------------------------------------------------------------------------------------------------------------");
@@ -447,7 +470,7 @@ public class AlGEnArDe {
 //            escrita.newLine();
 //            escrita.write("------------------------------------------------------------------------------------------------------------------------------------------------------");
 //            escrita.newLine();
-//            escrita.write(" Finalizando Impressão Geração.: " + geracao);
+//            escrita.write(" Finalizando Impressão Geração.: " + geracaoAtual);
 ////            escrita.close();
 //
 //        } catch (Exception e) {

@@ -50,13 +50,34 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
 
     }
 
-    public ArrayList<Atributos> getArestas() {       
-        return this.arestas;
+    public ArrayList<Atributos> getArestas() {
+        //Retornar as arestas desde que existam
+        return this.arestas != null ? this.arestas : null;
 
     }
 
     public Atributos getArestas(int pos) {
-        return this.arestas.get(pos);
+        //Retornar a aresta da posição desde que exista
+        if (this.arestas != null) {
+            //Se posição for inválida retorna Nulo
+            if (pos >= this.arestas.size()) {
+                return null;
+
+            }
+
+            if (this.arestas.get(pos) != null) {
+                return this.arestas.get(pos);
+
+            } else {
+
+                return null;
+
+            }
+
+        } else {
+            return null;
+
+        }
 
     }
 
@@ -71,8 +92,27 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
     }
 
     public Arvores getArvoreApartirAresta(int pos) {
-        //Setar o Nodo na Aresta Selecionada
-        return this.arestas.get(pos).getNodo();
+        //Retornar a aresta da posição desde que exista
+        if (this.arestas != null) {
+            //Se posição for inválida retorna Nulo
+            if (pos >= this.arestas.size()) {
+                return null;
+
+            }
+
+            if (this.arestas.get(pos).getNodo() != null) {
+                return this.arestas.get(pos).getNodo();
+
+            } else {
+
+                return null;
+
+            }
+
+        } else {
+            return null;
+
+        }
 
     }
 

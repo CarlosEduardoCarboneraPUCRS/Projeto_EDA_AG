@@ -64,7 +64,7 @@ public class Atributos {
     }
 
     public ArrayList<Classes> getClasses() {
-        return this.classes;
+        return this.classes == null ? null : this.classes;
         
     }
 

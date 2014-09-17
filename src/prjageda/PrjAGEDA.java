@@ -7,8 +7,7 @@ public class PrjAGEDA {
 
     //Arquivo com Atributos Nominais
     //private static final String arquivo = "C:\\ArffTeste\\weathernominal.arff";
-    
-    public static void main(String[] args) throws Exception {        
+    public static void main(String[] args) throws Exception {
         //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         //01° - Leitura do(s) Arquivo(s) <nome(s)>.arff
         //02° - Processamento das Instâncias (Decision Stumps) - Criação das Árvores com seus atributos { Numérico - Bifurcado / Demais - Quantidade de atributos existentes }
@@ -34,5 +33,5 @@ public class PrjAGEDA {
         new AlGEnArDe().AlGenArDe(new Processamento(arquivo).LeituraArquivo());
 
     }
-    
+
 }
