@@ -11,7 +11,7 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int quantidade = 100;
+    public static final int quantidade = 200;
     public static final int profundidade = 4;
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
@@ -19,7 +19,7 @@ public class AlGEnArDe {
     public static ArrayList<Arvores> arvores = null;
 
     //Variáveis Privadas Estáticas
-    private static final int geracoes = 100;
+    private static final int geracoes = 1000;
     private static final int nroFolds = 3;
     private int qtdOcorr = 0;
 
@@ -198,11 +198,8 @@ public class AlGEnArDe {
 
                 }
 
-                //Definição da Classe majoritária de cada um dos nodos "Folhas" da árvore
-                for (int i = 0; i < arvore.getArestas().size(); i++) {
-                    proc.DefinicaoClasseMajoritariaNodosFolhas(arvore, i);
-
-                }
+                //Definir a classe majoritária da aresta
+                proc.DefinicaoClasseMajoritariaNodosFolhas(arvore);
 
             }
 

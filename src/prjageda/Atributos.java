@@ -39,7 +39,7 @@ public class Atributos {
     }
 
     public Arvores getNodo() {
-        return this.nodo;
+        return this.nodo == null ? null: this.nodo;
         
     }
 
