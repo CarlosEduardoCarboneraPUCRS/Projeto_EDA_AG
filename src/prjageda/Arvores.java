@@ -31,15 +31,6 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
 
     }
 
-    public Arvores(Arvores ar) {
-        //Clonar o Objeto
-        this.nomeAtr = ar.getNomeAtributo();
-        this.fitness = ar.getFitness();
-        this.qtdOcorr = ar.getQtdOcorrencias();
-        this.arestas = ar.getArestas();
-
-    }
-
     public String getNomeAtributo() {
         return this.nomeAtr;
 

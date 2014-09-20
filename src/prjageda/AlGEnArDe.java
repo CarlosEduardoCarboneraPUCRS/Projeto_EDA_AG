@@ -11,8 +11,8 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int quantidade = 200;
-    public static final int profundidade = 4;
+    public static final int quantidade = 100;
+    public static final int profundidade = 4;   //Defini-se com 4 + 1 = 5
     public static final double TxCrossover = 0.9;
     public static final int qtdDecimais = 4;
     public static ArrayList<Arvores> nodos = null;
@@ -53,7 +53,7 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="3° Definição dos Métodos pertinentes a Geração da População">
     //Tradução da Sigla - AlGenArDe - "Al"goritmo "Gen"ético de "Ar"vore de "De"cisão
-    public void AlGenArDe(Instances dados) {
+    public void AlGenArDe(Instances dados) throws Throwable {
         try {
             //Estratificar os dados e divisão em 3 folds - "Treino, Validação e Teste"
             dados.stratify(nroFolds);
@@ -67,16 +67,17 @@ public class AlGEnArDe {
 
             //Definição das instâncias de "Validação" e "Teste""
             Instances validacao = tempInst.testCV(nroFolds - 1, 0);
-            Instances teste = tempInst.trainCV(nroFolds - 1, 0);
+            //Por enquanto comentado
+            //Instances teste = tempInst.trainCV(nroFolds - 1, 0);
 
             arvores = new ArrayList<>();
             int geracaoAtual = 1;
 
             //Efetuar o processamento das Sub-Arvores e suas Aretas (COM TODAS AS INSTÂNCIAS DE DADOS)
-            ProcessamentoNodos(dados);
+            gerarDecisionStumps(dados);
 
             //Efetuar a Geração da População Inicial, informar a quantidade de atributos MENOS o atributos classe
-            GeracaoPopulacaoInicial(dados.instance(0).numAttributes() - 1, treino, validacao);
+            gerarPopulacaoInicial(treino, validacao);
 
             //Imprimir as 2 melhores árvores da geração
             ImprimirMelhorArvoreGeracao(geracaoAtual, "H");
@@ -86,11 +87,18 @@ public class AlGEnArDe {
                 //Atualizar a Geração
                 geracaoAtual++;
 
-                //Inicialização e Atribuição das árvores
-                arvores = new Processamento().NovaGeracaoArvores(dados, true);
+                //Carregar com as árvores
+                arvores = new Processamento().GerarArvores(dados, true);
+
+                //Processar Árvores e Eliminar as definções dos Nodos Folhas
+                for (Arvores arvore : arvores) {
+                    //Processamento dos nodos folhas
+                    eliminarClassificacaoNodosFolhas(arvore, 0);
+
+                }
 
                 //Calcular o Fitness e após Ordenar Crescente
-                CalculoFitnessPopulacao(treino, validacao);
+                calcularFitnessPopulacao(treino, validacao);
 
                 //Imprimir as 2 melhores árvores da geração
                 ImprimirMelhorArvoreGeracao(geracaoAtual, "H");
@@ -100,34 +108,44 @@ public class AlGEnArDe {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
+        } finally {
+            //Atibuir nulo aos objetos
+            nodos = null;
+            arvores = null;
+            qtdOcorr = 0;
+            escrita = null;
+
+            //Chamar o garbage collector
+            System.gc();
+            
         }
 
     }
 
     //Efetuar a Geração da População Inicial
-    private void GeracaoPopulacaoInicial(int nroAtributos, Instances treino, Instances validacao) throws Exception {
+    private void gerarPopulacaoInicial(Instances treino, Instances validacao) throws Exception {
         try {
             //Declaração Variáveis e Objetos
             ArrayList<Arvores> arvTemp;
 
             //Percorrer a quantidade de árvores informado
             for (int i = 0; i < quantidade; i++) {
-                //Inicialização Objetos
+                //Inicialização Objetos (DeepCopy dos Decisions Stumps)
                 arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(nodos);
 
                 //Selecionar o nodo raiz (sorteado aleatóriamente)
-                Arvores arv = arvTemp.get(Processamento.mt.nextInt(nroAtributos));
+                Arvores arv = arvTemp.get(Processamento.mt.nextInt(treino.instance(0).numAttributes() - 1));
 
-                //Geração da árvore ATÉ a profundidade estabelecida
-                GerarPopulacaoArvores(nroAtributos, 1, arv);
+                //Geração da árvore ATÉ a profundidade estabelecida (Desconsiderando o nodo do 1° Nível)
+                gerarPopulacaoArvores(treino.instance(0).numAttributes() - 1, 1, arv);
 
                 //Adicionar a Árvore Gerada
                 arvores.add(arv);
 
             }
 
-            //Calcular o Fitness das árvores E após Ordenação Crescente
-            CalculoFitnessPopulacao(treino, validacao);
+            //Calcular o Fitness das árvores(Treinamento e Validação) E após Ordenar Crescentemente
+            calcularFitnessPopulacao(treino, validacao);
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -137,7 +155,7 @@ public class AlGEnArDe {
     }
 
     //Efetuar a Geração da População de Árvores de Decisão
-    public void GerarPopulacaoArvores(int nroAtributos, int prof, Arvores arvore) throws IOException {
+    public void gerarPopulacaoArvores(int nroAtributos, int prof, Arvores arvore) throws IOException {
         //Condição de Parada - Se o grau de profundidade máxima
         if (prof <= profundidade) {
             //percorrer todas as arestas do árvore
@@ -152,7 +170,7 @@ public class AlGEnArDe {
                     arvore.SetNodo(arvore.getArestas(i), arvTemp.get(Processamento.mt.nextInt(arvTemp.size())));
 
                     //Chamada Recursiva para Geração da árvore atualizando o nivel de profundidade
-                    GerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
+                    gerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
 
                 }
 
@@ -163,7 +181,7 @@ public class AlGEnArDe {
     }
 
     //Processamento dos nodos - Definição das árvores e seus nodos (Numéricos - Bifurcadas / Nominais - Quantidade de arestas definida pela quantidade de classes)
-    public void ProcessamentoNodos(Instances dados) {
+    public void gerarDecisionStumps(Instances dados) {
         //Inicialização do Objeto
         nodos = new ArrayList<>();
 
@@ -174,7 +192,7 @@ public class AlGEnArDe {
             //1° Passo     - Processar todos os Atributos (Binários e Nominais)
             //2° Parâmetro - Nome do atributo
             //3° Parâmetro - Instâncias e a posição do Atributo
-            nodos.add(new Arvores(dados.instance(0).attribute(i).name(), new Processamento().ProcessamentoInstancias(dados, i)));
+            nodos.add(new Arvores(dados.instance(0).attribute(i).name(), new Processamento().processarInstanciasDados(dados, i)));
 
         }
 
@@ -183,7 +201,7 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="4° Definição dos Métodos e Funções Destinadas a Avaliação da População">    
     //Efetuar o treinamento dos nodos folhas - Atribuição das classes e suas quantidades, a classe que possuir maior quantidade será a classe dominante
-    private void TreinamentoNodosFolhas(Instances treino) throws Exception {
+    private void treinarNodosFolhas(Instances treino) throws Exception {
         try {
             //Declaração Variáveis e Objetos
             Processamento proc = new Processamento();
@@ -194,19 +212,19 @@ public class AlGEnArDe {
                 //2° Passo - Executa-se as instância de treino p/ calcular o fitness da árvore(s)
                 for (int i = 0; i < treino.numInstances(); i++) {
                     //Atualizar(Calcular) a quantidade de ocorrências dos atributos na árvore
-                    proc.AtribuicaoClasseNodosFolhas(arvore, treino.instance(i));
+                    proc.definirClasseNodosFolhas(arvore, treino.instance(i));
 
                 }
 
                 //Definir a classe majoritária da aresta
-                proc.DefinicaoClasseMajoritariaNodosFolhas(arvore);
+                proc.atribuirClasseNodosFolhas(arvore);
 
             }
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
-        }
+        } 
 
     }
 
@@ -214,21 +232,21 @@ public class AlGEnArDe {
     // 1° Passo - Efetua-se a classificação das árvores (definição da classe majoritária) com as instâncias de teste
     // 2° Passo - Efetua-se a Validação da árvore pelas instâncias de treinamento
     // 3° Passo - Cálculo do Fitness da árvore 
-    private void CalculoFitnessPopulacao(Instances treino, Instances validacao) throws Exception {
+    private void calcularFitnessPopulacao(Instances treino, Instances validacao) throws Exception {
         try {
-            //Eliminar Classificação Nodos
-            EliminarClassificacaoNodos();
-
             //Efetuar o treinamento - Definir quais classes pertencem os nodos folhas
-            TreinamentoNodosFolhas(treino);
+            treinarNodosFolhas(treino);
 
             //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
-            ValidacaoNodoFolhasParaCalculoFitness(validacao);
+            validarNodosFolhas(validacao);
 
             //Percorrer todas as árvres existentes e calcula o fitnes de cada uma delas
-            for (Arvores arvore : arvores) {
-                //Calcular E Setar o Valor do Fitness
-                arvore.setFitness(new Processamento().Arredondar(1 - ((double) arvore.getQtdOcorrencias() / validacao.numInstances()), qtdDecimais, 1));
+            for (Arvores arv : arvores) {
+                //Declaração variáveis e objetos
+                double valorFitness = new Processamento().arredondarValor(1 - ((double) arv.getQtdOcorrencias() / validacao.numInstances()), qtdDecimais, 1);
+
+                //Setar o Valor do Fitness
+                arv.setFitness(valorFitness);
 
             }
 
@@ -238,13 +256,17 @@ public class AlGEnArDe {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
+        } finally {
+            //Chamar o Garbage Collector
+            System.gc();
+
         }
 
     }
 
     //Efetuar a Validação do nodos folhas p/ o Cálculo do Fitness, resumindo PARA cada árvore percorre-se TODAS as instâncias de Validação e efetua-se o calculo das 
     //quantidades das Classes p/ cada nodo folha
-    private void ValidacaoNodoFolhasParaCalculoFitness(Instances validacao) throws Exception {
+    private void validarNodosFolhas(Instances validacao) throws Exception {
         try {
             //Percorrer todas as árores existentes e Atualiza a quantidade de ocorrências
             for (Arvores arv : arvores) {
@@ -255,7 +277,7 @@ public class AlGEnArDe {
                 //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
                 for (int i = 0; i < validacao.numInstances(); i++) {
                     //Atualizar(Calcular) a quantidade de ocorrências dos atributos na árvore
-                    ValidacaoCalculoFitnessGeracao(arv, validacao.instance(i));
+                    validarCalculoFitnessArvore(arv, validacao.instance(i));
 
                 }
 
@@ -267,12 +289,12 @@ public class AlGEnArDe {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
-        }
+        } 
 
     }
 
     //Cálculo das quantidades (POR CLASSE) de cada um dos nodos folhas
-    public void ValidacaoCalculoFitnessGeracao(Arvores arvore, Instance avaliacao) {
+    public void validarCalculoFitnessArvore(Arvores arvore, Instance avaliacao) {
         //Se o árvore não for nula
         if (arvore != null) {
             //Declaração Variáveis e Objetos
@@ -301,7 +323,7 @@ public class AlGEnArDe {
                     double valorAresta = Double.valueOf(arvore.getArestas(0).getAtributo().split(" ")[1]);
 
                     //Se valor posição 0 FOR MENOR IGUAL ao valor atributo selecionado (Então posição igual a 0 SENAO 1)
-                    int pos = prc.Arredondar(avaliacao.value(posicao), qtdDecimais, 1) <= prc.Arredondar(valorAresta, qtdDecimais, 1) ? 0 : 1;
+                    int pos = prc.arredondarValor(avaliacao.value(posicao), qtdDecimais, 1) <= prc.arredondarValor(valorAresta, qtdDecimais, 1) ? 0 : 1;
 
                     //Se for um nodo folha
                     if (arvore.getArestas(pos).getNodo() == null) {
@@ -314,39 +336,30 @@ public class AlGEnArDe {
 
                     } else {
                         //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                        ValidacaoCalculoFitnessGeracao(arvore.getArestas(pos).getNodo(), avaliacao);
+                        validarCalculoFitnessArvore(arvore.getArestas(pos).getNodo(), avaliacao);
 
                     }
 
                 } else {
-                    /*    
-                     Aqui Rever  ------------------------------------------------
-                     Aqui Rever  ------------------------------------------------
-                     Aqui Rever  ------------------------------------------------
-                     Aqui Rever  ------------------------------------------------
-                     //Percorrer todas as arestas
-                     for (Atributos aresta : arvore.getArestas()) {
-                     //Se for um nodo folha
-                     if (aresta.getNodo() == null) {
-                     //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
-                     if (aresta.getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                     //Atualizar a quantidade (Somar 1 na quantidade atual)
-                     atuQtdOcorr(1);
+                    //Percorrer todas as arestas
+                    for (Atributos aresta : arvore.getArestas()) {
+                        //Se for um nodo folha
+                        if (aresta.getNodo() == null) {
+                            //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
+                            if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(aresta.getClasseDominante())) {
+                                //Atualizar a quantidade (Somar 1 na quantidade atual)
+                                atuQtdOcorr(1);
 
-                     }
+                            }
 
-                     } else {
-                     //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                     ValidacaoCalculoFitnessGeracao(aresta.getNodo(), avaliacao);
+                        } else {
+                            //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                            validarCalculoFitnessArvore(aresta.getNodo(), avaliacao);
 
-                     }
+                        }
 
-                     }
-                     Aqui Rever  ------------------------------------------------
-                     Aqui Rever  ------------------------------------------------
-                     Aqui Rever  ------------------------------------------------
-                     Aqui Rever  ------------------------------------------------
-                     */
+                    }
+
                 }
 
             }
@@ -355,19 +368,8 @@ public class AlGEnArDe {
 
     }
 
-    //Eliminar as definições da árvore (Valor Fitness, Quantidade de Ocorrência, Classe Dominante e Classes)
-    private void EliminarClassificacaoNodos() {
-        //Processar Árvores e Eliminar as definções dos Nodos Folhas
-        for (Arvores arvore : arvores) {
-            //Processamento dos nodos folhas
-            LimparDefinicaoClassesNodosFolhas(arvore, 0);
-
-        }
-
-    }
-
     //Eliminar a Classificação dos nodos Folhas
-    private void LimparDefinicaoClassesNodosFolhas(Arvores arv, int posicao) {
+    private void eliminarClassificacaoNodosFolhas(Arvores arv, int posicao) {
         try {
             if (arv != null) {
                 //Atualizar os Atributos da Árvore
@@ -385,14 +387,14 @@ public class AlGEnArDe {
                         //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
                         if (arv.getArestas(posicao).getNodo() != null) {
                             //Chamada Recursiva da Função Avaliando a posição Atual
-                            LimparDefinicaoClassesNodosFolhas(arv.getArestas(posicao).getNodo(), posicao);
+                            eliminarClassificacaoNodosFolhas(arv.getArestas(posicao).getNodo(), posicao);
 
                             //Se a próxima aresta não for nula
                             if (arv.getArestas(posicao + 1) != null) {
                                 //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
                                 if (arv.getArestas(posicao + 1).getNodo() != null) {
                                     //Chamada Recursiva da Função
-                                    LimparDefinicaoClassesNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
+                                    eliminarClassificacaoNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
 
                                 }
 
@@ -402,7 +404,7 @@ public class AlGEnArDe {
 
                     } else //Chamada Recursiva da Função
                     {
-                        LimparDefinicaoClassesNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
+                        eliminarClassificacaoNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
 
                     }
 
@@ -413,7 +415,7 @@ public class AlGEnArDe {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
-        }
+        } 
 
     }
     //</editor-fold> 
@@ -502,4 +504,5 @@ public class AlGEnArDe {
 
     }
     //</editor-fold>     
+
 }

@@ -42,7 +42,7 @@ public class Classes {
 
     }
 
-    public void atualizarQtd(int qtd) {
+    public void somarQuantidade(int qtd) {
         this.quantidade += qtd;
 
     }
