@@ -29,27 +29,7 @@ public class AlGEnArDe {
     //Método Inicializador da classe
     public AlGEnArDe() {
     }
-    //</editor-fold> 
-
-    //<editor-fold defaultstate="collapsed" desc="2° Métodos Inicializadores da classe e Get´s E Set´s">    
-    private void zerarqtdOcorr() {
-        //Zerar a quantidade
-        this.qtdOcorr = 0;
-
-    }
-
-    private int getqtdOcorr() {
-        //Retornar a quantidade
-        return this.qtdOcorr;
-
-    }
-
-    private void atuQtdOcorr(int quantidade) {
-        //Atualizar a quantidade de ocorrências
-        this.qtdOcorr += quantidade;
-
-    }
-    //</editor-fold> 
+    //</editor-fold>  
 
     //<editor-fold defaultstate="collapsed" desc="3° Definição dos Métodos pertinentes a Geração da População">
     //Tradução da Sigla - AlGenArDe - "Al"goritmo "Gen"ético de "Ar"vore de "De"cisão
@@ -91,9 +71,9 @@ public class AlGEnArDe {
                 arvores = new Processamento().GerarArvores(dados, true);
 
                 //Processar Árvores e Eliminar as definções dos Nodos Folhas
-                for (Arvores arvore : arvores) {
+                for (Arvores arv : arvores) {
                     //Processamento dos nodos folhas
-                    eliminarClassificacaoNodosFolhas(arvore, 0);
+                    eliminarClassificacaoNodosFolhas(arv);
 
                 }
 
@@ -117,7 +97,7 @@ public class AlGEnArDe {
 
             //Chamar o garbage collector
             System.gc();
-            
+
         }
 
     }
@@ -224,7 +204,7 @@ public class AlGEnArDe {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
-        } 
+        }
 
     }
 
@@ -237,18 +217,8 @@ public class AlGEnArDe {
             //Efetuar o treinamento - Definir quais classes pertencem os nodos folhas
             treinarNodosFolhas(treino);
 
-            //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada
+            //Execução da Validação para atualizar a quantidade de ocorrência a partir da base montada e Calcular o Fitness
             validarNodosFolhas(validacao);
-
-            //Percorrer todas as árvres existentes e calcula o fitnes de cada uma delas
-            for (Arvores arv : arvores) {
-                //Declaração variáveis e objetos
-                double valorFitness = new Processamento().arredondarValor(1 - ((double) arv.getQtdOcorrencias() / validacao.numInstances()), qtdDecimais, 1);
-
-                //Setar o Valor do Fitness
-                arv.setFitness(valorFitness);
-
-            }
 
             //Ordenar a população EM ORDEM CRESCENTE pelo valor do Fitness, por exemplo.: 0.2, 0.3, 0.4,...1.0
             Collections.sort(arvores);
@@ -271,7 +241,7 @@ public class AlGEnArDe {
             //Percorrer todas as árores existentes e Atualiza a quantidade de ocorrências
             for (Arvores arv : arvores) {
                 //Zerar a quantidade de Ocorrências
-                zerarqtdOcorr();
+                this.qtdOcorr = 0;
 
                 //1° Passo - Percorre a função recursivamente para chegar a todos os nodos folhas e atribuir a(s) propriedades encontradas
                 //2° Passo - Executa-se as instância de avaliação p/ calcular o fitness da árvore(s)
@@ -281,15 +251,16 @@ public class AlGEnArDe {
 
                 }
 
-                //Atualizar a Quantidade de ocorrências
-                arv.setQtdOcorrencias(getqtdOcorr());
+                //Atualizar a Quantidade de ocorrências e Calcular o Valor do Fitness
+                arv.setQtdOcorrencias(this.qtdOcorr);
+                arv.setFitness(new Processamento().arredondarValor(1 - ((double) arv.getQtdOcorrencias() / validacao.numInstances()), qtdDecimais, 1));
 
             }
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
-        } 
+        }
 
     }
 
@@ -330,7 +301,7 @@ public class AlGEnArDe {
                         //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
                         if (arvore.getArestas(pos).getClasseDominante().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
                             //Atualizar a quantidade (Somar 1 na quantidade atual)
-                            atuQtdOcorr(1);
+                            this.qtdOcorr += 1;
 
                         }
 
@@ -348,7 +319,7 @@ public class AlGEnArDe {
                             //Se o valor da aresta for igual ao valor do atributo selecionada da instância processada, atualiza a quantidade de OCORRÊNCIAS do Nodo
                             if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(aresta.getClasseDominante())) {
                                 //Atualizar a quantidade (Somar 1 na quantidade atual)
-                                atuQtdOcorr(1);
+                                this.qtdOcorr += 1;
 
                             }
 
@@ -369,7 +340,7 @@ public class AlGEnArDe {
     }
 
     //Eliminar a Classificação dos nodos Folhas
-    private void eliminarClassificacaoNodosFolhas(Arvores arv, int posicao) {
+    private void eliminarClassificacaoNodosFolhas(Arvores arv) {
         try {
             if (arv != null) {
                 //Atualizar os Atributos da Árvore
@@ -378,33 +349,22 @@ public class AlGEnArDe {
 
                 //Se possuir arestas
                 if (arv.getArestas() != null) {
-                    //Se a aresta não for nula
-                    if (arv.getArestas(posicao) != null) {
-                        //Atribuições
-                        arv.getArestas(posicao).setClasses(null);
-                        arv.getArestas(posicao).setClasseDominante("");
+                    //Percorrer todas as arestas
+                    for (int i = 0; i < arv.getArestas().size(); i++) {
+                        //Se a aresta não for nula
+                        if (arv.getArestas(i) != null) {
+                            //Atribuições
+                            arv.getArestas(i).setClasses(null);
+                            arv.getArestas(i).setClasseDominante("");
 
-                        //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
-                        if (arv.getArestas(posicao).getNodo() != null) {
-                            //Chamada Recursiva da Função Avaliando a posição Atual
-                            eliminarClassificacaoNodosFolhas(arv.getArestas(posicao).getNodo(), posicao);
-
-                            //Se a próxima aresta não for nula
-                            if (arv.getArestas(posicao + 1) != null) {
-                                //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
-                                if (arv.getArestas(posicao + 1).getNodo() != null) {
-                                    //Chamada Recursiva da Função
-                                    eliminarClassificacaoNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
-
-                                }
+                            //Se o nodo não for nulo (Chama Recursivamento o próximo nível) até chegar em um nodo Folha
+                            if (arv.getArestas(i).getNodo() != null) {
+                                //Chamada Recursiva da Função Avaliando a posição Atual
+                                eliminarClassificacaoNodosFolhas(arv.getArestas(i).getNodo());
 
                             }
 
                         }
-
-                    } else //Chamada Recursiva da Função
-                    {
-                        eliminarClassificacaoNodosFolhas(arv.getArestas(posicao + 1).getNodo(), posicao + 1);
 
                     }
 
@@ -415,7 +375,10 @@ public class AlGEnArDe {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
-        } 
+        } finally {
+            System.gc();
+
+        }
 
     }
     //</editor-fold> 

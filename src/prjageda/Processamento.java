@@ -2,7 +2,6 @@ package prjageda;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import weka.core.Instance;
@@ -14,12 +13,14 @@ public class Processamento {
     //<editor-fold defaultstate="collapsed" desc="Declaração Atributos e Método(s) Construtor(es) da Classe">    
     private String caminhoDados;
     private Arvores arvTemporaria;
-    private String atributosArv = "";
 
     //Declaração de objetos
     public static final MersenneTwister mt = new MersenneTwister();
     private static final double percMutacao = 0.05; //5% de Possibilidade de Mutação
+    private static final double probSorteioAtr = 0.5;
     private static final int qtdElitismo = 2;
+    private static final String statusArv = "nula";
+    private static String atributoDS = "";
 
     public String getCaminhoDados() {
         return caminhoDados;
@@ -74,7 +75,7 @@ public class Processamento {
         try {
             //1 - Avaliar se o Atributo é Numérico ou Nominal 
             //  - 1.1 - Se Numérico a árvore terá 2 arestas (Árvore será bifurcada) 
-            //  - 1.2 - Se Categórico terá o número de arestas em função da quantidade de atributosArv encontrados no dataset
+            //  - 1.2 - Se Categórico terá o número de arestas em função da quantidade de atributos encontrados no dataset
             if (dados.attribute(posicao).isNumeric()) {
                 //Declaração Variáveis e Objetos
                 String indiceGini = String.valueOf(arredondarValor(calcularIndiceGini(dados, posicao), AlGEnArDe.qtdDecimais, 1));
@@ -151,14 +152,16 @@ public class Processamento {
                 //Se for MENOR OU IGUAL ao Limite Superior (Valor < Limite Superior)
                 if (arredondarValor(mt.nextDouble(), 2, 1) < Processamento.percMutacao) {
                     //Declaração Variáveis e Objetos
-                    String atributo = buscarNomesAtributosArvore(populacao.get(i));
+                    buscarNomesAtributosArvore(populacao.get(i));
 
                     //Caso a árvore possuir mais do que o nodo raiz, retornará um atributo, caso contrário nem processa
-                    if (!atributo.isEmpty()) {
-                        //Efetuar a Mutação da Árvore - "E"xpansão ou "R"etração de Nodos
-                        efetuarMutacaoArvores(populacao.get(i), mt.nextBoolean() ? "E" : "R", dados, atributo, 0);
+                    if (!atributoDS.isEmpty()) {
+                        //Efetuar a Mutação da Árvore - "E"xpansão ou "R"etração de Nodos e Limpar o Objeto
+                        efetuarMutacaoArvores(populacao.get(i), mt.nextBoolean() ? "E" : "R", dados, atributoDS);
 
                     }
+                    //Limpar o Objeto
+                    atributoDS = "";
 
                 }
 
@@ -201,29 +204,29 @@ public class Processamento {
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //Efetuar o Crossover na 1° Árvore
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            String atributoArv1 = buscarNomesAtributosArvore(arv1);
+            buscarNomesAtributosArvore(arv1);
 
             //Se o atributo for válido processa SENÃO abandona o processamento
-            if (!atributoArv1.isEmpty()) {
+            if (!atributoDS.isEmpty() && !atributoDS.equals(statusArv)) {
                 //Buscar um dos Atributos Selecionados Aleatóriamente e Remove a Sub-Árvore da 1° Árvore Transformando em um Nodo "Folha" na posição 
-                eliminarNodoOrigemESetarNuloeRetornarArvore(arv1, atributoArv1, 0);
+                eliminarNodoOrigemESetarNuloeRetornarArvore(arv1, atributoDS);
 
                 //Incluir o nodo removido na 1° Árvore em uma posição aleatório da 2° Árvore (desde que a posição seja um nodo folha)
                 pesquisarPosicaoArvoreDestino(arv2);
 
             }
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                        
+
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //Efetuar o Crossover na 2° Árvore (Sempre DEPOIS de Finalizar o processamento da 1° Árvore)
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //Depois de passar pelo crossover da primeira árvore seleciona o novo atributo
-            String atributoArv2 = buscarNomesAtributosArvore(arv2);
+            buscarNomesAtributosArvore(arv2);
 
             //Se o atributo for válido processa SENÃO abandona o processamento
-            if (!atributoArv2.isEmpty()) {
+            if (!atributoDS.isEmpty() && !atributoDS.equals(statusArv)) {
                 //Buscar um dos atributosArv selecionados aleatóriamente e Remover Sub-Árvore da 2° Árvore transformando em um nodo folha na respectiva posição 
-                eliminarNodoOrigemESetarNuloeRetornarArvore(arv2, atributoArv2, 0);
+                eliminarNodoOrigemESetarNuloeRetornarArvore(arv2, atributoDS);
 
                 //Incluir o nodo removido na 1° Árvore em uma posição aleatória da 2° Árvore (desde que a posição seja um nodo folha)
                 pesquisarPosicaoArvoreDestino(arv1);
@@ -237,6 +240,7 @@ public class Processamento {
 
             //Liberar o Objeto
             arvTemporaria = null;
+            atributoDS = "";
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -251,7 +255,7 @@ public class Processamento {
 
     //<editor-fold defaultstate="collapsed" desc="Funções Pertinentes aos Métodos de Mutação">   
     //Efetuar a Mutação da árvore, a mesma poderá ser de "E"xpansão ou "R"edução
-    private void efetuarMutacaoArvores(Arvores arvore, String tipo, Instances dados, String atributo, int posicao) throws IOException {
+    private void efetuarMutacaoArvores(Arvores arvore, String tipo, Instances dados, String atributo) throws IOException {
         try {
             //SE for "E" - EXPANSÃO - Vai até um nodo FOLHA ALEATÓRIO E ADICIONA um AlGEnArDe Aleatóriamente
             //SENÃO  "R" - REDUÇÃO  - Vai até o nodo passado como parâmetro e transforma-se todos as sub-árvores abaixo em folhas
@@ -273,10 +277,11 @@ public class Processamento {
                                 if (arvore.getArestas(itemPos).getNodo().getArestas(itemPos).getNodo() == null) {
                                     //Selecionar aleatóriamente uma árvore p/ ser incluida no nodo raiz e Adicionar o nodo na aresta selecionada
                                     arvore.getArestas(itemPos).getNodo().getArestas(itemPos).setNodo(temp.get(Processamento.mt.nextInt(temp.size() - 1)));
+                                    return;
 
                                 } else {
                                     //Chamar a função recursivamente até chegar em um nodo raiz
-                                    efetuarMutacaoArvores(arvore.getArestas(itemPos).getNodo(), tipo, dados, atributo, posicao);
+                                    efetuarMutacaoArvores(arvore.getArestas(itemPos).getNodo(), tipo, dados, atributo);
 
                                 }
 
@@ -297,32 +302,31 @@ public class Processamento {
 
                             //Se o nodo for nulo, seleciona uma Decision Stump aleatóriamente p/ ser incluida no nodo folha                    
                             arvore.setArestas(atribs);
+                            return;
 
                         }
 
                     } else {
                         //Se for "REDUÇÃO"
-                        //Se a aresta não for nula
-                        if (arvore.getArestas(posicao) != null) {
-                            //Se o nodo não for nulo
-                            if (arvore.getArestas(posicao).getNodo() != null) {
-                                //Se for o Atributo Selecionado Atribuo nulo senão retorno pra pesquisa
-                                if (arvore.getArestas(posicao).getNodo().getNomeAtributo().equals(atributo)) {
-                                    //Transformar o Nodo c/ arestas em Nodo Folha (Mutação de "REDUÇÃO") E Sair do processamento
-                                    arvore.getArestas(posicao).setNodo(null);
-                                    //Sair fora da execução -- NAO REMOVER
-                                    return;
+                        //Prcorrer as Arestas
+                        for (int i = 0; i < arvore.getArestas().size(); i++) {
+                            //Se a aresta não for nula
+                            if (arvore.getArestas(i) != null) {
+                                //Se o nodo não for nulo
+                                if (arvore.getArestas(i).getNodo() != null) {
+                                    //Se for o Atributo Selecionado Atribuo nulo senão retorno pra pesquisa
+                                    if (arvore.getArestas(i).getNodo().getNomeAtributo().equals(atributo)) {
+                                        //Transformar o Nodo c/ arestas em Nodo Folha (Mutação de "REDUÇÃO") E Sair do processamento
+                                        arvore.getArestas(i).setNodo(null);
+                                        //Sair fora da execução
+                                        break;
 
-                                } else {
-                                    //Chamada recursiva da função atualizando o nível de profundidade
-                                    efetuarMutacaoArvores(arvore.getArestas(posicao).getNodo(), tipo, dados, atributo, posicao);
+                                    } else {
+                                        //Chamada recursiva da função atualizando o nível de profundidade
+                                        efetuarMutacaoArvores(arvore.getArestas(i).getNodo(), tipo, dados, atributo);
 
-                                }
+                                    }
 
-                            } else {
-                                if (arvore.getArestas(posicao + 1) != null) {
-                                    //Chamada recursiva da função atualizando o nível de profundidade
-                                    efetuarMutacaoArvores(arvore.getArestas(posicao + 1).getNodo(), tipo, dados, atributo, posicao + 1);
                                 }
 
                             }
@@ -334,8 +338,12 @@ public class Processamento {
                 }
 
             }
-        } catch (Exception e) {
+
+        } catch (IOException e) {
             System.out.println(e.getMessage());
+
+        } finally {
+            System.gc();
 
         }
 
@@ -344,38 +352,38 @@ public class Processamento {
 
     //<editor-fold defaultstate="collapsed" desc="Funções Destinadas ao Crossover">
     //Remover uma Sub-Árvore da Árvore atual e setar nulo a mesma
-    public void eliminarNodoOrigemESetarNuloeRetornarArvore(Arvores arvore, String atributo, int posicao) {
+    public void eliminarNodoOrigemESetarNuloeRetornarArvore(Arvores arvore, String atributo) {
         try {
             if (arvore != null) {
                 //Se as arestas não forem nulas
                 if (arvore.getArestas() != null) {
-                    //Se a aresta selecionada não for nula
-                    if (arvore.getArestas(posicao) != null) {
-                        //Se o nodo não for nulo
-                        if (arvore.getArestas(posicao).getNodo() != null) {
-                            //Se for o nodo da aresta selecionado aleatóriamente
-                            if (arvore.getArestas(posicao).getNodo().getNomeAtributo().equals(atributo)) {
-                                //Criar o Objeto e Inicializar o mesmo
-                                arvTemporaria = new Arvores();
-                                arvTemporaria = arvore.getArestas(posicao).getNodo();
+                    //Percorrer todas as arestas
+                    for (int i = 0; i < arvore.getArestas().size(); i++) {
+                        //Se a aresta selecionada não for nula
+                        if (arvore.getArestas(i) != null) {
+                            //Se o nodo não for nulo
+                            if (arvore.getArestas(i).getNodo() != null) {
+                                //Se for o nodo da aresta selecionado aleatóriamente
+                                if (arvore.getArestas(i).getNodo().getNomeAtributo().equals(atributo)) {
+                                    //Criar o Objeto e Inicializar o mesmo
+                                    arvTemporaria = new Arvores();
+                                    arvTemporaria = arvore.getArestas(i).getNodo();
 
-                                //Setar nulo p/ a sub-árvore selecionada
-                                arvore.getArestas(posicao).setNodo(null);
-                                arvore.getArestas(posicao).setClasses(null);
-                                arvore.getArestas(posicao).setClasseDominante("");
+                                    //Setar nulo p/ a sub-árvore selecionada
+                                    arvore.getArestas(i).setNodo(null);
+                                    arvore.getArestas(i).setClasses(null);
+                                    arvore.getArestas(i).setClasseDominante("");
 
-                                //Sair fora
-                                return;
+                                    //Sair fora
+                                    break;
+
+                                }
+                                //Chamar Recursivamente a função até encontrar o nodo
+                                eliminarNodoOrigemESetarNuloeRetornarArvore(arvore.getArestas(i).getNodo(), atributo);
 
                             }
-                            //Chamar Recursivamente a função até encontrar o nodo
-                            eliminarNodoOrigemESetarNuloeRetornarArvore(arvore.getArestas(posicao).getNodo(), atributo, posicao);
 
                         }
-
-                    } else {
-                        //Chamar Recursivamente a função até encontrar o nodo
-                        eliminarNodoOrigemESetarNuloeRetornarArvore(arvore.getArestas(posicao + 1).getNodo(), atributo, posicao + 1);
 
                     }
 
@@ -385,6 +393,9 @@ public class Processamento {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
+
+        } finally {
+            System.gc();
 
         }
 
@@ -410,6 +421,7 @@ public class Processamento {
                     //Setar as propriedades
                     arvore.getArestas(posicao).setClasses(null);
                     arvore.getArestas(posicao).setClasseDominante("");
+                    return;
 
                 }
 
@@ -417,6 +429,9 @@ public class Processamento {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
+
+        } finally {
+            System.gc();
 
         }
 
@@ -548,7 +563,7 @@ public class Processamento {
 
             }
 
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             System.out.println(e.getMessage());
 
         }
@@ -739,26 +754,16 @@ public class Processamento {
 
     }
 
-    private String buscarNomesAtributosArvore(Arvores arv) {
-        //Declaração Variáveis e Objetos e Inicializações
-        String nomeatributo = "", atributos = "";
-
+    private void buscarNomesAtributosArvore(Arvores arv) {
         try {
-            //Limpar o Objeto e chamada Recursiva p/ montagem dos atributosArv da árvore(apartir do nodo raiz)
-            atributosArv = "";
-            processarNomesAtributos(arv, arv.getNomeAtributo());
+            //Inicializar o objeto
+            atributoDS = "";
 
-            //Se não for vazio
-            if (!atributosArv.equals("")) {
-                //Declaração Variáveis e Objetos e Inicializações
-                ArrayList<String> atribArv = new ArrayList<>(Arrays.asList(atributosArv.substring(0, atributosArv.length() - 1).split(",")));
+            //Enquanto não for vazio
+            while (atributoDS.equals("")) {
+                //Perquisar atributo
+                processarNomesAtributos(arv, arv.getNomeAtributo());
 
-                //Se for diferente de nulo(carregou algum atribuito)
-                if (atribArv.size() > 0) {
-                    //Se o tamanho for 1, pega o único existente (sem sorteio) SENÃO Sortear um entre os possíveis
-                    nomeatributo = (atribArv.size() <= 1) ? atribArv.get(0) : atribArv.get(mt.nextInt(atribArv.size() - 1));
-
-                }
             }
 
         } catch (Exception e) {
@@ -769,9 +774,6 @@ public class Processamento {
             System.gc();
 
         }
-
-        //Definir o retorno
-        return nomeatributo;
 
     }
 
@@ -784,19 +786,49 @@ public class Processamento {
 
             }
 
+            //Se não possuir arestas retorna e for vazio
+            if ((arv.getArestas() == null) && (atributoDS.isEmpty())) {
+                //Se possuir apenas 
+                atributoDS = "nula";
+                return;
+
+            }
+
             //Se possuir arestas válidas
             if (arv.getArestas() != null) {
+                //Declaração Variáveis e Objetos
+                boolean bNodos = false;
+
                 //Percorrer as Arestas
                 for (int i = 0; i < arv.getArestas().size(); i++) {
-                    //Adicionar o atributo (caso não exista)
-                    atributosArv += !atributosArv.contains(arv.getNomeAtributo()) ? !arv.getNomeAtributo().equals(atributoRaiz) ? arv.getNomeAtributo() + "," : "" : "";
-
                     //Se o nodo não for nulo
                     if (arv.getArestas(i).getNodo() != null) {
+                        //Atribuições
+                        bNodos = true;
+
+                        //Se nao for igual ao nodo raiz
+                        if (!arv.getArestas(i).getNodo().getNomeAtributo().equals(atributoRaiz)) {
+                            //Sortear o elemento
+                            if (mt.nextBoolean(probSorteioAtr)) {
+                                atributoDS = arv.getArestas(i).getNodo().getNomeAtributo();
+                                break;
+
+                            }
+
+                        }
+
                         //Chamada recursiva da árvore passando o nodo selecionado
                         processarNomesAtributos(arv.getArestas(i).getNodo(), atributoRaiz);
 
                     }
+
+                }
+
+                //Se chegou aqui e não processou(é porque existe apenas 1 atributo) e não possuir nodos
+                if (atributoDS.isEmpty() && !bNodos) {
+                    //Atribuições e Sair da função
+                    atributoDS = "nula";
+                    return;
 
                 }
 
@@ -805,6 +837,11 @@ public class Processamento {
         } catch (Exception e) {
             System.out.println(e.getMessage());
 
+        }
+        finally{
+            //Garbage collector
+            System.gc();
+            
         }
 
     }
