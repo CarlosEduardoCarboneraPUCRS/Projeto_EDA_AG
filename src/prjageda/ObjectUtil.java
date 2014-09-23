@@ -42,8 +42,10 @@ public final class ObjectUtil {
                 if (Object.class.equals(clazz)) {
                     break;
                 }
+                
                 clazz = clazz.getSuperclass();
                 Field[] sFields = clazz.getDeclaredFields();
+                
                 for (Field field : sFields) {
                     field.setAccessible(true);
                     if (!Modifier.isFinal(field.getModifiers())) {
@@ -74,6 +76,7 @@ public final class ObjectUtil {
     public static <T> List<T> deepCopyList(List<T> arg) {
         if (arg == null) {
             return null;
+            
         }
 
         List<T> retList = new ArrayList<>();

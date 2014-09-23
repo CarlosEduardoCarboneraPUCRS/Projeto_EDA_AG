@@ -32,7 +32,8 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
     }
 
     public String getNomeAtributo() {
-        return this.nomeAtr;
+        //Definir o retorno
+        return nomeAtr == null ? "" : !(nomeAtr.isEmpty()) ? this.nomeAtr : "";
 
     }
 

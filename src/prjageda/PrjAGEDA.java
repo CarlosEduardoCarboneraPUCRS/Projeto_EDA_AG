@@ -3,10 +3,10 @@ package prjageda;
 public class PrjAGEDA {
 
     //Arquivo com Atributos Numéricos
-    private static final String arquivo = "C:\\ArffTeste\\ionosphere.arff";
+    private static final String _arquivo = "C:\\ArffTeste\\ionosphere.arff";
 
     //Arquivo com Atributos Nominais
-    //private static final String arquivo = "C:\\ArffTeste\\weathernominal.arff";
+    //private static final String _arquivo = "C:\\ArffTeste\\weathernominal.arff";
     public static void main(String[] args) throws Exception, Throwable {
         //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         //01° - Leitura do(s) Arquivo(s) <nome(s)>.arff
@@ -30,7 +30,7 @@ public class PrjAGEDA {
         //12° - Repete-se a partir do passo 07° Novamente até atingir o nro de Gerações
         //13° - Retorna a melhor árvore
         //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        new AlGEnArDe().AlGenArDe(new Processamento(arquivo).lerArquivoDados());
+        new AlGEnArDe().AlGenArDe(new Processamento(_arquivo).lerArquivoDados());
 
     }
 

@@ -11,15 +11,16 @@ public class Atributos {
     private Arvores nodo;
 
     public Atributos() {
-        //setar o atributo
+        //Inicialização dos atributos
         this.atributo = "";
         this.classeDominante = "";
         this.nodo = null; 
         this.classes = null;
+        
     }
 
     public Atributos(String atr, Arvores no, String clsDominante, ArrayList<Classes> cls) {
-        //setar o atributo
+        //Inicialização dos atributos
         this.atributo = atr;
         this.classeDominante = clsDominante;
         this.nodo = no;
