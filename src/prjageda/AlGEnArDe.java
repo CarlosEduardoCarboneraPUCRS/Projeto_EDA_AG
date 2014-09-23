@@ -11,8 +11,8 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int _quantidade = 100;
-    public static final int _profundidade = 4;   //Defini-se com 4 + 1 = 5
+    public static final int _quantidade = 200;
+    public static final int _profundidade = 4;   //Defini-se como Nível = Nível + 1;
     public static final double _TxCrossover = 0.9;
     public static final int _qtdDecimais = 4;
     public static ArrayList<Arvores> _nodos = null;
