@@ -79,7 +79,7 @@ public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
     }
 
     public void setArestas(ArrayList<Atributos> arestas) {
-        this.arestas = arestas;
+        this.arestas = arestas == null ? null : arestas;
 
     }
 

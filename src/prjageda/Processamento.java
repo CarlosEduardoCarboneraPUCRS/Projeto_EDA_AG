@@ -13,12 +13,12 @@ public class Processamento {
     //<editor-fold defaultstate="collapsed" desc="Declaração Atributos e Método(s) Construtor(es) da Classe">    
     //Declaração de objetos privados
     private static final double _percMutacao = 0.05; //5% de Possibilidade de Mutação
-    private static final int _qtdElitismo = 2;
     private String _caminhoDados;
     private Arvores _arvTemporaria;
 
     //Declaração de objetos públicos
     public static final MersenneTwister mt = new MersenneTwister();
+    public static final int _qtdElitismo = 2;
 
     public String getCaminhoDados() {
         return _caminhoDados;
@@ -121,21 +121,25 @@ public class Processamento {
 
             //Efetua a geração da nova população equanto a população for menor que a população inicialmente estabelecida
             while (populacao.size() < AlGEnArDe._quantidade) {
-                //Efetuar o DeepCopy das Árvores(JÁ QUE TUDO NO JAVA É POR REFERÊNCIA) 
-                ArrayList<Arvores> listagem = new ArrayList<>(ObjectUtil.deepCopyList(AlGEnArDe._arvores));
-
                 //Inicialização do Objeto            
                 filhos = new ArrayList<>();
 
                 //Adicionar as Árvores pais
-                filhos.add((Arvores) selecionarArvoresPorTorneio(listagem));
-                filhos.add((Arvores) selecionarArvoresPorTorneio(listagem));
+                filhos.add((Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores));
+                filhos.add((Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores));
 
                 //SE Valor Gerado <= _TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
                 if (mt.nextDouble() <= AlGEnArDe._TxCrossover) {
-                    //Copiar as Árvores
-                    populacao.add(efetuarCrossoverArvores(ObjectUtil.deepCopy(filhos.get(0)), ObjectUtil.deepCopy(filhos.get(1))));
-                    populacao.add(efetuarCrossoverArvores(ObjectUtil.deepCopy(filhos.get(1)), ObjectUtil.deepCopy(filhos.get(0))));
+                    //Efetuar o Crossover
+                    Arvores arvore1 = ObjectUtil.deepCopy(filhos.get(0));
+                    Arvores arvore2 = ObjectUtil.deepCopy(filhos.get(1));
+                    
+                    populacao.add(efetuarCrossoverArvores(arvore1, arvore2));
+                    
+                    Arvores arvore3 = ObjectUtil.deepCopy(filhos.get(1));
+                    Arvores arvore4 = ObjectUtil.deepCopy(filhos.get(0));
+                    
+                    populacao.add(efetuarCrossoverArvores(arvore4, arvore3));
 
                 }
 
@@ -208,7 +212,7 @@ public class Processamento {
                 if (!atribDestinto.isEmpty()) {
                     //Incluir o nodo removido na 1° Árvore em uma posição aleatório da 2° Árvore (desde que a posição seja um nodo folha)
                     pesquisarPosicaoArvoreDestino(destino, 1, atribDestinto);
-                    
+
                 }
 
             }
@@ -410,9 +414,20 @@ public class Processamento {
                         pesquisarPosicaoArvoreDestino(arvore.getArestas(i).getNodo(), prof + 1, atributo);
 
                     } else {
-                        //Setar a aresta informada e liberar o objeto
-                        arvore = _arvTemporaria;
-                        _arvTemporaria = null;
+                        if (_arvTemporaria != null) {
+                            //Setar a aresta informada e liberar o objeto
+                            arvore = new Arvores();
+
+                            //Setar as propriedades
+                            arvore.setNomeAtributo(_arvTemporaria.getNomeAtributo());
+                            arvore.setFitness(0);
+                            arvore.setQtdOcorrencias(0);
+                            arvore.setArestas(_arvTemporaria.getArestas());
+
+                            //Limpar o Objeto
+                            _arvTemporaria = null;
+
+                        }
 
                         //Definir o retorno da função
                         return;
