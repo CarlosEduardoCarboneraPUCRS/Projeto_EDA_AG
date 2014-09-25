@@ -17,7 +17,6 @@ public class Processamento {
     private Arvores _arvTemporaria;
 
     //Declaração de objetos públicos
-    public static final MersenneTwister mt = new MersenneTwister();
     public static final int _qtdElitismo = 2;
 
     public String getCaminhoDados() {
@@ -108,14 +107,15 @@ public class Processamento {
     public ArrayList<Arvores> gerarPopulacaoArvores(Instances dados, boolean elitismo) throws IOException, Exception {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> populacao = new ArrayList<>();
+        MersenneTwister mtw = new MersenneTwister();
         ArrayList<Arvores> filhos;
 
         try {
             //Se tiver elitismo, adicionar (mantém) a melhor árvore da geração atual(ordenada) para a próxima geração
             if (elitismo) {
                 //Adicionar as árvores obtidas por Elitismo
-                populacao.add((Arvores) ObjectUtil.deepCopyList(AlGEnArDe._arvores).get(0));
-                populacao.add((Arvores) ObjectUtil.deepCopyList(AlGEnArDe._arvores).get(1));
+                populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(0)));
+                populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(1)));
 
             }
 
@@ -129,17 +129,14 @@ public class Processamento {
                 filhos.add((Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores));
 
                 //SE Valor Gerado <= _TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
-                if (mt.nextDouble() <= AlGEnArDe._TxCrossover) {
-                    //Efetuar o Crossover
-                    Arvores arvore1 = ObjectUtil.deepCopy(filhos.get(0));
-                    Arvores arvore2 = ObjectUtil.deepCopy(filhos.get(1));
-                    
-                    populacao.add(efetuarCrossoverArvores(arvore1, arvore2));
-                    
-                    Arvores arvore3 = ObjectUtil.deepCopy(filhos.get(1));
-                    Arvores arvore4 = ObjectUtil.deepCopy(filhos.get(0));
-                    
-                    populacao.add(efetuarCrossoverArvores(arvore4, arvore3));
+                if (mtw.nextDouble() <= AlGEnArDe._TxCrossover) {
+                    //Efetuar o Crossover E Adicionar as Árvores Filhas              
+                    populacao.add(efetuarCrossoverArvores(ObjectUtil.deepCopy(filhos.get(0)), ObjectUtil.deepCopy(filhos.get(1))));
+                    populacao.add(efetuarCrossoverArvores(ObjectUtil.deepCopy(filhos.get(1)), ObjectUtil.deepCopy(filhos.get(0))));
+
+                } else {
+                    //Apenas Adicionar as Árvores Filhas
+                    populacao.addAll(ObjectUtil.deepCopyList(filhos));
 
                 }
 
@@ -148,14 +145,14 @@ public class Processamento {
             //Efetuar Mutação das Árvores (se selecionado pelo critério do %), Exceto p/ as Árvores obtidas por Elitismo
             for (int i = _qtdElitismo; i < populacao.size(); i++) {
                 //Se for MENOR OU IGUAL ao Limite Superior (Valor < Limite Superior)
-                if (arredondarValor(mt.nextDouble(), 2, 1) < Processamento._percMutacao) {
+                if (arredondarValor(mtw.nextDouble(), 2, 1) < Processamento._percMutacao) {
                     //Declaração Variáveis e Objetos
                     String atributo = BuscarAtributosArvore(populacao.get(i));
 
                     //Caso a árvore possuir mais do que o nodo raiz, retornará um atributo, caso contrário nem processa
                     if (!atributo.isEmpty()) {
                         //Efetuar a Mutação da Árvore - "E"xpansão ou "R"etração de Nodos e Limpar o Objeto
-                        efetuarMutacaoArvores(populacao.get(i), 1, mt.nextBoolean() ? "E" : "R", dados, atributo);
+                        efetuarMutacaoArvores(populacao.get(i), 1, mtw.nextBoolean() ? "E" : "R", atributo);
 
                     }
 
@@ -177,11 +174,12 @@ public class Processamento {
     private Arvores selecionarArvoresPorTorneio(List<Arvores> arvores) throws Exception {
         //Declaração Variáveis e Objetos
         ArrayList<Arvores> selecao = new ArrayList<>();
+        MersenneTwister mtw = new MersenneTwister();
 
         try {
             //Adicionar 2 árvores Selecionadas Aleatóriamente
-            selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
-            selecao.add(arvores.get(mt.nextInt(arvores.size() - 1)));
+            selecao.add(arvores.get(mtw.nextInt(arvores.size() - 1)));
+            selecao.add(arvores.get(mtw.nextInt(arvores.size() - 1)));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -230,10 +228,8 @@ public class Processamento {
 
     //<editor-fold defaultstate="collapsed" desc="Funções Pertinentes aos Métodos de Mutação">   
     //Efetuar a Mutação da árvore, a mesma poderá ser de "E"xpansão ou "R"edução
-    private void efetuarMutacaoArvores(Arvores arvore, int prof, String tipo, Instances dados, String atributo) throws IOException {
+    private void efetuarMutacaoArvores(Arvores arvore, int prof, String tipo, String atributo) throws IOException {
         try {
-            //SE for "E" - EXPANSÃO - Vai até um nodo FOLHA ALEATÓRIO E ADICIONA um AlGEnArDe Aleatóriamente
-            //SENÃO  "R" - REDUÇÃO  - Vai até o nodo passado como parâmetro e transforma-se todos as sub-árvores abaixo em folhas
             //Se a árvore não for nula
             if (arvore == null) {
                 return;
@@ -246,12 +242,15 @@ public class Processamento {
 
             }
 
+            //SE for "E" - EXPANSÃO - Vai até um nodo FOLHA ALEATÓRIO E ADICIONA um AlGEnArDe Aleatóriamente
+            //SENÃO  "R" - REDUÇÃO  - Vai até o nodo passado como parâmetro e transforma-se todos as sub-árvores abaixo em folhas
             //Condição de Parada - Se o grau de _profundidade máxima
             if (prof <= AlGEnArDe._profundidade) {
                 //Se for "EXPANSÃO"
                 if (tipo.equals("E")) {
                     //Declaração Variáveis e Objetos - Selecionar uma posição aleatória
-                    int itemPos = arvore.getArestas().size() <= 1 ? 0 : mt.nextInt(arvore.getArestas().size() - 1);
+                    MersenneTwister mtw = new MersenneTwister();
+                    int itemPos = arvore.getArestas().size() <= 1 ? 0 : mtw.nextInt(arvore.getArestas().size() - 1);
                     ArrayList<Arvores> temp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(AlGEnArDe._nodos);
 
                     //Se a aresta selecionada não for nula percorre até encontrar uma aresta nula
@@ -261,27 +260,27 @@ public class Processamento {
                             //Se atingiu o MAIOR NÍVEL de _profundidade da árvore (O último nodo da aresta DEVERÁ SER nulo) - Avaliando a aresta SELECIONADA aleatóriamente
                             if (arvore.getArestas(itemPos).getNodo().getArestas(itemPos).getNodo() == null) {
                                 //Selecionar aleatóriamente uma árvore p/ ser incluida no nodo raiz e Adicionar o nodo na aresta selecionada
-                                arvore.getArestas(itemPos).getNodo().getArestas(itemPos).setNodo(temp.get(Processamento.mt.nextInt(temp.size() - 1)));
+                                arvore.getArestas(itemPos).getNodo().getArestas(itemPos).setNodo(temp.get(mtw.nextInt(temp.size() - 1)));
 
                                 //Definir o retorno da função
                                 return;
 
                             } else {
                                 //Chamar a função recursivamente até chegar em um nodo raiz
-                                efetuarMutacaoArvores(arvore.getArestas(itemPos).getNodo(), prof + 1, tipo, dados, atributo);
+                                efetuarMutacaoArvores(arvore.getArestas(itemPos).getNodo(), prof + 1, tipo, atributo);
 
                             }
 
                         } else {
                             //Se o nodo for nulo, seleciona uma Decision Stump aleatóriamente p/ ser incluida no nodo folha
-                            arvore.getArestas(itemPos).setNodo(temp.get(Processamento.mt.nextInt(temp.size() - 1)));
+                            arvore.getArestas(itemPos).setNodo(temp.get(mtw.nextInt(temp.size() - 1)));
 
                         }
 
                     } else //Se a aresta for nula insere 
                     {
                         //Declaração variáveis e Objetos
-                        Arvores arvTempor = temp.get(Processamento.mt.nextInt(temp.size() - 1));
+                        Arvores arvTempor = temp.get(mtw.nextInt(temp.size() - 1));
                         ArrayList<Atributos> atribs = new ArrayList<>();
 
                         //Atribuições
@@ -313,7 +312,7 @@ public class Processamento {
 
                                 } else {
                                     //Chamada recursiva da função atualizando o nível de _profundidade
-                                    efetuarMutacaoArvores(arvore.getArestas(i).getNodo(), prof + 1, tipo, dados, atributo);
+                                    efetuarMutacaoArvores(arvore.getArestas(i).getNodo(), prof + 1, tipo, atributo);
 
                                 }
 
@@ -591,51 +590,66 @@ public class Processamento {
 
     //Irá percorrer todos os Nodos da árvore(avaliando SOMENTE os _nodos folhas) 
     public void atribuirClasseNodosFolhas(Arvores arvore, int prof) {
-        //Condição de Parada - Se o grau de _profundidade máxima
-        if (prof <= AlGEnArDe._profundidade) {
-            //Se o árvore não for nula
-            if (arvore.getArestas() != null) {
-                //Percorrer TODAS as arestas do árvore selecionado para atribuir uma classe as folhas
-                for (int i = 0; i < arvore.getArestas().size(); i++) {
-                    //Se a aresta selecionada não for NULA pesquisa pela mesma (NULA == Nodo Folha)
-                    if (arvore.getArestas(i).getNodo() != null) {
-                        //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                        atribuirClasseNodosFolhas(arvore.getArestas(i).getNodo(), prof + 1);
+        try {
+            //Se a árvore não for nula
+            if (arvore == null) {
+                return;
 
-                    } else //Chegou em um nodo folha
-                    {
-                        //Declaração Variáveis e Objetos
-                        ArrayList<Classes> classes = arvore.getArestas(i).getClasses();
+            }
 
-                        //Se não for nulo
-                        if (classes != null) {
+            //Se possuir arestas válidas
+            if (arvore.getArestas() == null) {
+                return;
+
+            }
+
+            //Condição de Parada - Se o grau de _profundidade máxima
+            if (prof <= AlGEnArDe._profundidade) {
+                //Se o árvore não for nula
+                if (arvore.getArestas() != null) {
+                    //Percorrer TODAS as arestas do árvore selecionado para atribuir uma classe as folhas
+                    for (int i = 0; i < arvore.getArestas().size(); i++) {
+                        //Se a aresta selecionada não for NULA pesquisa pela mesma (NULA == Nodo Folha)
+                        if (arvore.getArestas(i).getNodo() != null) {
+                            //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                            atribuirClasseNodosFolhas(arvore.getArestas(i).getNodo(), prof + 1);
+
+                        } else //Chegou em um nodo folha
+                        {
                             //Declaração Variáveis e Objetos
-                            String clsDominante = "";
-                            double qtdOcorrCls = 0;
+                            ArrayList<Classes> classes = arvore.getArestas(i).getClasses();
 
-                            //Percorre todas as Classes
-                            for (Classes classe : classes) {
-                                //Se for a 1° Ocorrência
-                                if (clsDominante.isEmpty()) {
-                                    //Atribuições do nome da classe e da _quantidade
-                                    clsDominante = classe.getNome();
-                                    qtdOcorrCls = classe.getQuantidade();
+                            //Se não for nulo
+                            if (classes != null) {
+                                //Declaração Variáveis e Objetos
+                                String clsDominante = "";
+                                double qtdOcorrCls = 0;
 
-                                } else {
-                                    //Se a _quantidade for MAIOR que a ATUAL ALTERA a classe SENÃO mantém a mesma
-                                    if (classe.getQuantidade() > qtdOcorrCls) {
+                                //Percorre todas as Classes
+                                for (Classes classe : classes) {
+                                    //Se for a 1° Ocorrência
+                                    if (clsDominante.isEmpty()) {
                                         //Atribuições do nome da classe e da _quantidade
                                         clsDominante = classe.getNome();
                                         qtdOcorrCls = classe.getQuantidade();
+
+                                    } else {
+                                        //Se a _quantidade for MAIOR que a ATUAL ALTERA a classe SENÃO mantém a mesma
+                                        if (classe.getQuantidade() > qtdOcorrCls) {
+                                            //Atribuições do nome da classe e da _quantidade
+                                            clsDominante = classe.getNome();
+                                            qtdOcorrCls = classe.getQuantidade();
+
+                                        }
 
                                     }
 
                                 }
 
-                            }
+                                //Setar a classe Majoritária
+                                arvore.getArestas(i).setClasseDominante(clsDominante);
 
-                            //Setar a classe Majoritária
-                            arvore.getArestas(i).setClasseDominante(clsDominante);
+                            }
 
                         }
 
@@ -644,6 +658,9 @@ public class Processamento {
                 }
 
             }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
 
         }
 
@@ -656,6 +673,7 @@ public class Processamento {
         try {
             //Declaração Variáveis e Objetos e Inicializações
             ArrayList<String> atributos = new ArrayList<>();
+            MersenneTwister mtw = new MersenneTwister();
 
             //Chamada Recursiva p/ montagem dos atributos da árvore(apartir do nodo raiz)
             processarNomesAtributos(arv, 1, atributos);
@@ -668,7 +686,7 @@ public class Processamento {
                 //Se possuir Árvores 
                 if (atributos.size() > 0) {
                     //Se o tamanho for 1, pega o único existente (sem sorteio) SENÃO Sorteia um entre os possíveis
-                    nomeatributo = (atributos.size() <= 1) ? atributos.get(0) : atributos.get(mt.nextInt(atributos.size() - 1));
+                    nomeatributo = (atributos.size() <= 1) ? atributos.get(0) : atributos.get(mtw.nextInt(atributos.size() - 1));
 
                 }
 
@@ -839,8 +857,8 @@ public class Processamento {
 
         }
 
-        //Definir o Retorno (se o Índice Gini for "exatamente" 1 deverá ser 0)
-        return indice.get(0) <= 1 ? 0 : indice.get(0);
+        //Definir o Retorno (se o Índice Gini for "EXATAMENTE" 1 deverá ser 0)
+        return indice.get(0) == 1 ? 0 : indice.get(0);
 
     }
 
