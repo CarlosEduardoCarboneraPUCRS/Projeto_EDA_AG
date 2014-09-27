@@ -1,9 +1,8 @@
 package prjageda;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Arvores implements Comparable<Arvores>, Cloneable, Serializable {
+public class Arvores implements Comparable<Arvores> {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    
     private String nomeAtr;
