@@ -109,12 +109,13 @@ public class Processamento {
 
         try {
             //Se tiver elitismo, adicionar (mantém) a melhor árvore da geração atual(ordenada) para a próxima geração
-            //if (elitismo) {
-            //Adicionar as árvores obtidas por Elitismo
-            //populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(0)));
-            //populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(1)));
+            if (elitismo) {
+                //Adicionar as árvores obtidas por Elitismo
+                populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(0)));
+                populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(1)));
 
-            //}
+            }
+
             //Efetua a geração da nova população equanto a população for menor que a população inicialmente estabelecida
             while (populacao.size() < AlGEnArDe._quantidade) {
                 //------------------------ Remover ---------------------------------------------------------------------------------------
@@ -169,11 +170,11 @@ public class Processamento {
     //Efetuar a seleção por Torneio das Árvores - Seleciona-se as Árvores Aleatóriamente Ordenando-os Crescente
     private Arvores selecionarArvoresPorTorneio(List<Arvores> arvores) throws Exception {
         //Adicionar 2 árvores Selecionadas Aleatóriamente
-        Arvores arv1 = ObjectUtil.deepCopy((Arvores) arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1)));
-        Arvores arv2 = ObjectUtil.deepCopy((Arvores) arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1)));
+        Arvores arvore1 = (Arvores) arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1));
+        Arvores arvore2 = (Arvores) arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1));
 
-        //Retornar a melhor arvore 
-        return (arv1.getFitness() < arv2.getFitness() ? arv1 : arv2);
+        //Retornar a melhor arvore (melhor fitness)
+        return ObjectUtil.deepCopy((arvore1.getFitness() < arvore1.getFitness() ? arvore1 : arvore2));
 
     }
     //</editor-fold>  
@@ -373,6 +374,7 @@ public class Processamento {
 
         }
 
+        //Definir o retorno
         return arvore;
 
     }
