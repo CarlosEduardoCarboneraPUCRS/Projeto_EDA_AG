@@ -74,7 +74,7 @@ public class AlGEnArDe {
 
                 }
 
-                //Calcular o Fitness e após Ordenar Crescente
+                //Calcular o Fitness e após Ordenar Crescente (em função do Crossover e da Mutação a profundidade da árvore poderá duplicar)
                 calcularFitnessPopulacao(treino, validacao, _profundidade * 2, Processamento._qtdElitismo);
 
                 //Imprimir a melhor árvore da geração
