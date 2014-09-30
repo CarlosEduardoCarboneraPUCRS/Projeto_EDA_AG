@@ -78,8 +78,8 @@ public class Processamento {
                 String indiceGini = String.valueOf(arredondarValor(calcularIndiceGini(dados, posicao), AlGEnArDe._qtdDecimais, 1));
 
                 //Para atribArv1 numéricos, SEMPRE será bifurcada, assim: 
-                // Aresta 0 - Sempre será MENOR OU IGUAL a Média Calculada
-                // Aresta 1 - Sempre será MAIOR que a Média Calculada
+                //Aresta 0 - Sempre será MENOR OU IGUAL a Média Calculada
+                //Aresta 1 - Sempre será MAIOR que a Média Calculada
                 registros.add(new Atributos("<= " + indiceGini, null, "", null));
                 registros.add(new Atributos("> " + indiceGini, null, "", null));
 
@@ -110,21 +110,22 @@ public class Processamento {
         try {
             //Se tiver elitismo, adicionar (mantém) a melhor árvore da geração atual(ordenada) para a próxima geração
             if (elitismo) {
-                //Adicionar as árvores obtidas por Elitismo
-                populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(0)));
-                populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(1)));
+                //Adicionar a Quantidade de Indivíduos obtidos por Elitismo
+                for (int i = 0; i < _qtdElitismo; i++) {
+                    //Adicionar as árvores obtidas por Elitismo(Quantidade definida p/ Elitismo)
+                    populacao.add((Arvores) ObjectUtil.deepCopy(AlGEnArDe._arvores.get(i)));
+
+                }
 
             }
 
             //Efetua a geração da nova população equanto a população for menor que a população inicialmente estabelecida
             while (populacao.size() < AlGEnArDe._quantidade) {
                 //------------------------ Remover ---------------------------------------------------------------------------------------
-                //Adicionar as Árvores pais
-                //Arvores arv1 = (Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores);
-                //Arvores arv2 = (Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores);
-                Arvores arv1 = ObjectUtil.deepCopy(AlGEnArDe._arvores.get(0));
-                Arvores arv2 = ObjectUtil.deepCopy(AlGEnArDe._arvores.get(1));
-
+                //Adicionar as Árvores Pais (Seleção por Torneio)
+                Arvores arv1 = (Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores);
+                Arvores arv2 = (Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores);
+                
                 //SE Valor Gerado <= _TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
                 if (AlGEnArDe.mtw.nextDouble() <= AlGEnArDe._TxCrossover) {
                     //Efetuar o Crossover E Adicionar as Árvores Filhas              
@@ -139,7 +140,7 @@ public class Processamento {
 
             }
 
-            //Efetuar Mutação das Árvores (se selecionado pelo critério do %), Exceto p/ as Árvores obtidas por Elitismo
+            //Efetuar Mutação das Árvores (se selecionado pelo critério do %), EXCETO p/ as Árvores obtidas por Elitismo
             for (int i = _qtdElitismo; i < populacao.size(); i++) {
                 //Se for MENOR OU IGUAL ao Limite Superior (Valor < Limite Superior)
                 if (arredondarValor(AlGEnArDe.mtw.nextDouble(), 2, 1) < Processamento._percMutacao) {
@@ -248,7 +249,7 @@ public class Processamento {
 
             //SE for "E" - EXPANSÃO - Vai até um nodo FOLHA ALEATÓRIO E ADICIONA um AlGEnArDe Aleatóriamente
             //SENÃO  "R" - REDUÇÃO  - Vai até o nodo passado como parâmetro e transforma-se todos as sub-árvores abaixo em folhas
-            //Condição de Parada - Se o grau de _profundidade máxima
+            //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= (AlGEnArDe._profundidade + 1)) {
                 //Se for "EXPANSÃO"
                 if (tipo.equals("E")) {
@@ -348,7 +349,7 @@ public class Processamento {
 
         }
 
-        //Condição de Parada - Se o grau de _profundidade máxima
+        //Condição de Parada - Se o grau de _profundidade for máximo
         if (prof <= AlGEnArDe._profundidade) {
             //Percorrer todas as arestas
             for (int i = 0; i < arvore.getArestas().size(); i++) {
@@ -395,7 +396,7 @@ public class Processamento {
 
             }
 
-            //Condição de Parada - Se o grau de _profundidade máxima
+            //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= AlGEnArDe._profundidade) {
                 //percorrer as arestas
                 for (int i = 0; i < arvore.getArestas().size(); i++) {
@@ -449,7 +450,7 @@ public class Processamento {
 
             }
 
-            //Condição de Parada - Se o grau de _profundidade máxima
+            //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= (profMaxima + 1)) {
                 //Declaração Variáveis e objetos
                 int posicao = 0;
@@ -593,7 +594,7 @@ public class Processamento {
 
             }
 
-            //Condição de Parada - Se o grau de _profundidade máxima
+            //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= (profMaxima + 1)) {
                 //Se o árvore não for nula
                 if (arvore.getArestas() != null) {
@@ -706,7 +707,7 @@ public class Processamento {
 
             }
 
-            //Condição de Parada - Se o grau de _profundidade máxima
+            //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= AlGEnArDe._profundidade) {
                 //Percorrer todas as arestas
                 for (int i = 0; i < arv.getArestas().size(); i++) {

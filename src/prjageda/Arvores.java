@@ -81,6 +81,12 @@ public class Arvores implements Comparable<Arvores> {
         this.arestas = arestas == null ? null : arestas;
 
     }
+        
+    public void setNuloArestas(Atributos arestaSel) {
+        //Atribuir Nulo a Aresta Informada
+        arestaSel = null;
+
+    }
 
     public Arvores getArvoreApartirAresta(int pos) {
         //Retornar a aresta da posição desde que exista
