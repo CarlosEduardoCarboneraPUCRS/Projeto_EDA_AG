@@ -125,7 +125,7 @@ public class Processamento {
                 //Adicionar as Árvores Pais (Seleção por Torneio)
                 Arvores arv1 = (Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores);
                 Arvores arv2 = (Arvores) selecionarArvoresPorTorneio(AlGEnArDe._arvores);
-                
+
                 //SE Valor Gerado <= _TxCrossover, realiza o Crossover entre os pais SENÃO mantém os pais selecionados através de Torneio p/ a próxima geração            
                 if (AlGEnArDe.mtw.nextDouble() <= AlGEnArDe._TxCrossover) {
                     //Efetuar o Crossover E Adicionar as Árvores Filhas              
@@ -171,8 +171,8 @@ public class Processamento {
     //Efetuar a seleção por Torneio das Árvores - Seleciona-se as Árvores Aleatóriamente Ordenando-os Crescente
     private Arvores selecionarArvoresPorTorneio(List<Arvores> arvores) throws Exception {
         //Adicionar 2 árvores Selecionadas Aleatóriamente
-        Arvores arvore1 = (Arvores) arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1));
-        Arvores arvore2 = (Arvores) arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1));
+        Arvores arvore1 = arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1));
+        Arvores arvore2 = arvores.get(AlGEnArDe.mtw.nextInt(arvores.size() - 1));
 
         //Retornar a melhor arvore (melhor fitness)
         return ObjectUtil.deepCopy((arvore1.getFitness() < arvore1.getFitness() ? arvore1 : arvore2));
@@ -573,7 +573,7 @@ public class Processamento {
             }
 
         } catch (NumberFormatException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Aqui deu erro 1 " + e.getMessage());
 
         }
 

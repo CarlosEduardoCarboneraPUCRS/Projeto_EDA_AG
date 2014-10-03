@@ -81,13 +81,23 @@ public class Arvores implements Comparable<Arvores> {
         this.arestas = arestas == null ? null : arestas;
 
     }
-        
-    public void setNuloArestas(Atributos arestaSel) {
-        //Atribuir Nulo a Aresta Informada
-        arestaSel = null;
 
-    }
+    public void removerAresta(int pos) {
+        try {
+            if (this.arestas == null) {
+                return;
+            }
+            
+            if (this.arestas.get(pos) != null) {
+                this.arestas.remove(pos);
+                
+            }
+            
+        } catch (Exception e) {
+        }
 
+    }    
+    
     public Arvores getArvoreApartirAresta(int pos) {
         //Retornar a aresta da posição desde que exista
         if (this.arestas != null) {
@@ -143,6 +153,6 @@ public class Arvores implements Comparable<Arvores> {
         return (this.getFitness() < obj.getFitness()) ? -1 : (this.getFitness() > obj.getFitness()) ? 1 : 0;
 
     }
-
     //</editor-fold>    
+    
 }
