@@ -14,9 +14,9 @@ public class Atributos {
         //Inicialização dos atributos
         this.atributo = "";
         this.classeDominante = "";
-        this.nodo = null; 
+        this.nodo = null;
         this.classes = null;
-        
+
     }
 
     public Atributos(String atr, Arvores no, String clsDominante, ArrayList<Classes> cls) {
@@ -36,43 +36,51 @@ public class Atributos {
 
     public String getAtributo() {
         return this.atributo;
-        
+
     }
 
     public Arvores getNodo() {
-        return this.nodo == null ? null: this.nodo;
-        
+        try {
+            return this.nodo == null ? null : this.nodo;
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+
+        }
+
     }
 
     public void setNodo(Arvores nodo) {
         this.nodo = nodo;
-        
+
     }
 
     public void setNodo(Atributos atr, Arvores arv) {
         atr.setNodo(arv);
-        
+
     }
 
     public String getClasseDominante() {
+        //Forçar a conversão em String caso o objeto seja nulo
         return this.classeDominante;
-        
+
     }
 
     public void setClasseDominante(String classe) {
         this.classeDominante = classe;
-        
+
     }
 
     public ArrayList<Classes> getClasses() {
         return this.classes == null ? null : this.classes;
-        
+
     }
 
     public void setClasses(ArrayList<Classes> classes) {
         this.classes = classes;
-        
+
     }
     //</editor-fold>        
-    
+
 }

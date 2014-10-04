@@ -10,12 +10,12 @@ public class AlGEnArDe {
 
     //<editor-fold defaultstate="collapsed" desc="1° Definição dos Atributos e método Inicializador da classe">    	
     //Variáveis Públicas Estáticas
-    public static final int _quantidade = 3;
-    public static final int _profundidade = 3;   //Defini-se como Nível = Nível + 1;
+    public static final int _quantidade = 10;
+    public static final int _profundidade = 4;   //Define-se como Nível = Nível + 1 (para 4 irá gerar até o Nivel 5, sendo 4 Níveis mais a aresta do último nível)
     public static final double _TxCrossover = 0.9;
     public static final int _qtdDecimais = 4;
-    public static ArrayList<Arvores> _nodos = null;
-    public static ArrayList<Arvores> _arvores = null;
+    public static ArrayList<Arvores> _nodos;
+    public static ArrayList<Arvores> _arvores;
     public static MersenneTwister mtw = new MersenneTwister();
 
     //Variáveis Privadas Estáticas
@@ -35,55 +35,6 @@ public class AlGEnArDe {
     //Tradução da Sigla - AlGenArDe - "Al"goritmo "Gen"ético de "Ar"vore de "De"cisão
     public void AlGenArDe(Instances dados) throws Throwable {
         try {
-            //<editor-fold defaultstate="collapsed" desc="1° - Processamento Original  - NÃO APAGAR - NÃO APAGAR - NÃO APAGAR - NÃO APAGAR - NÃO APAGAR - NÃO APAGAR - NÃO APAGAR ">         
-            ////Estratificar os dados e divisão em 3 Folds - "Treino, Validação e Teste"
-            //dados.stratify(_nroFolds);
-            //
-            ////Definição da instância de "Treino, Validação e Teste"
-            //Instances treino = dados.testCV(_nroFolds, 0);
-            //Instances tempInst = dados.trainCV(_nroFolds, 0);
-            //
-            ////Definição das instâncias de "Validação e Teste"
-            //Instances validacao = tempInst.testCV(_nroFolds - 1, 0);
-            //Instances teste = tempInst.trainCV(_nroFolds - 1, 0);
-            //
-            ////Declaração Variáveis e Objetos E Inicializações
-            //_arvores = new ArrayList<>();
-            ////int geracaoAtual = 1;
-            //
-            ////Efetuar o processamento das Sub-Arvores e suas Aretas (COM TODAS AS INSTÂNCIAS DE DADOS)
-            //gerarDecisionStumps(dados);
-            //
-            ////Efetuar a Geração da População Inicial, informar a _quantidade de atributos MENOS o atributos classe
-            //gerarPopulacaoInicial(treino, validacao, _profundidade);
-            //
-            ////Imprimir a melhor árvore da geração
-            //System.out.println("Geração.: " + geracaoAtual + " - Árvore.: " + _arvores.get(0).getNomeAtributo() + " - Fitness.: " + _arvores.get(0).getFitness());
-            //
-            ////Efetuar a geração das novas populações
-            //while (geracaoAtual < _geracoes) {
-            //    //Atualizar a Geração
-            //    geracaoAtual++;
-            //
-            //    //Carregar com as árvores
-            //    _arvores = new Processamento().gerarPopulacaoArvores(dados, true);
-            //
-            //    //Processar Árvores e Eliminar as definições dos Nodos Folhas (Na Geração Inicial NÃO SE FAZ necessário)
-            //    for (int i = Processamento._qtdElitismo; i < _arvores.size(); i++) {
-            //        //Processamento dos _nodos folhas
-            //        eliminarClassificacaoNodosFolhas(_arvores.get(i), 1, _profundidade * 2);
-            //
-            //    }
-            //
-            //    //Calcular o Fitness e após Ordenar Crescente (em função do Crossover e da Mutação a profundidade da árvore poderá duplicar)
-            //    calcularFitnessPopulacao(treino, validacao, _profundidade * 2, Processamento._qtdElitismo);
-            //
-            //    //Imprimir a melhor árvore da geração
-            //    System.out.println("Geração.: " + geracaoAtual + " - Árvore.: " + _arvores.get(0).getNomeAtributo() + " - Fitness.: " + _arvores.get(0).getFitness());
-            //
-            //}
-            //</editor-fold>  
-
             //Efetuar o processamento das Sub-Arvores e suas Aretas (COM TODAS AS INSTÂNCIAS DE DADOS)
             gerarDecisionStumps(dados);
 
@@ -148,7 +99,7 @@ public class AlGEnArDe {
             calcularMediaEDesvioPadraoArvores(resultado);
 
         } catch (Exception e) {
-            //System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
 
         } finally {
             //Atibuir nulo aos objetos
@@ -199,25 +150,8 @@ public class AlGEnArDe {
         if (prof <= _profundidade) {
             //percorrer todas as arestas do árvore
             for (int i = 0; i < arvore.getArestas().size(); i++) {
-                
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //
-                //
                 //Gerar as Sub-Árvores com 50% de probabilidade                
-                //if (mtw.nextBoolean()) {
-                //
-                //
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
-                //Aqui descomentar-------------------------------------------------------------------------------------------------------------------------------------------------- 
+                if (mtw.nextBoolean()) {
                     //Tratamento dos _nodos (Geração das Sub-Árvores e Atributos)
                     ArrayList<Arvores> arvTemp = (ArrayList<Arvores>) ObjectUtil.deepCopyList(_nodos);
 
@@ -228,7 +162,7 @@ public class AlGEnArDe {
                     //Chamada Recursiva para Geração da árvore atualizando o nivel de _profundidade
                     gerarPopulacaoArvores(nroAtributos, prof + 1, arvore.getArvoreApartirAresta(i));
 
-                //}
+                }
 
             }
 
@@ -272,7 +206,7 @@ public class AlGEnArDe {
             Collections.sort(_arvores);
 
         } catch (Exception e) {
-            //System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
 
         }
 
@@ -290,23 +224,23 @@ public class AlGEnArDe {
                 //2° Passo - Executa-se as instância de treino p/ calcular o fitness da árvore(s)
                 for (int j = 0; j < treino.numInstances(); j++) {
                     //Atualizar(Calcular) a _quantidade de ocorrências dos atributos na árvore
-                    proc.definirClasseNodosFolhas(_arvores.get(i), treino.instance(j), 1, profMaxima + 1);
+                    proc.definirClasseNodosFolhas(_arvores.get(i), treino.instance(j), 1, profMaxima);
 
                 }
 
                 //Definir a classe majoritária da aresta
-                proc.atribuirClasseNodosFolhas(_arvores.get(i), 1, profMaxima + 1);
+                proc.atribuirClasseNodosFolhas(_arvores.get(i), 1, profMaxima);
 
                 //Eliminar as arestas que não possuem classificação após a execução do "Treino", ou seja, efetua a PODA dos nodos que possuem apenas 1 aresta válida
-                podarArestasSemClassificacao(_arvores.get(i), 1, profMaxima + 1);
+                podarArestasSemClassificacao(_arvores.get(i), 1, profMaxima);
 
                 //Eliminar os Nodos(Atributos) que não possuem arestas após a execução do "Treino"
-                podarNodosSemArestas(_arvores.get(i), 1, profMaxima + 1);
-
+                //podarNodosSemArestas(_arvores.get(i), 1, profMaxima);
+                
             }
 
         } catch (Exception e) {
-            //System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
 
         }
 
@@ -491,7 +425,7 @@ public class AlGEnArDe {
         }
 
         //Se as arestas forem nulas
-        if (arv.getArestas() == null) {
+        if (arv.getArestas().isEmpty()) {
             return;
 
         }
@@ -504,7 +438,7 @@ public class AlGEnArDe {
                 arv.setFitness(0);
 
                 //Se possuir arestas
-                if (arv.getArestas() != null) {
+                if (!arv.getArestas().isEmpty()) {
                     //Percorrer todas as arestas
                     for (int i = 0; i < arv.getArestas().size(); i++) {
                         //Se a aresta não for nula
@@ -591,7 +525,7 @@ public class AlGEnArDe {
         }
 
         //Se as arestas forem nulas
-        if (arv.getArestas() == null) {
+        if (arv.getArestas().isEmpty()) {
             return;
 
         }
@@ -600,23 +534,46 @@ public class AlGEnArDe {
             //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= profMaxima) {
                 //Se possuir arestas
-                if (arv.getArestas() != null) {
+                if (!arv.getArestas().isEmpty()) {
                     //Percorrer todas as arestas
                     for (int i = 0; i < arv.getArestas().size(); i++) {
                         //Se a aresta não for nula
                         if (arv.getArestas(i) != null) {
-                            //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
-                            if ((arv.getArestas(i).getNodo() == null) && (arv.getArestas(i).getClasseDominante().isEmpty())) {
-                                //Excluir o nodo atual E Atualizar a poição
-                                arv.removerAresta(i);
-                                i = 0;
+                            //Declaração Variáveis e Objetos
+                            int posicao = 0;
+
+                            //Enquanto possuir arestas
+                            while (posicao < arv.getArestas().size()) {
+                                //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
+                                if ((arv.getArestas(posicao).getNodo() == null) && (arv.getArestas(posicao).getClasseDominante().isEmpty())) {
+                                    //Excluir o nodo atual E Atualizar a poição
+                                    arv.removerAresta(posicao);
+                                    posicao = 0;
+                                    i = 0;
+
+                                    //Se não possuir mais arestas válidas
+                                    if (arv.getArestas().isEmpty()) {
+                                        //Sair fora
+                                        break;
+
+                                    }
+
+                                } else {
+                                    //Atualizar a posição
+                                    posicao += 1;
+
+                                }
 
                             }
 
-                            //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
-                            if (arv.getArestas(i).getNodo() != null) {
-                                //Chamada Recursiva da Função Avaliando a posição Atual
-                                podarArestasSemClassificacao(arv.getArestas(i).getNodo(), prof + 1, profMaxima);
+                            //Se possuir arestas
+                            if (!arv.getArestas().isEmpty()) {
+                                //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
+                                if (arv.getArestas(i).getNodo() != null) {
+                                    //Chamada Recursiva da Função Avaliando a posição Atual
+                                    podarArestasSemClassificacao(arv.getArestas(i).getNodo(), prof + 1, profMaxima);
+
+                                }
 
                             }
 
@@ -644,7 +601,7 @@ public class AlGEnArDe {
         }
 
         //Se as arestas forem nulas
-        if (arv.getArestas() == null) {
+        if (arv.getArestas().isEmpty()) {
             return;
 
         }
@@ -653,16 +610,20 @@ public class AlGEnArDe {
             //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= profMaxima) {
                 //Se possuir arestas
-                if (arv.getArestas() != null) {
+                if (!arv.getArestas().isEmpty()) {
                     //Percorrer todas as arestas
                     for (int i = 0; i < arv.getArestas().size(); i++) {
                         //Se a aresta não for nula
                         if (arv.getArestas(i) != null) {
-                            //Se possuir apenas 1 aresta
+                            //Se NÃO possuir arestas OU apenas 1 efetua a poda do nodo
                             if (arv.getArestas().size() <= 1) {
-                                //Excluir o nodo atual setando o próximo nodo
-                                arv = arv.getArestas(0).getNodo();
-                                i = 0;
+                                //Se possuir nodo válido válida
+                                if (arv.getArestas(0).getNodo() != null) {
+                                    //Excluir o nodo atual setando o próximo nodo
+                                    arv = arv.getArestas(0).getNodo();
+                                    i = 0;
+                                    
+                                }
 
                             }
 

@@ -42,32 +42,44 @@ public class Arvores implements Comparable<Arvores> {
     }
 
     public ArrayList<Atributos> getArestas() {
-        //Retornar as arestas desde que existam
-        return this.arestas != null ? this.arestas : null;
+        try {
+            //Retornar as arestas desde que existam
+            return this.arestas != null ? this.arestas : null;
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+            return null;
+        }
 
     }
 
     public Atributos getArestas(int pos) {
-        //Retornar a aresta da posição desde que exista
-        if (this.arestas != null) {
-            //Se posição for inválida retorna Nulo
-            if (pos >= this.arestas.size()) {
-                return null;
+        try {
+            //Retornar a aresta da posição desde que exista
+            if (this.arestas != null) {
+                //Se posição for inválida retorna Nulo
+                if (pos >= this.arestas.size()) {
+                    return null;
 
-            }
+                }
 
-            if (this.arestas.get(pos) != null) {
-                return this.arestas.get(pos);
+                if (this.arestas.get(pos) != null) {
+                    return this.arestas.get(pos);
+
+                } else {
+                    return null;
+
+                }
 
             } else {
-
                 return null;
 
             }
-
-        } else {
+        } catch (Exception e) {
+            System.out.println(e.getCause().getMessage());
             return null;
-
+            
         }
 
     }
@@ -87,17 +99,19 @@ public class Arvores implements Comparable<Arvores> {
             if (this.arestas == null) {
                 return;
             }
-            
+
             if (this.arestas.get(pos) != null) {
                 this.arestas.remove(pos);
-                
+
             }
-            
+
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+
         }
 
-    }    
-    
+    }
+
     public Arvores getArvoreApartirAresta(int pos) {
         //Retornar a aresta da posição desde que exista
         if (this.arestas != null) {
@@ -154,5 +168,5 @@ public class Arvores implements Comparable<Arvores> {
 
     }
     //</editor-fold>    
-    
+
 }
