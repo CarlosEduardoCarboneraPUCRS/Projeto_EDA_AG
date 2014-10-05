@@ -242,7 +242,7 @@ public class Processamento {
             }
 
             //Se possuir arestas válidas
-            if (arvore.getArestas() == null) {
+            if (arvore.getArestas().isEmpty()) {
                 return;
 
             }
@@ -344,7 +344,7 @@ public class Processamento {
         }
 
         //Se possuir arestas válidas
-        if (arvore.getArestas() == null) {
+        if (arvore.getArestas().isEmpty()) {
             return null;
 
         }
@@ -391,7 +391,7 @@ public class Processamento {
             }
 
             //Se a árvore não possuir arestas
-            if (arvore.getArestas() == null) {
+            if (arvore.getArestas().isEmpty()) {
                 return null;
 
             }
@@ -445,7 +445,7 @@ public class Processamento {
             }
 
             //Se possuir arestas válidas
-            if (arvore.getArestas() == null) {
+            if (arvore.getArestas().isEmpty()) {
                 return;
 
             }
@@ -589,7 +589,7 @@ public class Processamento {
             }
 
             //Se possuir arestas válidas
-            if (arvore.getArestas() == null) {
+            if (arvore.getArestas().isEmpty()) {
                 return;
 
             }
@@ -597,7 +597,7 @@ public class Processamento {
             //Condição de Parada - Se o grau de _profundidade for máximo
             if (prof <= (profMaxima + 1)) {
                 //Se o árvore não for nula
-                if (arvore.getArestas() != null) {
+                if (!arvore.getArestas().isEmpty()) {
                     //Percorrer TODAS as arestas do árvore selecionado para atribuir uma classe as folhas
                     for (int i = 0; i < arvore.getArestas().size(); i++) {
                         //Se a aresta selecionada não for NULA pesquisa pela mesma (NULA == Nodo Folha)

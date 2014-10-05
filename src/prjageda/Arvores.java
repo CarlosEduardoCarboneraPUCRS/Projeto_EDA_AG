@@ -42,44 +42,31 @@ public class Arvores implements Comparable<Arvores> {
     }
 
     public ArrayList<Atributos> getArestas() {
-        try {
-            //Retornar as arestas desde que existam
-            return this.arestas != null ? this.arestas : null;
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-
-            return null;
-        }
+        //Retornar as arestas desde que existam
+        return this.arestas != null ? this.arestas : null;
 
     }
 
     public Atributos getArestas(int pos) {
-        try {
-            //Retornar a aresta da posição desde que exista
-            if (this.arestas != null) {
-                //Se posição for inválida retorna Nulo
-                if (pos >= this.arestas.size()) {
-                    return null;
+        //Retornar a aresta da posição desde que exista
+        if (this.arestas != null) {
+            //Se posição for inválida retorna Nulo
+            if (pos >= this.arestas.size()) {
+                return null;
 
-                }
+            }
 
-                if (this.arestas.get(pos) != null) {
-                    return this.arestas.get(pos);
-
-                } else {
-                    return null;
-
-                }
+            if (this.arestas.get(pos) != null) {
+                return this.arestas.get(pos);
 
             } else {
                 return null;
 
             }
-        } catch (Exception e) {
-            System.out.println(e.getCause().getMessage());
+
+        } else {
             return null;
-            
+
         }
 
     }
