@@ -11,26 +11,34 @@ public final class ObjectUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T deepCopy(T obj) {
+    public static <T> T deepCopy(T objeto) {
         try {
-            if (obj == null) {
+            //Se o objeto for nulo retorna
+            if (objeto == null) {
                 return null;
 
             }
 
-            Class<?> clazz = obj.getClass();
-            T clone = (T) clazz.newInstance();
-            Field[] fields = clazz.getDeclaredFields();
+            //Declaração Variáveis e Objetos
+            Class<?> classe = objeto.getClass();
+            T clone = (T) classe.newInstance();
+            Field[] campos = classe.getDeclaredFields();
 
-            for (Field field : fields) {
-                field.setAccessible(true);
-                if (!Modifier.isFinal(field.getModifiers())) {
-                    if (field.get(obj) instanceof List<?>) {
-                        List<?> copiedList = deepCopyList((List<?>) field.get(obj));
-                        field.set(clone, copiedList);
+            //percorrer todos os objetos
+            for (Field obj : campos) {
+                //setar o objeto como acessível
+                obj.setAccessible(true);
+
+                if (!Modifier.isFinal(obj.getModifiers())) {
+                    //Se o objeto for uma instância do Objeto avaliado
+                    if (obj.get(objeto) instanceof List<?>) {
+                        //Copiar os objetos
+                        List<?> copiados = deepCopyList((List<?>) obj.get(objeto));
+                        obj.set(clone, copiados);
 
                     } else {
-                        field.set(clone, field.get(obj));
+                        //Setar um clone do objetos
+                        obj.set(clone, obj.get(objeto));
 
                     }
 
@@ -38,23 +46,31 @@ public final class ObjectUtil {
 
             }
 
+            //Enquanto verdadeiro
             while (true) {
-                if (Object.class.equals(clazz)) {
+                //Se for igual a classe sair fora
+                if (Object.class.equals(classe)) {
                     break;
                 }
-                
-                clazz = clazz.getSuperclass();
-                Field[] sFields = clazz.getDeclaredFields();
-                
-                for (Field field : sFields) {
-                    field.setAccessible(true);
-                    if (!Modifier.isFinal(field.getModifiers())) {
-                        if (field.get(obj) instanceof List<?>) {
-                            List<?> copiedList = deepCopyList((List<?>) field.get(obj));
-                            field.set(clone, copiedList);
+
+                //Declaração Variáveis e Objetos e inicializações
+                classe = classe.getSuperclass();
+                Field[] sCampos = classe.getDeclaredFields();
+
+                for (Field _campo : sCampos) {
+                    //Setar acessível
+                    _campo.setAccessible(true);
+
+                    if (!Modifier.isFinal(_campo.getModifiers())) {
+                        //Se o objeto for uma instância do Objeto avaliado
+                        if (_campo.get(objeto) instanceof List<?>) {
+                            //Copiar os objetos
+                            List<?> listaCopiada = deepCopyList((List<?>) _campo.get(objeto));
+                            _campo.set(clone, listaCopiada);
 
                         } else {
-                            field.set(clone, field.get(obj));
+                            //Setar um clone do objetos
+                            _campo.set(clone, _campo.get(objeto));
 
                         }
 
@@ -63,29 +79,34 @@ public final class ObjectUtil {
                 }
 
             }
-
+            
+            //Definir o retorno
             return clone;
 
         } catch (InstantiationException | IllegalAccessException e) {
             return null;
-            
+
         }
-        
+
     }
 
-    public static <T> List<T> deepCopyList(List<T> arg) {
-        if (arg == null) {
+    public static <T> List<T> deepCopyList(List<T> objetos) {
+        //Se o objeto for nulo retorna
+        if (objetos == null) {
             return null;
-            
+
+        }
+        //Declaração variáveis e Objetos
+        List<T> retorno = new ArrayList<>();
+
+        //Adicionar todos os objetos
+        for (T obj : objetos) {
+            retorno.add(deepCopy(obj));
         }
 
-        List<T> retList = new ArrayList<>();
+        //Definir o retorno
+        return retorno;
 
-        for (T each : arg) {
-            retList.add(deepCopy(each));
-        }
-
-        return retList;
     }
 
 }

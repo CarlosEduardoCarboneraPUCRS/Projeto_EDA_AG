@@ -25,7 +25,7 @@ public class IndiceGini implements Comparable<IndiceGini> {
    
     //<editor-fold defaultstate="collapsed" desc="2° Definição dos Get´s e Set´s e demais métodos">
     public double getValor() {
-        return valor;
+        return this.valor;
     }
 
     public void setValor(double valor) {
@@ -33,7 +33,7 @@ public class IndiceGini implements Comparable<IndiceGini> {
     }
 
     public ArrayList<Classes> getClsAtribruto() {
-        return clsAtribruto;
+        return this.clsAtribruto;
         
     }
 
@@ -46,7 +46,8 @@ public class IndiceGini implements Comparable<IndiceGini> {
     //<editor-fold defaultstate="collapsed" desc="3° Definição Métodos de Ordenação">
     @Override
     public int compareTo(IndiceGini o) {
-        return (this.valor == ((IndiceGini) o).getValor()) ? 0 : (this.valor > (((IndiceGini) o).getValor())) ? 1 : -1;
+        //Definir o retorno
+        return this.valor == o.getValor() ? 0 : (this.valor > o.getValor() ? 1 : -1);
         
     }
     //</editor-fold>

@@ -55,7 +55,7 @@ public class Processamento {
 
         } catch (Exception e) {
             //Se ocorreu alguma exceção
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -93,7 +93,7 @@ public class Processamento {
 
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -159,7 +159,7 @@ public class Processamento {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -221,7 +221,7 @@ public class Processamento {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -262,11 +262,14 @@ public class Processamento {
                         //Se o nodo da aresta não for nulo
                         if (arvore.getArestas(itemPos).getNodo() != null) {
                             //Se atingiu o MAIOR NÍVEL de _profundidade da árvore (O último nodo da aresta DEVERÁ SER nulo) - Avaliando a aresta SELECIONADA aleatóriamente
-                            if (arvore.getArestas(itemPos).getNodo().getArestas(itemPos).getNodo() == null) {
-                                //Selecionar aleatóriamente uma árvore p/ ser incluida no nodo raiz e Adicionar o nodo na aresta selecionada e retornar
-                                arvore.getArestas(itemPos).getNodo().getArestas(itemPos).setNodo(temp.get(AlGEnArDe.mtw.nextInt(temp.size() - 1)));
-                                return;
+                            if (arvore.getArestas(itemPos).getNodo().getArestas(itemPos) != null) {
+                                //Se atingiu o MAIOR NÍVEL de _profundidade da árvore (O último nodo da aresta DEVERÁ SER nulo) - Avaliando a aresta SELECIONADA aleatóriamente
+                                if (arvore.getArestas(itemPos).getNodo().getArestas(itemPos).getNodo() == null) {
+                                    //Selecionar aleatóriamente uma árvore p/ ser incluida no nodo raiz e Adicionar o nodo na aresta selecionada e retornar
+                                    arvore.getArestas(itemPos).getNodo().getArestas(itemPos).setNodo(temp.get(AlGEnArDe.mtw.nextInt(temp.size() - 1)));
+                                    return;
 
+                                }
                             } else {
                                 //Chamar a função recursivamente até chegar em um nodo raiz
                                 efetuarMutacaoArvores(arvore.getArestas(itemPos).getNodo(), prof + 1, tipo, atributo);
@@ -327,7 +330,7 @@ public class Processamento {
             }
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -426,7 +429,7 @@ public class Processamento {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -504,7 +507,7 @@ public class Processamento {
 
                                 //Percorre TODAS as classes do Nodo
                                 for (Classes classe : classes) {
-                                //Se o valor da aresta FOR IGUAL AO VALOR DO ATRIBUTO DA INSTÂNCIA                                            
+                                    //Se o valor da aresta FOR IGUAL AO VALOR DO ATRIBUTO DA INSTÂNCIA                                            
                                     //Se o "VALOR" da classe DA INSTÂNCIA SELECIONADA FOR IGUAL a da classe informada atualiza a _quantidade
                                     if (avaliacao.classAttribute().value((int) avaliacao.classValue()).equals(classe.getNome())) {
                                         //Atualizar a _quantidade (Adicionando 1) de registros X Atributo - Para Definir a Classe dominante
@@ -577,7 +580,7 @@ public class Processamento {
             }
 
         } catch (NumberFormatException e) {
-            System.out.println("Aqui deu erro 1 " + e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -732,7 +735,7 @@ public class Processamento {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
 
@@ -753,7 +756,7 @@ public class Processamento {
             Filter<IndiceGini, Double> filtro = new Filter<IndiceGini, Double>() {
                 @Override
                 public boolean isMatched(IndiceGini object, Double valor) {
-                    return object.getValor() == valor;
+                    return (object.getValor() == valor);
 
                 }
             };
@@ -850,11 +853,9 @@ public class Processamento {
 
     }
 
-    /**
-     * Parâmetros: 1 - Valor a arredondarValor. 2 - Quantidade de casas depois da vírgula. 3 - arredondarValor para cima ou para baixo? Para Cima = 0 (ceil) Para Baixo = 1 ou
-     * qualquer outro inteiro (floor)
-     *
-     */
+    //Parâmetros: 1 - Valor a arredondarValor. 
+    //            2 - Quantidade de casas depois da vírgula. 
+    //            3 - arredondarValor para cima ou para baixo? Para Cima = 0 (ceil) Para Baixo = 1 ou qualquer outro inteiro (floor)
     public double arredondarValor(double valor, int casas, int ACimaouABaixo) {
         //Atribuições do Cálculo
         valor *= (Math.pow(10, casas));

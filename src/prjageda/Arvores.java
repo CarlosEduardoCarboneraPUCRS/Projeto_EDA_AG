@@ -32,7 +32,7 @@ public class Arvores implements Comparable<Arvores> {
 
     public String getNomeAtributo() {
         //Definir o retorno
-        return nomeAtr == null ? "" : !(nomeAtr.isEmpty()) ? this.nomeAtr : "";
+        return nomeAtr == null ? "" : !nomeAtr.isEmpty() ? this.nomeAtr : "";
 
     }
 
