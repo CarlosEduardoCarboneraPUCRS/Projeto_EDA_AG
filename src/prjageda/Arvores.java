@@ -43,7 +43,7 @@ public class Arvores implements Comparable<Arvores> {
 
     public ArrayList<Atributos> getArestas() {
         //Retornar as arestas desde que existam
-        return this.arestas != null ? this.arestas : null;
+        return this.arestas.isEmpty() ? new ArrayList<Atributos>() : this.arestas;
 
     }
 

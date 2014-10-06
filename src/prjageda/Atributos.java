@@ -40,19 +40,8 @@ public class Atributos {
     }
 
     public Arvores getNodo() {
-        try {
-            if (this.nodo == null) {
-                return null;
-                
-            }
-            
-            return this.nodo;
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
-
-        }
+        //Retornar o nodo
+        return this.nodo;
 
     }
 

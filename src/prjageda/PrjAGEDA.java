@@ -7,6 +7,7 @@ public class PrjAGEDA {
 
     //Arquivo com Atributos Nominais
     //private static final String _arquivo = "C:\\ArffTeste\\weathernominal.arff";
+    
     public static void main(String[] args) throws Exception, Throwable {
         /**-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
          * 01° - Leitura do(s) Arquivo(s) <nome(s)>.arff
