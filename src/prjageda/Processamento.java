@@ -580,67 +580,64 @@ public class Processamento {
     }
 
     //Irá percorrer todos os Nodos da árvore(avaliando SOMENTE os _nodos folhas) 
-    public void atribuirClasseNodosFolhas(Arvores arvore, int prof, int profMaxima) {
-        try {
-            //Se a árvore não for nula
-            if (arvore == null) {
-                return;
+    public void atribuirClasseNodosFolhas(Arvores arvore, int prof, int profMaxima) throws NullPointerException {
+        //Se a árvore não for nula
+        if (arvore == null) {
+            return;
 
-            }
+        }
 
-            //Se possuir arestas válidas
-            if (arvore.getArestas().isEmpty()) {
-                return;
+        //Se possuir arestas válidas
+        if (arvore.getArestas().isEmpty()) {
+            return;
 
-            }
+        }
 
-            //Condição de Parada - Se o grau de _profundidade for máximo
-            if (prof <= (profMaxima + 1)) {
-                //Se o árvore não for nula
-                if (!arvore.getArestas().isEmpty()) {
-                    //Percorrer TODAS as arestas do árvore selecionado para atribuir uma classe as folhas
-                    for (int i = 0; i < arvore.getArestas().size(); i++) {
-                        //Se a aresta selecionada não for NULA pesquisa pela mesma (NULA == Nodo Folha)
-                        if (arvore.getArestas(i).getNodo() != null) {
-                            //Chamada recursiva da função passando como parâmetros a aresta selecionada
-                            atribuirClasseNodosFolhas(arvore.getArestas(i).getNodo(), prof + 1, profMaxima);
+        //Condição de Parada - Se o grau de _profundidade for máximo
+        if (prof <= (profMaxima + 1)) {
+            //Se o árvore não for nula
+            if (!arvore.getArestas().isEmpty()) {
+                //Percorrer TODAS as arestas do árvore selecionado para atribuir uma classe as folhas
+                for (int i = 0; i < arvore.getArestas().size(); i++) {
+                    //Se a aresta selecionada não for NULA pesquisa pela mesma (NULA == Nodo Folha)
+                    if (arvore.getArestas(i).getNodo() != null) {
+                        //Chamada recursiva da função passando como parâmetros a aresta selecionada
+                        atribuirClasseNodosFolhas(arvore.getArestas(i).getNodo(), prof + 1, profMaxima);
 
-                        } else //Chegou em um nodo folha
-                        {
+                    } else //Chegou em um nodo folha
+                    {
+                        //Declaração Variáveis e Objetos
+                        ArrayList<Classes> classes = arvore.getArestas(i).getClasses();
+
+                        //Se não for nulo
+                        if (classes != null) {
                             //Declaração Variáveis e Objetos
-                            ArrayList<Classes> classes = arvore.getArestas(i).getClasses();
+                            String clsDominante = "";
+                            double qtdOcorrCls = 0;
 
-                            //Se não for nulo
-                            if (classes != null) {
-                                //Declaração Variáveis e Objetos
-                                String clsDominante = "";
-                                double qtdOcorrCls = 0;
+                            //Percorre todas as Classes
+                            for (Classes classe : classes) {
+                                //Se for a 1° Ocorrência
+                                if (clsDominante.isEmpty()) {
+                                    //Atribuições do nome da classe e da _quantidade
+                                    clsDominante = classe.getNome();
+                                    qtdOcorrCls = classe.getQuantidade();
 
-                                //Percorre todas as Classes
-                                for (Classes classe : classes) {
-                                    //Se for a 1° Ocorrência
-                                    if (clsDominante.isEmpty()) {
+                                } else {
+                                    //Se a _quantidade for MAIOR que a ATUAL ALTERA a classe SENÃO mantém a mesma
+                                    if (classe.getQuantidade() > qtdOcorrCls) {
                                         //Atribuições do nome da classe e da _quantidade
                                         clsDominante = classe.getNome();
                                         qtdOcorrCls = classe.getQuantidade();
-
-                                    } else {
-                                        //Se a _quantidade for MAIOR que a ATUAL ALTERA a classe SENÃO mantém a mesma
-                                        if (classe.getQuantidade() > qtdOcorrCls) {
-                                            //Atribuições do nome da classe e da _quantidade
-                                            clsDominante = classe.getNome();
-                                            qtdOcorrCls = classe.getQuantidade();
-
-                                        }
 
                                     }
 
                                 }
 
-                                //Setar a classe Majoritária
-                                arvore.getArestas(i).setClasseDominante(clsDominante);
-
                             }
+
+                            //Setar a classe Majoritária
+                            arvore.getArestas(i).setClasseDominante(clsDominante);
 
                         }
 
@@ -649,9 +646,6 @@ public class Processamento {
                 }
 
             }
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
 
         }
 
@@ -853,8 +847,8 @@ public class Processamento {
     }
 
     /**
-     * Parâmetros: 1 - Valor a arredondarValor. 2 - Quantidade de casas depois da vírgula. 3 - arredondarValor para cima ou para baixo? Para Cima = 0 (ceil) Para Baixo = 1 ou
-     * qualquer outro inteiro (floor)
+     * Parâmetros: 1 - Valor a arredondarValor. 2 - Quantidade de casas depois da vírgula. 3 - arredondarValor para cima ou
+     * para baixo? Para Cima = 0 (ceil) Para Baixo = 1 ou qualquer outro inteiro (floor)
      *
      */
     public double arredondarValor(double valor, int casas, int ACimaouABaixo) {

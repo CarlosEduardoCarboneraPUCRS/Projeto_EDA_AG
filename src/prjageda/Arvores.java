@@ -49,7 +49,7 @@ public class Arvores implements Comparable<Arvores> {
 
     public Atributos getArestas(int pos) {
         //Retornar a aresta da posição desde que exista
-        if (this.arestas != null) {
+        if (!this.arestas.isEmpty()) {
             //Se posição for inválida retorna Nulo
             if (pos >= this.arestas.size()) {
                 return null;

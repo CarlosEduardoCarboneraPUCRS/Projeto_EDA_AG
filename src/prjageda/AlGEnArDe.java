@@ -60,7 +60,7 @@ public class AlGEnArDe {
                 //Declaração Variáveis e Objetos E Inicializações
                 _arvores = new ArrayList<>();
                 int geracaoAtual = 1;
-                int profMaxima = (_profundidade * 2) + 1;
+                int profMaxima = _profundidade * 2;
 
                 //Efetuar a Geração da População Inicial, informar a _quantidade de atributos MENOS o atributos classe
                 gerarPopulacaoInicial(treino, validacao, _profundidade + 1);
@@ -99,7 +99,7 @@ public class AlGEnArDe {
             //Calcular a Media E Desvio Padrão dos Indivíduos
             calcularMediaEDesvioPadraoArvores(resultado);
 
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             System.out.println(e.getMessage());
 
         } finally {
@@ -138,8 +138,8 @@ public class AlGEnArDe {
             //Calcular o Fitness das árvores(Treinamento e Validação) E após Ordenar Crescentemente 
             calcularFitnessPopulacao(treino, validacao, profMaxima, 0);
 
-        } catch (IOException e) {
-            //System.out.println(e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
 
         }
 
@@ -206,7 +206,7 @@ public class AlGEnArDe {
             //Ordenar a população EM ORDEM CRESCENTE pelo valor do Fitness, por exemplo.: 0.2, 0.3, 0.4,...1.0
             Collections.sort(_arvores);
 
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             System.out.println(e.getMessage());
 
         }
@@ -214,7 +214,7 @@ public class AlGEnArDe {
     }
 
     //Efetuar o treinamento dos _nodos folhas - Atribuição das classes e suas quantidades, a classe que possuir maior _quantidade será a classe dominante
-    private void treinarNodosFolhas(Instances treino, int profMaxima, int posInicial) throws Exception {
+    private void treinarNodosFolhas(Instances treino, int profMaxima, int posInicial) throws NullPointerException {
         try {
             //Declaração Variáveis e Objetos
             Processamento proc = new Processamento();
@@ -236,14 +236,11 @@ public class AlGEnArDe {
                 podarArestasSemClassificacao(_arvores.get(i), 1, profMaxima);
 
                 //Eliminar os Nodos(Atributos) que não possuem arestas após a execução do "Treino"
-                //podarNodosSemArestas(_arvores.get(i), 1, profMaxima);
-
-                int ipos = 0;
-                ipos = 1;
-
+                podarNodosSemArestas(_arvores.get(i), 1, profMaxima);
+                
             }
 
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             System.out.println(e.getMessage());
 
         }
@@ -283,8 +280,8 @@ public class AlGEnArDe {
 
             }
 
-        } catch (Exception e) {
-            //System.out.println(e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
 
         }
 
@@ -406,8 +403,8 @@ public class AlGEnArDe {
 
             }
 
-        } catch (Exception e) {
-            //System.out.println(e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
 
         }
 
@@ -469,8 +466,8 @@ public class AlGEnArDe {
 
             }
 
-        } catch (Exception e) {
-            //System.out.println(e.getMessage());
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
 
         }
 
@@ -520,75 +517,72 @@ public class AlGEnArDe {
     }
 
     //Eliminar as arestas nulas da árvoe após a classificação dos nodos(Após a aplicação das Instâncias de "Treino")
-    private void podarArestasSemClassificacao(Arvores arv, int prof, int profMaxima) {
-        try {
-            //Condição de Parada - Se o grau de _profundidade for máximo
-            if (prof <= profMaxima) {
-                //Se o árvore for nula
-                if (arv == null) {
-                    return;
+    private void podarArestasSemClassificacao(Arvores arv, int prof, int profMaxima) throws NullPointerException {
+        //Condição de Parada - Se o grau de _profundidade for máximo
+        if (prof <= profMaxima) {
+            //Se o árvore for nula
+            if (arv == null) {
+                return;
 
-                }
+            }
 
-                //Se as arestas forem nulas
-                if (arv.getArestas().isEmpty()) {
-                    return;
+            //Se as arestas forem nulas
+            if (arv.getArestas().isEmpty()) {
+                return;
 
-                }
+            }
 
-                //Se possuir arestas
-                if (!arv.getArestas().isEmpty()) {
-                    //Declaração Variáveis e Objetos
-                    int qArestas = arv.getArestas().size();
-                    int posicao = 0;
+            //Se possuir arestas
+            if (!arv.getArestas().isEmpty()) {
+                //Declaração Variáveis e Objetos
+                int qArestas = arv.getArestas().size();
+                int pos = 0, i = 0;
 
-                    //Percorrer todas as arestas
-                    for (int i = 0; i < qArestas; i++) {                    
-                        //Se a aresta não for nula
-                        if (arv.getArestas(i) != null) {
-                            //Percorrer todas as arestas
-                            while (posicao < qArestas) {
-                                //Se a aresta da "posição" não for nula
-                                if (arv.getArestas(posicao) != null) {
-                                    //Se o nodo for nulo elimina a aresta e verifica as demais
-                                    if ((arv.getArestas(posicao).getNodo() == null) && (arv.getArestas(posicao).getClasseDominante().isEmpty())) {
-                                        //Excluir o nodo atual E Atualizar a posição e a quantidade
-                                        arv.removerAresta(posicao);
-                                        qArestas = posicao = i = 0;
+                //Percorrer todas as arestas
+                for (i = 0; i < qArestas; i++) {
+                    //Se a aresta não for nula
+                    if (arv.getArestas(i) != null) {
+                        //Percorrer todas as arestas
+                        while (pos < qArestas) {
+                            //Se a aresta da "posição" não for nula
+                            if (arv.getArestas(pos) != null) {
+                                //Se o nodo for nulo elimina a aresta e verifica as demais
+                                if ((arv.getArestas(pos).getNodo() == null) && (arv.getArestas(pos).getClasseDominante().isEmpty())) {
+                                    //Excluir o nodo atual E Atualizar a posição e a quantidade
+                                    arv.removerAresta(pos);
+                                    qArestas = pos = i = 0;
 
-                                        if (!arv.getArestas().isEmpty()) {
-                                            qArestas = arv.getArestas().size();
-
-                                        } else {
-                                            //Sair fora
-                                            break;
-
-                                        }
+                                    if (!arv.getArestas().isEmpty()) {
+                                        qArestas = arv.getArestas().size();
 
                                     } else {
-                                        //Atualizar a posição
-                                        posicao += 1;
+                                        //Sair fora
+                                        break;
 
                                     }
 
                                 } else {
                                     //Atualizar a posição
-                                    posicao += 1;
+                                    pos += 1;
 
                                 }
 
+                            } else {
+                                //Atualizar a posição
+                                pos += 1;
+
                             }
 
-                            //Se possuir arestas
-                            if (!arv.getArestas().isEmpty()) {
-                                //Se possuir a aresta da posição atual válida
-                                if (arv.getArestas(posicao) != null) {
-                                    //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
-                                    if (arv.getArestas(posicao).getNodo() != null) {
-                                        //Chamada Recursiva da Função Avaliando a posição Atual
-                                        podarArestasSemClassificacao(arv.getArestas(posicao).getNodo(), prof + 1, profMaxima);
+                        }
 
-                                    }
+                        //Se possuir arestas
+                        if (!arv.getArestas().isEmpty()) {
+                            //Se possuir a aresta da posição atual válida
+                            if (arv.getArestas(i) != null) {
+                                //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
+                                if (arv.getArestas(i).getNodo() != null) {
+                                    //Chamada Recursiva da Função Avaliando a posição Atual
+                                    podarArestasSemClassificacao(arv.getArestas(i).getNodo(), prof + 1, profMaxima);
 
                                 }
 
@@ -602,41 +596,43 @@ public class AlGEnArDe {
 
             }
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-
         }
 
     }
 
     //Podar os nodos que não possuem arestas
-    private void podarNodosSemArestas(Arvores arv, int prof, int profMaxima) {
-        try {
-            //Condição de Parada - Se o grau de _profundidade for máximo
-            if (prof <= profMaxima) {
-                //Se o árvore for nula
-                if (arv == null) {
-                    return;
+    private void podarNodosSemArestas(Arvores arv, int prof, int profMaxima) throws NullPointerException {
+        //Condição de Parada - Se o grau de _profundidade for máximo
+        if (prof <= profMaxima) {
+            //Se o árvore for nula
+            if (arv == null) {
+                return;
 
-                }
+            }
 
-                //Se possuir arestas
-                if (!arv.getArestas().isEmpty()) {
-                    //Declaração Variáveis e Objetos
-                    int qArestas = arv.getArestas().size();
-                    int i = 0;
+            //Se possuir arestas
+            if (!arv.getArestas().isEmpty()) {
+                //Declaração Variáveis e Objetos
+                int qArestas = arv.getArestas().size();
+                int i = 0;
 
-                    //Percorrer todas as arestas
-                    for (i = 0; i < qArestas; i++) {
-                        //Se a aresta não for nula
-                        if (arv.getArestas(i) != null) {
-                            //Se possuir nodo válido
-                            if (arv.getArestas(i).getNodo() != null) {
-                                //Se a Arestas tiver um atributo válido, mas o mesmo não possu nenhuma aresta, elimina o nodo
-                                if (arv.getArestas(i).getNodo().getArestas().isEmpty()) {
-                                    //Remover a aresta Selecinada cujo o nodo existe mas as arestas deste nodo são inválidas
-                                    arv.removerAresta(i);
+                //Percorrer todas as arestas
+                for (i = 0; i < qArestas; i++) {
+                    //Se a aresta não for nula
+                    if (arv.getArestas(i) != null) {
+                        //Se possuir nodo válido
+                        if (arv.getArestas(i).getNodo() != null) {
+                            //Se a Arestas tiver um atributo válido, mas o mesmo não possui nenhuma aresta, elimina o nodo
+                            if (arv.getArestas(i).getNodo().getArestas().isEmpty()) {
+                                //Remover a aresta Selecionada cujo o nodo existe mas as arestas deste nodo são inválidas
+                                arv.removerAresta(i);
 
+                                //Atribuições
+                                qArestas = arv.getArestas().isEmpty() ? 0 : arv.getArestas().size();
+                                i = 0;
+
+                                //Se possuir arestas
+                                if (arv.getArestas() != null) {
                                     //Se após a remoção do nodo a quantidade de arestas for 1
                                     if (arv.getArestas().size() == 1) {
                                         //Se o nodo da Sub-Árvore não for nulo "Absorve" a Árvore Atual
@@ -648,30 +644,13 @@ public class AlGEnArDe {
 
                                     }
 
-                                    //Atribuições
-                                    qArestas = arv.getArestas().isEmpty() ? 0 : arv.getArestas().size();
-                                    i = 0;
-
-                                } //Se possuir Apenas 1 arestas ligando 2 atributos aonde o 2° possuir Nodo válido o 1° será absorvido
-                                else if (arv.getArestas(i).getNodo().getArestas().size() == 1) {
-                                    //Se possuir nodo válido da respectiva aresta
-                                    if (arv.getArestas(0).getNodo() != null) {
-                                        //Absorver a arestas setando o próximo nodo
-                                        arv = arv.getArestas(0).getNodo();
-                                        i = 0;
-
-                                    }
+                                } else {
+                                    break;
 
                                 }
 
-                            }
-
-                        }
-
-                        //Se possuir arestas válidas
-                        if (!arv.getArestas().isEmpty()) {
-                            //Se possuir Apenas 1 ou Nenhuma Aresta
-                            if (arv.getArestas().size() <= 1) {
+                            } //Se possuir Apenas 1 arestas ligando 2 atributos aonde o 2° possuir Nodo válido o 1° será absorvido
+                            else if (arv.getArestas(i).getNodo().getArestas().size() == 1) {
                                 //Se possuir nodo válido da respectiva aresta
                                 if (arv.getArestas(0).getNodo() != null) {
                                     //Absorver a arestas setando o próximo nodo
@@ -684,14 +663,47 @@ public class AlGEnArDe {
 
                         }
 
-                        //Se possuir arestas válidas
-                        if (!arv.getArestas().isEmpty()) {
-                            //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
-                            if (arv.getArestas(i).getNodo() != null) {
-                                //Chamada Recursiva da Função Avaliando a posição Atual
-                                podarNodosSemArestas(arv.getArestas(i).getNodo(), prof + 1, profMaxima);
+                    }
+
+                    //Se possuir arestas válidas
+                    if (!arv.getArestas().isEmpty()) {
+                        //Se possuir Apenas 1 ou Nenhuma Aresta
+                        if (arv.getArestas().size() <= 1) {
+                            //Se possuir nodo válido da respectiva aresta
+                            if (arv.getArestas(0).getNodo() != null) {
+                                //Absorver a arestas setando o próximo nodo
+                                arv = arv.getArestas(0).getNodo();
+                                
+                                //Atribuições
+                                i = 0;
+                                
+                                //Se possuir arestas válidas
+                                if (arv.getArestas() != null) {
+                                    //Se possuir apenas uma arets
+                                    if (arv.getArestas().size() == 1) {
+                                        //Se esta arestas possuir um nodo válido
+                                        if (arv.getArestas(0).getNodo() != null) {
+                                            //"Absover" o nodo Substituindo pela Sub-Árvore
+                                            arv = arv.getArestas(0).getNodo();
+
+                                        }
+
+                                    }
+
+                                }
 
                             }
+
+                        }
+
+                    }
+
+                    //Se possuir arestas válidas
+                    if (!arv.getArestas().isEmpty()) {
+                        //Se o nodo não for nulo (Chama Recursivamente o próximo nível) até chegar em um nodo Folha
+                        if (arv.getArestas(i).getNodo() != null) {
+                            //Chamada Recursiva da Função Avaliando a posição Atual
+                            podarNodosSemArestas(arv.getArestas(i).getNodo(), prof + 1, profMaxima);
 
                         }
 
@@ -700,9 +712,6 @@ public class AlGEnArDe {
                 }
 
             }
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
 
         }
 
