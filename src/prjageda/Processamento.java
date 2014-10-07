@@ -538,36 +538,53 @@ public class Processamento {
 
                     }
 
-                } else { //Se for uma atribArv1 "Categorico" (Terá N-1 Arestas)                    
-                    //Percorrer todas as arestas da arvore
+                } else { //Se for uma atribArv1 "Categorico" (Terá N-1 Arestas)                 
+                    //Percorrer todas as arestas da árvore
                     for (int i = 0; i < arvore.getArestas().size(); i++) {
                         //Se não for um nodo RAIZ, efetua a chamada recursiva da função até chegar em um nodo raiz
                         if (arvore.getArestas(i).getNodo() != null) {
                             //Chama a função recursivamente passando o nodo da aresta
-                            definirClasseNodosFolhas(arvore.getArestas(i).getNodo(), avaliacao, prof + 1, AlGEnArDe._profundidade * 2);
+                            definirClasseNodosFolhas(arvore.getArestas(i).getNodo(), avaliacao, prof + 1, profMaxima);
 
                         } else {
                             //Declaração Variáveis e Objetos
-                            ArrayList<Classes> classes = arvore.getArestas(i).getClasses();
+                            ArrayList<Classes> classes = new ArrayList<>();
 
-                            //Percorrer todas as classes da Aresta
-                            for (Classes classe : classes) {
-                                //Percorrer todos os valores existentes da instância selecionada
-                                for (int l = 0; l < avaliacao.numValues(); l++) {
-                                    //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
-                                    if (arvore.getArestas(i).getAtributo().equals(avaliacao.attribute(posicao).value(l))) {
-                                        //Se o nome da classe dominante for igual a classe avaliada
-                                        if (classe.getNome().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
-                                            //Atualizar a _quantidade de registros X Atributo - Para Definir a Classe dominante
-                                            classe.somarQuantidade(1);
-                                            //Sair do for
-                                            break;
+                            //Se a Classe for vazia Inclui o mesmo (Sendo o 1° Registro)
+                            if (arvore.getArestas(i).getClasses() == null) {
+                                //Percorrer as arestas existentes
+                                for (int j = 0; j < arvore.getArestas().size(); j++) {
+                                    //Adicionar a Nova classe 
+                                    classes.add(new Classes(avaliacao.classAttribute().value(j), 0));
+                                    
+                                }
+
+                                //Atribuir as classes e sair fora da execução para a aresta selecionada
+                                arvore.getArestas(i).setClasses(classes);
+
+                            } else //Já Existem Registros na Classe, irá atualizar o mesmo
+                            {
+                                //Declaração Variáveis e Objetos
+                                classes = arvore.getArestas(i).getClasses();
+
+                                //Percorrer todas as classes da Aresta
+                                for (Classes classe : classes) {
+                                    //Percorrer todos os valores existentes da instância selecionada (MENOS O ATRIBUTO CLASSE)
+                                    for (int l = 0; l < avaliacao.numValues() - 1; l++) {
+                                        //Se o nome do Atributo FOR IGUAL AO NOME DO ATRIBUTO da instancia de avaliação selecionada
+                                        if (arvore.getArestas(i).getAtributo().equals(avaliacao.attribute(posicao).value(i))) {
+                                            //Se o nome da classe dominante for igual a classe avaliada
+                                            if (classe.getNome().equals(avaliacao.classAttribute().value((int) avaliacao.classValue()))) {
+                                                //Atualizar a _quantidade de registros X Atributo - Para Definir a Classe dominante
+                                                classe.somarQuantidade(1);
+
+                                            }
 
                                         }
 
                                     }
 
-                                }
+                                }                                
 
                             }
 
