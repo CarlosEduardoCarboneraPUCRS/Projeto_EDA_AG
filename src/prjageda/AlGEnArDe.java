@@ -674,58 +674,44 @@ public class AlGEnArDe {
 
                                         }
 
-                                    } 
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //                                  //Se o próximo nodo possuir apenas 1 aresta ("Absorve o atual")
-//                                    else if (arv.getArestas(i).getNodo().getArestas().size() == 1) {
-//                                        //Se o nodo da Sub-Árvore não for nulo, o mesmo "Absorve" a Árvore Atual
-//                                        arv = arv.getArestas(i).getNodo();
-//
-//                                    }
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //--------Aqui está o Erro Carlos Eduardo
-                                    //--------Aqui está o Erro Carlos Eduardo
-
-                                }
-
-                            }
-
-                            //Se possuir arestas válidas (VALIDAÇÃO NECESSÁRIA DEVIDO AS POSSÍVEIS ELIMINAÇÕES DA LÓGICA ANTERIOR)
-                            if (!arv.getArestas().isEmpty()) {
-                                //Se possuir Apenas 1 ou Nenhuma Aresta
-                                if (arv.getArestas().size() <= 1) {
-                                    //Se possuir nodo válido da respectiva aresta
-                                    if (arv.getArestas(0).getNodo() != null) {
-                                        //Absorver a arestas setando o próximo nodo
-                                        arv = arv.getArestas(0).getNodo();
-
-                                        //Atribuições(Devido a Remoção da Árvore)
-                                        i = 0;
-
-                                        //Se possuir arestas válidas
-                                        if (arv.getArestas() != null) {
-                                            //Se possuir apenas uma arets
-                                            if (arv.getArestas().size() == 1) {
-                                                //Se esta arestas possuir um nodo válido
-                                                if (arv.getArestas(0).getNodo() != null) {
-                                                    //"Absover" o nodo Substituindo pela Sub-Árvore
-                                                    arv = arv.getArestas(0).getNodo();
-
-                                                }
-
-                                            }
-
-                                        }
-
                                     }
 
                                 }
 
                             }
+
+//                            //Se possuir arestas válidas (VALIDAÇÃO NECESSÁRIA DEVIDO AS POSSÍVEIS ELIMINAÇÕES DA LÓGICA ANTERIOR)
+//                            if (!arv.getArestas().isEmpty()) {
+//                                //Se possuir Apenas 1 ou Nenhuma Aresta
+//                                if (arv.getArestas().size() <= 1) {
+//                                    //Se possuir nodo válido da respectiva aresta
+//                                    if (arv.getArestas(0).getNodo() != null) {
+//                                        //Absorver a arestas setando o próximo nodo
+//                                        arv = arv.getArestas(0).getNodo();
+//
+//                                        //Atribuições(Devido a Remoção da Árvore)
+//                                        i = 0;
+//
+//                                        //Se possuir arestas válidas
+//                                        if (arv.getArestas() != null) {
+//                                            //Se possuir apenas uma arets
+//                                            if (arv.getArestas().size() == 1) {
+//                                                //Se esta arestas possuir um nodo válido
+//                                                if (arv.getArestas(0).getNodo() != null) {
+//                                                    //"Absover" o nodo Substituindo pela Sub-Árvore
+//                                                    arv = arv.getArestas(0).getNodo();
+//
+//                                                }
+//
+//                                            }
+//
+//                                        }
+//
+//                                    }
+//
+//                                }
+//
+//                            }
 
                             //Se possuir arestas válidas
                             if (!arv.getArestas().isEmpty()) {

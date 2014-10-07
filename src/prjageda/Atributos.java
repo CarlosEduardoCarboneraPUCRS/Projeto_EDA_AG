@@ -57,7 +57,7 @@ public class Atributos {
 
     public String getClasseDominante() {
         //Forçar a conversão em String caso o objeto seja nulo
-        return this.classeDominante;
+        return String.valueOf(this.classeDominante).trim();
 
     }
 
