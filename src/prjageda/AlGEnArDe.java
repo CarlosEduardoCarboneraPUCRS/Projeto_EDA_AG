@@ -62,6 +62,9 @@ public class AlGEnArDe {
                 //Efetuar a Geração da População Inicial, informar a _quantidade de atributos MENOS o atributos classe
                 gerarPopulacaoInicial(treino, validacao, _profundidade + 1);
 
+                System.out.println("Melhor Arvore.: " + _arvores.get(0).getNomeAtributo() + " "
+                        + _arvores.get(0).getFitness());
+
                 //Efetuar a geração das novas populações
                 while (geracaoAtual < _geracoes) {
                     //Atualizar a Geração
@@ -79,7 +82,9 @@ public class AlGEnArDe {
 
                     //Calcular o Fitness e após Ordenar Crescente (em função do Crossover e da Mutação a profundidade da árvore poderá duplicar)
                     calcularFitnessPopulacao(treino, validacao, profMaxima, Processamento._qtdElitismo);
-
+                    
+                    System.out.println("Melhor Arvore.: " + _arvores.get(0).getNomeAtributo() + " "
+                            + _arvores.get(0).getFitness());
                 }
 
                 //Processamento dos _nodos folhas
@@ -636,8 +641,18 @@ public class AlGEnArDe {
                     if (qArestas == 1) {
                         //Se a única aresta possuir uma Sub-Árvore Válida
                         if (arv.getArestas(0).getNodo() != null) {
+                            //Declaração Variáveis e Objetos
+                            Arvores arvTemp = arv.getArestas(0).getNodo();
+
                             //Excluir o nodo atual setando o próximo nodo como mandante ("Absorver" a árvore atual)
-                            arv = arv.getArestas(0).getNodo();
+                            arv.removerAresta(0);
+
+                            //Se possuir arestas válidas
+                            if (!arvTemp.getArestas().isEmpty()) {
+                                //Setar os atributos da árvore
+                                arv.setArvore(arvTemp);
+
+                            }
 
                         }
 
@@ -667,8 +682,84 @@ public class AlGEnArDe {
                                         } else if (qArestas == 1) { //Se possuir apenas 1 aresta
                                             //Se o nodo da Sub-Árvore não for nulo "Absorve" a Árvore Atual
                                             if (arv.getArestas(0).getNodo() != null) {
-                                                //Excluir o nodo atual setando o próximo nodo como mandante
-                                                arv = arv.getArestas(0).getNodo();
+                                                //Declaração Variáveis e Objetos
+                                                Arvores arvTemp = arv.getArestas(0).getNodo();
+
+                                                //Excluir o nodo atual setando o próximo nodo como mandante ("Absorver" a árvore atual)
+                                                arv.removerAresta(0);
+
+                                                //Se possuir arestas válidas
+                                                if (!arvTemp.getArestas().isEmpty()) {
+                                                    //Setar os atributos da árvore
+                                                    arv.setArvore(arvTemp);
+
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                    //Se possuir arestas válidas
+                                    if (!arv.getArestas().isEmpty()) {
+                                        //Se a aresta informada for válida
+                                        if (arv.getArestas(i) != null) {
+                                            //Se o nodo da aresta for válido
+                                            if (arv.getArestas(i).getNodo() != null) {
+                                                //Se o nodo possuir arestas
+                                                if (!arv.getArestas(i).getNodo().getArestas().isEmpty()) {
+                                                    //Se a quantidade de arestas do nodo for apenas 1 aresta
+                                                    if (arv.getArestas(i).getNodo().getArestas().size() == 1) {
+                                                        //Se a posição da aresta for 0 processa SENÃO existe aresta válida anterior
+                                                        if (i == 0) {
+                                                            //Se o nodo não for nulo
+                                                            if (arv.getArestas(i).getNodo().getArestas(i).getNodo() != null) {
+                                                                //Declaração Variáveis e Objetos
+                                                                Arvores arvTemp = arv.getArestas(i).getNodo().getArestas(i).getNodo();
+
+                                                                //Excluir o nodo atual setando o próximo nodo como mandante ("Absorver" a árvore atual)
+                                                                arv.removerAresta(i);
+
+                                                                //Se possuir arestas válidas
+                                                                if (!arvTemp.getArestas().isEmpty()) {
+                                                                    //Setar os atributos da árvore
+                                                                    arv.setArvore(arvTemp);
+
+                                                                }
+
+                                                            }
+
+                                                        }
+
+                                                    }
+
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                    //Se possuir arestas
+                                    if (!arv.getArestas().isEmpty()) {
+                                        //Se possuir apenas 1 aresta
+                                        if (arv.getArestas().size() == 1) {
+                                            //Se o nodo da Sub-Árvore não for nulo "Absorve" a Árvore Atual
+                                            if (arv.getArestas(0).getNodo() != null) {
+                                                //Declaração Variáveis e Objetos
+                                                Arvores arvTemp = arv.getArestas(0).getNodo();
+
+                                                //Excluir o nodo atual setando o próximo nodo como mandante ("Absorver" a árvore atual)
+                                                arv.removerAresta(0);
+
+                                                //Se possuir arestas válidas
+                                                if (!arvTemp.getArestas().isEmpty()) {
+                                                    //Setar os atributos da árvore
+                                                    arv.setArvore(arvTemp);
+
+                                                }
 
                                             }
 
@@ -679,39 +770,6 @@ public class AlGEnArDe {
                                 }
 
                             }
-
-//                            //Se possuir arestas válidas (VALIDAÇÃO NECESSÁRIA DEVIDO AS POSSÍVEIS ELIMINAÇÕES DA LÓGICA ANTERIOR)
-//                            if (!arv.getArestas().isEmpty()) {
-//                                //Se possuir Apenas 1 ou Nenhuma Aresta
-//                                if (arv.getArestas().size() <= 1) {
-//                                    //Se possuir nodo válido da respectiva aresta
-//                                    if (arv.getArestas(0).getNodo() != null) {
-//                                        //Absorver a arestas setando o próximo nodo
-//                                        arv = arv.getArestas(0).getNodo();
-//
-//                                        //Atribuições(Devido a Remoção da Árvore)
-//                                        i = 0;
-//
-//                                        //Se possuir arestas válidas
-//                                        if (arv.getArestas() != null) {
-//                                            //Se possuir apenas uma arets
-//                                            if (arv.getArestas().size() == 1) {
-//                                                //Se esta arestas possuir um nodo válido
-//                                                if (arv.getArestas(0).getNodo() != null) {
-//                                                    //"Absover" o nodo Substituindo pela Sub-Árvore
-//                                                    arv = arv.getArestas(0).getNodo();
-//
-//                                                }
-//
-//                                            }
-//
-//                                        }
-//
-//                                    }
-//
-//                                }
-//
-//                            }
 
                             //Se possuir arestas válidas
                             if (!arv.getArestas().isEmpty()) {

@@ -11,10 +11,10 @@ public class PrjAGEDA {
     //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     //Arquivo com Atributos Numéricos
-    //private static final String _arquivo = "C:\\ArffTeste\\ionosphere.arff";
+    private static final String _arquivo = "C:\\ArffTeste\\ionosphere.arff";
     
     //Arquivo com Atributos Nominais
-    private static final String _arquivo = "C:\\ArffTeste\\vote.arff";
+    //private static final String _arquivo = "C:\\ArffTeste\\vote.arff";
 
     public static void main(String[] args) throws Exception, Throwable {
         /**

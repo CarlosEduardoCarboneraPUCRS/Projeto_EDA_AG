@@ -81,6 +81,15 @@ public class Arvores implements Comparable<Arvores> {
 
     }
 
+    public void setArvore(Arvores arv) {
+        //Atribuições
+        this.nomeAtr = arv.getNomeAtributo();
+        this.fitness = arv.getFitness();
+        this.qtdOcorr = arv.getQtdOcorrencias();
+        this.arestas = arv.getArestas();
+
+    }
+
     public void removerAresta(int pos) {
         try {
             if (this.arestas == null) {
